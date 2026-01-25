@@ -30,7 +30,7 @@
   outputs = inputs@{ nixpkgs, nix-darwin, home-manager, nix-homebrew, stylix, ... }:
     let
       system = "aarch64-darwin";
-      hostname = "svyat";
+      hostname = "svyat-mac";
       username = "ivsv";
     in
     {
