@@ -62,7 +62,6 @@
     enable = true;
     extensions = [
       pkgs.gh-dash
-      pkgs.gh-copilot
     ];
   };
 
