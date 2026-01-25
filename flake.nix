@@ -57,6 +57,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs username; };
+              sharedModules = [ stylix.homeManagerModules.stylix ];
               users.${username} = import ./modules/home.nix;
             };
           }
