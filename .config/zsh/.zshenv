@@ -12,10 +12,6 @@ export LESSHISTFILE="$XDG_CACHE_HOME/less/.lesshst"
 # tldr
 export TEALDEER_CONFIG_DIR="$XDG_CONFIG_HOME/tealdeer"
 
-# asdf
-export ASDF_CONFIG_FILE="$XDG_CONFIG_HOME/asdf/asdfrc"
-export ASDF_DATA_DIR="$XDG_DATA_HOME/asdf"
-
 # pypoetry
 export POETRY_CONFIG_DIR="$XDG_CONFIG_HOME/pypoetry"
 
@@ -38,6 +34,8 @@ if uname -r |grep -q 'Microsoft' ; then
     fi
 fi
 
+# Added by get-aspire-cli.sh
+export PATH="$HOME/.aspire/bin:$PATH"
 
 # Expiremental, setting language to english manually
 # LANG=en_US

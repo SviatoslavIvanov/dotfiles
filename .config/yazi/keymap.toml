@@ -1,14 +1,14 @@
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = "f"
 run = "plugin jump-to-char"
 desc = "Jump to char"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["l"]
 run = "plugin --sync smart-enter"
 desc = "Enter the child directory, or open the file"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["C"]
 run = "plugin ouch --args=zip"
 desc = "Compress with ouch"
@@ -21,72 +21,72 @@ append_keymap = [
   ], run = "escape", desc = "Remap jj to ecape insert mode" },
 ]
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = "H"
 run = "plugin duckdb -1"
 desc = "Scroll one column to the left"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = "L"
 run = "plugin duckdb +1"
 desc = "Scroll one column to the right"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["g", "o"]
 run = "plugin duckdb -open"
 desc = "open with duckdb"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["g", "u"]
 run = "plugin duckdb -ui"
 desc = "open with duckdb ui"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = "T"
 run = "plugin toggle-pane max-preview"
 desc = "Maximize or restore the preview pane"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["1"]
 run = "plugin relative-motions 1"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["2"]
 run = "plugin relative-motions 2"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["3"]
 run = "plugin relative-motions 3"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["4"]
 run = "plugin relative-motions 4"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["5"]
 run = "plugin relative-motions 5"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["6"]
 run = "plugin relative-motions 6"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["7"]
 run = "plugin relative-motions 7"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["8"]
 run = "plugin relative-motions 8"
 desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
+[[mgr.prepend_keymap]]
 on = ["9"]
 run = "plugin relative-motions 9"
 desc = "Move in relative steps"

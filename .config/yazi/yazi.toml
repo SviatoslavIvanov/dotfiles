@@ -26,5 +26,5 @@ prepend_preloaders = [
   { name = "*.txt", run = "duckdb", multi = false },
   { name = "*.xlsx", run = "duckdb", multi = false },
 ]
-[manager]
+[mgr]
 ratio = [1, 2, 5]

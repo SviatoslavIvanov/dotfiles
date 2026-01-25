@@ -1,8 +1,7 @@
 git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never
-
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never
 gui:
   language: "en"
   # Use the mocha catppuccin theme
@@ -28,6 +27,5 @@ gui:
       - "#cdd6f4"
     searchingActiveBorderColor:
       - "#f9e2af"
-
 os:
   editPreset: "nvim"

@@ -23,14 +23,17 @@ setopt HIST_IGNORE_DUPS
 setopt HIST_VERIFY
 setopt APPENDHISTORY 
 
-# Custom commands
-source $ZDOTDIR/functions.zsh
+if [[ ! -n "$CURSOR_AGENT" ]]; then
+  # Custom commands
+  source $ZDOTDIR/functions.zsh
 
-# Personal aliases and commands
-source $ZDOTDIR/personal.zsh
+  # Personal aliases and commands
+  source $ZDOTDIR/personal.zsh
 
-# Custom aliases
-source $ZDOTDIR/aliases.zsh
+  # Custom aliases
+  source $ZDOTDIR/aliases.zsh
+fi
+
 
 # brew installed completions
 FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
@@ -59,9 +62,6 @@ source $ZPLUGDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZPLUGDIR/zsh-autocomplete/zsh-autocomplete.plugin.zsh 
 zstyle ':autocomplete:*' add-space '*'
 
-# zoxide
-eval "$(zoxide init zsh)"
-
 # navi
 eval "$(navi widget zsh)"
 
@@ -78,12 +78,6 @@ zstyle '*:compinit' arguments -d "$XDG_CACHE_HOME/zsh/.zcompdump"
 # thefuck
 eval $(thefuck --alias)
 
-# asdf
-. $(brew --prefix)/opt/asdf/libexec/asdf.sh
-. $ASDF_DATA_DIR/plugins/java/set-java-home.zsh
-. $ASDF_DATA_DIR/plugins/dotnet-core/set-dotnet-home.zsh
-. $ASDF_DATA_DIR/plugins/golang/set-env.zsh
-export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 
 # Shell-GPT integration ZSH v0.2
 _sgpt_zsh() {
@@ -112,3 +106,14 @@ esac
 
 # duckdb
 export PATH='/Users/ivsv/.duckdb/cli/latest':$PATH
+
+if [[ ! -n "$CURSOR_AGENT" ]]; then
+  # zoxide
+  eval "$(zoxide init zsh)"
+fi
+
+export PATH="$HOME/.opencode/bin":$PATH
+
+eval "$(mise activate zsh)"
+
+ulimit -n 10240
