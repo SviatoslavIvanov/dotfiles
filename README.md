@@ -1,51 +1,41 @@
 # dotfiles
 
-Declarative macOS configuration powered by Nix.
+Personal Nix-powered macOS configuration. Terminal-first workflow.
+
+Declarative, reproducible setup managed entirely through Nix flakes. Includes system preferences, CLI tools, GUI apps, editor configs, and shell customizations. One `darwin-rebuild switch` to bootstrap or restore a machine.
 
 ## Prerequisites
 
-1. **Nix** — install via [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer):
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-   ```
-
-2. **Xcode Command Line Tools**:
-   ```bash
-   xcode-select --install
-   ```
-
-3. **mise** (optional, for dev tasks):
-   ```bash
-   curl https://mise.run | sh
-   ```
+**Nix** via [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer):
+```bash
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
 
 ## Installation
 
 ```bash
 git clone git@github.com:IvanovSvyatoslav/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-```
-
-> **Note:** This config uses a private `dotfiles-private` flake input for sensitive data.
-> Fork this repo and either remove it from `flake.nix` or replace with your own.
-
-Build and apply:
-```bash
 darwin-rebuild switch --flake .
 ```
 
-## Stack
+> **Note:** This config references a private `dotfiles-private` flake input.
+> Fork this repo and remove it from `flake.nix` or replace with your own secrets management.
+
+## What's Inside
+
+### Stack
 
 | Component | Purpose |
 |-----------|---------|
-| **Nix Flakes** | Reproducible declarative configuration |
+| **Nix Flakes** | Reproducible, declarative system configuration |
 | **nix-darwin** | macOS system settings management |
 | **Home Manager** | User environment and dotfiles |
 | **Stylix** + **Catppuccin Mocha** | Unified theming across all apps |
 | **Homebrew** (via nix-homebrew) | GUI apps and casks |
 | **mise** | Runtime version manager + task runner |
 
-## Structure
+### Structure
 
 ```
 .
@@ -53,40 +43,34 @@ darwin-rebuild switch --flake .
 ├── flake.lock          # Pinned dependency versions
 ├── mise.toml           # Dev tasks (lint, format, check)
 ├── modules/
-│   ├── darwin.nix      # macOS system settings, fonts, Homebrew casks
+│   ├── darwin.nix      # macOS settings, fonts, Homebrew casks
 │   ├── home.nix        # Home Manager entry point
 │   ├── packages.nix    # CLI tools and yazi config
 │   ├── shell.nix       # Zsh, fzf, zoxide, bat, eza
 │   ├── terminal.nix    # Ghostty, tmux
 │   ├── git.nix         # Git, delta, lazygit, gh
-│   ├── zed.nix         # Zed editor config
-│   └── claude-code.nix # Claude Code config
-└── configs/            # Configs not managed by Nix (nvim, p10k)
+│   ├── zed.nix         # Zed editor settings
+│   └── claude-code.nix # Claude Code settings
+└── configs/            # Non-Nix configs (nvim, p10k)
 ```
 
 ## CLI Tools
 
-### Shell
+### Shell & Navigation
 
 | Tool | Description |
 |------|-------------|
 | **zsh** | Shell with vi-mode, fzf-tab, fast-syntax-highlighting |
 | **powerlevel10k** | Prompt theme |
 | **fzf** | Fuzzy finder |
-| **zoxide** | Smarter `cd` with history |
+| **zoxide** | Smarter `cd` with frecency |
 | **bat** | `cat` with syntax highlighting |
 | **eza** | `ls` with icons and git status |
-
-### Files & Navigation
-
-| Tool | Description |
-|------|-------------|
-| **yazi** | Terminal file manager with previews |
-| **fd** | Fast `find` replacement |
-| **ripgrep** | Fast `grep` replacement |
-| **sd** | Simple `sed` replacement |
+| **yazi** | Terminal file manager with image previews |
+| **fd** | Fast `find` |
+| **ripgrep** | Fast `grep` |
+| **sd** | Simple `sed` |
 | **dust** | `du` with visualization |
-| **ouch** | Universal archiver (zip, tar, gz, etc.) |
 | **tree** | Directory tree |
 
 ### Git
@@ -94,43 +78,67 @@ darwin-rebuild switch --flake .
 | Tool | Description |
 |------|-------------|
 | **lazygit** | Git TUI |
-| **delta** | Syntax-highlighted diffs with side-by-side view |
+| **delta** | Syntax-highlighted side-by-side diffs |
 | **gh** | GitHub CLI |
 | **gh-dash** | PR and issues dashboard |
 | **git-lfs** | Large File Storage |
 
-### Terminal
+### Terminal & Multiplexing
 
 | Tool | Description |
 |------|-------------|
 | **ghostty** | GPU-accelerated terminal |
-| **tmux** | Terminal multiplexer with vim-style navigation |
+| **tmux** | Multiplexer with vim-style navigation, resurrect, continuum |
 
-### Editors
-
-| Tool | Description |
-|------|-------------|
-| **neovim** | LazyVim config |
-| **zed** | GUI editor |
-| **cursor** | AI editor |
-
-### DevOps
+### Editors & IDEs
 
 | Tool | Description |
 |------|-------------|
-| **lazydocker** | Docker TUI |
+| **neovim** | LazyVim configuration |
+| **zed** | Fast GUI editor |
+| **cursor** | AI-powered editor |
+| **VS Code** | When you need extensions |
+| **JetBrains Toolbox** | JetBrains IDEs manager |
+
+### DevOps & Containers
+
+| Tool | Description |
+|------|-------------|
 | **orbstack** | Docker & Linux VMs for macOS |
+| **lazydocker** | Docker TUI |
 | **ansible** | Infrastructure automation |
+| **utm** / **parallels** | Virtual machines |
+
+### Data & HTTP
+
+| Tool | Description |
+|------|-------------|
+| **jq** / **yq** | JSON/YAML processors |
+| **httpie** | HTTP client |
+| **yaak** | API client |
 
 ### Utilities
 
 | Tool | Description |
 |------|-------------|
-| **jq** / **yq** | JSON/YAML parsers |
-| **httpie** | HTTP client |
 | **btop** | System monitor |
 | **tokei** | Lines of code counter |
 | **glow** | Markdown viewer |
+| **ouch** | Universal archiver |
+| **agenix-cli** | Secrets management |
+| **coreutils** | GNU core utilities |
+| **gnused** | GNU sed |
+| **curl** / **wget** | HTTP clients |
+
+### AI Tools
+
+| Tool | Description |
+|------|-------------|
+| **claude** | Claude desktop app |
+| **claude-code** | Claude CLI agent |
+| **codex** | OpenAI Codex CLI |
+| **gemini-cli** | Google Gemini CLI |
+| **ollama** | Local LLMs |
 
 ### Nix Tooling
 
@@ -141,9 +149,33 @@ darwin-rebuild switch --flake .
 | **statix** | Linter |
 | **deadnix** | Dead code finder |
 
+## GUI Apps (via Homebrew)
+
+**Productivity:** Raycast, Obsidian, Capacities, Todoist, Raindrop.io, Linear
+
+**Browsers:** Arc, Google Chrome
+
+**Communication:** Telegram, WhatsApp, Signal, Discord, Mattermost, Zoom
+
+**Media:** Spotify, Tidal, Qobuz, IINA, OBS
+
+**Design:** Figma
+
+**Security:** 1Password, AmneziaVPN, Pritunl
+
+**Gaming:** Steam, Moonlight
+
+**Utilities:** Alt-Tab, Ice (menu bar), Mac Mouse Fix, balenaEtcher, RustDesk, qBittorrent, VIA (keyboard)
+
+## Fonts
+
+- JetBrains Mono Nerd Font
+- Monaspace Nerd Font
+- Nerd Fonts Symbols
+
 ## mise Tasks
 
-Dev tasks defined in `mise.toml`:
+Dev tasks for this repo (`mise.toml`):
 
 ```bash
 mise run fmt          # Format .nix files
@@ -159,7 +191,7 @@ mise run lint         # Run all checks
 Apply changes:
 ```bash
 darwin-rebuild switch --flake .
-# or use the shell alias:
+# or shell alias:
 rebuild
 ```
 
@@ -170,19 +202,19 @@ nix flake update
 update
 ```
 
-Clean up Nix store:
+Clean Nix store:
 ```bash
 nix-collect-garbage -d
 # or:
 cleanup
 ```
 
-## macOS Settings
+## macOS Defaults
 
 Automatically configured:
 
-- **Dock**: auto-hide, no recent apps
-- **Finder**: show hidden files, extensions, path bar
-- **Keyboard**: fast key repeat, no auto-corrections
-- **Security**: Touch ID for sudo
-- **Screenshots**: saved to `~/Pictures/Screenshots`
+- **Dock:** auto-hide, no recent apps, stable spaces order
+- **Finder:** show hidden files, extensions, path bar, status bar
+- **Keyboard:** fast key repeat (2/15), no auto-corrections
+- **Security:** Touch ID for sudo, guest login disabled
+- **Screenshots:** saved to `~/Pictures/Screenshots`
