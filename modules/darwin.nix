@@ -1,102 +1,33 @@
-{ pkgs
-, username
-, hostname
-, ...
+{
+  pkgs,
+  username,
+  hostname,
+  ...
 }:
 
 {
+  networking = {
+    computerName = hostname;
+    hostName = hostname;
+    localHostName = hostname;
+  };
+
+  # Determinate Nix manages itself
+  nix.enable = false;
+
+  nixpkgs.config.allowUnfree = true;
+
+  security.pam.services.sudo_local.touchIdAuth = true;
+
+  users.users.${username} = {
+    name = username;
+    home = "/Users/${username}";
+  };
+
   system = {
     stateVersion = 5;
-    nixpkgs.config.allowUnfree = true;
-
-    # Determinate Nix manages itself
-    nix.enable = false;
-
-    networking = {
-      computerName = hostname;
-      hostName = hostname;
-      localHostName = hostname;
-    };
-
-    users.users.${username} = {
-      name = username;
-      home = "/Users/${username}";
-    };
-
-    security.pam.services.sudo_local.touchIdAuth = true;
 
     primaryUser = username;
-
-    fonts.packages = with pkgs; [
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.monaspace
-      nerd-fonts.symbols-only
-    ];
-
-    homebrew = {
-      enable = true;
-      onActivation = {
-        autoUpdate = true;
-        cleanup = "uninstall";
-        upgrade = true;
-      };
-
-      brews = [
-        "mas"
-        "powerlevel10k"
-        "gemini-cli"
-      ];
-
-      casks = [
-        "1password"
-        "alt-tab"
-        "amneziavpn"
-        "arc"
-        "balenaetcher"
-        "capacities"
-        "claude"
-        "cursor"
-        "discord"
-        "figma"
-        "ghostty"
-        "google-chrome"
-        "iina"
-        "jetbrains-toolbox"
-        "jordanbaird-ice"
-        "linear-linear"
-        "mac-mouse-fix"
-        "mattermost"
-        "moonlight"
-        "obs"
-        "obsidian"
-        "ollama-app"
-        "orbstack"
-        "parallels"
-        "pritunl"
-        "qbittorrent"
-        "qobuz"
-        "raindropio"
-        "raycast"
-        "rustdesk"
-        "signal"
-        "spotify"
-        "steam"
-        "telegram"
-        "tidal"
-        "todoist-app"
-        "utm"
-        "via"
-        "visual-studio-code"
-        "whatsapp"
-        "yaak"
-        "zed"
-        "zoom"
-      ];
-
-      masApps = {
-        "1Password for Safari" = 1569813296;
-      };
-    };
 
     defaults = {
       dock = {
@@ -127,6 +58,77 @@
 
       screencapture.location = "~/Pictures/Screenshots";
       loginwindow.GuestEnabled = false;
+    };
+  };
+
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.monaspace
+    nerd-fonts.symbols-only
+  ];
+
+  homebrew = {
+    enable = true;
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "uninstall";
+      upgrade = true;
+    };
+
+    brews = [
+      "mas"
+      "powerlevel10k"
+      "gemini-cli"
+    ];
+
+    casks = [
+      "1password"
+      "alt-tab"
+      "amneziavpn"
+      "arc"
+      "balenaetcher"
+      "capacities"
+      "claude"
+      "cursor"
+      "discord"
+      "figma"
+      "ghostty"
+      "google-chrome"
+      "iina"
+      "jetbrains-toolbox"
+      "jordanbaird-ice"
+      "linear-linear"
+      "mac-mouse-fix"
+      "mattermost"
+      "moonlight"
+      "obs"
+      "obsidian"
+      "ollama-app"
+      "orbstack"
+      "parallels"
+      "pritunl"
+      "qbittorrent"
+      "qobuz"
+      "raindropio"
+      "raycast"
+      "rustdesk"
+      "signal"
+      "spotify"
+      "steam"
+      "telegram"
+      "tidal"
+      "todoist-app"
+      "utm"
+      "via"
+      "visual-studio-code"
+      "whatsapp"
+      "yaak"
+      "zed"
+      "zoom"
+    ];
+
+    masApps = {
+      "1Password for Safari" = 1569813296;
     };
   };
 

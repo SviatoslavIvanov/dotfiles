@@ -18,6 +18,10 @@ description = "Find dead code"
 run = "deadnix -e -f ."
 description = "Remove dead code"
 
+[tasks.flake-check]
+run = "nix flake check"
+description = "Check flake validity"
+
 [tasks.lint]
-depends = ["check", "dead"]
+depends = ["check", "dead", "flake-check"]
 description = "Run all checks"
