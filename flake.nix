@@ -21,13 +21,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    catppuccin.url = "github:catppuccin/nix";
+
     dotfiles-private = {
       url = "git+ssh://git@github.com/IvanovSvyatoslav/dotfiles-private";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ nixpkgs, nix-darwin, home-manager, nix-homebrew, stylix, dotfiles-private, ... }:
+  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, ... }:
     let
       system = "aarch64-darwin";
       hostname = "svyat-mac";
@@ -62,6 +64,7 @@
               extraSpecialArgs = { inherit inputs username; };
               sharedModules = [
                 stylix.homeModules.stylix
+                catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default
               ];
               users.${username} = import ./modules/home.nix;

@@ -1,0 +1,23 @@
+[tasks.fmt]
+run = "nixpkgs-fmt **/*.nix"
+description = "Format Nix files"
+
+[tasks.check]
+run = "statix check ."
+description = "Lint Nix files"
+
+[tasks.fix]
+run = "statix fix ."
+description = "Auto-fix lint issues"
+
+[tasks.dead]
+run = "deadnix -e ."
+description = "Find dead code"
+
+[tasks.clean]
+run = "deadnix -e -f ."
+description = "Remove dead code"
+
+[tasks.lint]
+depends = ["check", "dead"]
+description = "Run all checks"

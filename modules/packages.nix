@@ -26,12 +26,17 @@ in
     httpie
     lazydocker
     ansible
-    btop
     dust
     gnused
     glow
     agenix-cli
+    nixd
+    nixpkgs-fmt
+    statix
+    deadnix
   ];
+
+  programs.btop.enable = true;
 
   programs.yazi = {
     enable = true;
@@ -73,31 +78,104 @@ in
 
     settings = {
       plugin.prepend_previewers = [
-        { name = "*.md"; run = "glow"; }
-        { mime = "application/*zip"; run = "ouch"; }
-        { mime = "application/x-tar"; run = "ouch"; }
-        { mime = "application/x-bzip2"; run = "ouch"; }
-        { mime = "application/x-7z-compressed"; run = "ouch"; }
-        { mime = "application/x-rar"; run = "ouch"; }
-        { mime = "application/x-xz"; run = "ouch"; }
+        {
+          name = "*.md";
+          run = "glow";
+        }
+        {
+          mime = "application/*zip";
+          run = "ouch";
+        }
+        {
+          mime = "application/x-tar";
+          run = "ouch";
+        }
+        {
+          mime = "application/x-bzip2";
+          run = "ouch";
+        }
+        {
+          mime = "application/x-7z-compressed";
+          run = "ouch";
+        }
+        {
+          mime = "application/x-rar";
+          run = "ouch";
+        }
+        {
+          mime = "application/x-xz";
+          run = "ouch";
+        }
       ];
     };
 
     keymap = {
       mgr.prepend_keymap = [
-        { on = "l"; run = "plugin smart-enter"; desc = "Enter or open"; }
-        { on = "<Enter>"; run = "plugin smart-enter"; desc = "Enter or open"; }
-        { on = "f"; run = "plugin jump-to-char"; desc = "Jump to char"; }
-        { on = "F"; run = "plugin jump-to-char --args=previous"; desc = "Jump to char (prev)"; }
-        { on = "1"; run = "plugin relative-motions --args=1"; desc = "Move 1"; }
-        { on = "2"; run = "plugin relative-motions --args=2"; desc = "Move 2"; }
-        { on = "3"; run = "plugin relative-motions --args=3"; desc = "Move 3"; }
-        { on = "4"; run = "plugin relative-motions --args=4"; desc = "Move 4"; }
-        { on = "5"; run = "plugin relative-motions --args=5"; desc = "Move 5"; }
-        { on = "6"; run = "plugin relative-motions --args=6"; desc = "Move 6"; }
-        { on = "7"; run = "plugin relative-motions --args=7"; desc = "Move 7"; }
-        { on = "8"; run = "plugin relative-motions --args=8"; desc = "Move 8"; }
-        { on = "9"; run = "plugin relative-motions --args=9"; desc = "Move 9"; }
+        {
+          on = "l";
+          run = "plugin smart-enter";
+          desc = "Enter or open";
+        }
+        {
+          on = "<Enter>";
+          run = "plugin smart-enter";
+          desc = "Enter or open";
+        }
+        {
+          on = "f";
+          run = "plugin jump-to-char";
+          desc = "Jump to char";
+        }
+        {
+          on = "F";
+          run = "plugin jump-to-char --args=previous";
+          desc = "Jump to char (prev)";
+        }
+        {
+          on = "1";
+          run = "plugin relative-motions --args=1";
+          desc = "Move 1";
+        }
+        {
+          on = "2";
+          run = "plugin relative-motions --args=2";
+          desc = "Move 2";
+        }
+        {
+          on = "3";
+          run = "plugin relative-motions --args=3";
+          desc = "Move 3";
+        }
+        {
+          on = "4";
+          run = "plugin relative-motions --args=4";
+          desc = "Move 4";
+        }
+        {
+          on = "5";
+          run = "plugin relative-motions --args=5";
+          desc = "Move 5";
+        }
+        {
+          on = "6";
+          run = "plugin relative-motions --args=6";
+          desc = "Move 6";
+        }
+        {
+          on = "7";
+          run = "plugin relative-motions --args=7";
+          desc = "Move 7";
+        }
+        {
+          on = "8";
+          run = "plugin relative-motions --args=8";
+          desc = "Move 8";
+        }
+        {
+          on = "9";
+          run = "plugin relative-motions --args=9";
+          desc = "Move 9";
+        }
       ];
     };
   };

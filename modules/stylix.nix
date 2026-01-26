@@ -23,12 +23,20 @@
         name = "Noto Serif";
       };
       sizes = {
-        terminal = 14;
+        terminal = 22;
         applications = 13;
       };
     };
 
-    targets.tmux.enable = false;
-    targets.zed.enable = false;
+    targets = {
+      bat.enable = false;
+      fzf.enable = false;
+      yazi.enable = false;
+      btop.enable = false;
+      neovim.enable = false;
+      lazygit.enable = false;
+      tmux.enable = false;
+      zed.enable = false;
+    };
   };
 }

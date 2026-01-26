@@ -1,8 +1,37 @@
 { pkgs, ... }:
 
 {
-  # Ghostty installed via Homebrew (not available in nixpkgs for darwin)
-  # programs.ghostty = { ... };
+  xdg.configFile."ghostty/config".text = ''
+    theme = Catppuccin Mocha
+
+    auto-update = check
+
+    font-thicken = true
+    font-family = MonaspiceNe Nerd Font Mono
+    font-size = 22
+    font-feature = ss01
+    font-feature = ss02
+    font-feature = ss03
+    font-feature = ss04
+    font-feature = ss05
+    font-feature = ss06
+    font-feature = ss07
+    font-feature = ss08
+    font-feature = ss09
+    font-feature = calt
+    font-feature = liga
+
+    background-opacity = 0.95
+    background-blur = 20
+    window-padding-x = 8
+    window-padding-y = 8
+
+    window-inherit-working-directory = true
+    window-inherit-font-size = true
+
+    confirm-close-surface = false
+    quit-after-last-window-closed = true
+  '';
 
   programs.tmux = {
     enable = true;
@@ -20,12 +49,9 @@
       yank
       resurrect
       continuum
-      catppuccin
     ];
 
     extraConfig = ''
-      set -g @catppuccin_flavor "mocha"
-      set -g @catppuccin_window_status_style "basic"
 
       set -ga terminal-overrides ",*256col*:Tc"
       set -ga terminal-overrides ",xterm-256color:Tc"
