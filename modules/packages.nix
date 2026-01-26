@@ -29,12 +29,13 @@ in
     dust
     gnused
     glow
-    agenix-cli
+    ragenix
     nixd
     nixpkgs-fmt
     statix
     deadnix
     codex
+    fx
   ];
 
   programs.btop.enable = true;

@@ -174,6 +174,7 @@
 
           function zvm_after_init() {
             source <(fzf --zsh)
+            eval "$(atuin init zsh)"
           }
 
           function rebuild() {
@@ -198,7 +199,7 @@
 
     fzf = {
       enable = true;
-      enableZshIntegration = false;
+      enableZshIntegration = false; # manual init in zvm_after_init (zsh-vi-mode resets keybindings)
       defaultCommand = "fd --type f --hidden --follow --exclude .git";
       defaultOptions = [
         "--height=50%"
@@ -218,6 +219,41 @@
       enable = true;
       icons = "auto";
       git = true;
+    };
+
+    atuin = {
+      enable = true;
+      enableZshIntegration = false; # manual init in zvm_after_init to load after fzf
+
+      settings = {
+        auto_sync = false;
+        search_mode = "fuzzy";
+        enter_accept = true;
+
+        history_filter = [
+          "^cd"
+          "^c "
+          "^z "
+          "^ls"
+          "^ll"
+          "^la"
+          "^l$"
+          "^lt"
+          "^tree"
+          "^pwd$"
+          "^clear$"
+          "^reset$"
+          "^cl$"
+          "^rst$"
+          "^exit$"
+          "^q$"
+          "^cat "
+          "^bat "
+          "^echo "
+          "^true$"
+          "^false$"
+        ];
+      };
     };
   };
 }
