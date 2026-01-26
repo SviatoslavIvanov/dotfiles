@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, inputs, system, ... }:
 
 {
   programs.claude-code = {
     enable = true;
-    package = pkgs.claude-code;
+    package = inputs.claude-code-nix.packages.${system}.default;
 
     settings = {
       permissions = {

@@ -27,9 +27,11 @@
       url = "git+ssh://git@github.com/IvanovSvyatoslav/dotfiles-private";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    claude-code-nix.url = "github:sadjow/claude-code-nix";
   };
 
-  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, ... }:
+  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, claude-code-nix, ... }:
     let
       system = "aarch64-darwin";
       hostname = "svyat-mac";
@@ -61,7 +63,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "backup";
-              extraSpecialArgs = { inherit inputs username; };
+              extraSpecialArgs = { inherit inputs username system; };
               sharedModules = [
                 stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin
