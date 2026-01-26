@@ -1,11 +1,94 @@
 { pkgs, lib, config, ... }:
 
 {
+  xdg.configFile."fsh/catppuccin-mocha.ini".text = ''
+    [base]
+    default          = #cdd6f4
+    unknown-token    = #f38ba8,bold
+    commandseparator = #94e2d5
+    redirection      = #94e2d5
+    here-string-tri  = #bac2de
+    here-string-text = #bac2de
+    here-string-var  = #bac2de
+    exec-descriptor  = none
+    comment          = #6c7086
+    correct-subtle   = #b4befe
+    incorrect-subtle = #eba0ac
+    subtle-separator = none
+    subtle-bg        = none
+    secondary        =
+    recursive-base   = #cdd6f4
+
+    [command-point]
+    reserved-word     = #cba6f7
+    subcommand        = #74c7ec
+    alias             = #89b4fa
+    suffix-alias      = #89b4fa
+    global-alias      = #89b4fa
+    builtin           = #cba6f7
+    function          = #89b4fa
+    command           = #89b4fa
+    precommand        = #cba6f7
+    hashed-command    = #89b4fa
+    single-sq-bracket = #f9e2af
+    double-sq-bracket = #f9e2af
+    double-paren      = #a6e3a1
+
+    [paths]
+    path          = #f5e0dc
+    pathseparator = #f5e0dc
+    path-to-dir   = #f5e0dc
+    globbing      = #f5c2e7
+    globbing-ext  = none
+
+    [brackets]
+    paired-bracket  = bold
+    bracket-level-1 = #f38ba8
+    bracket-level-2 = #f9e2af
+    bracket-level-3 = #74c7ec
+
+    [arguments]
+    single-hyphen-option   = #94e2d5
+    double-hyphen-option   = #94e2d5
+    back-quoted-argument   = #94e2d5
+    single-quoted-argument = #a6e3a1
+    double-quoted-argument = #a6e3a1
+    dollar-quoted-argument = #a6e3a1
+    optarg-string          = #a6e3a1
+    optarg-number          = #fab387
+
+    [in-string]
+    back-dollar-quoted-argument           = #fab387
+    back-or-dollar-double-quoted-argument = #fab387
+
+    [other]
+    variable             = #fab387
+    assign               = none
+    assign-array-bracket = none
+    history-expansion    = none
+
+    [math]
+    mathvar = #f5c2e7
+    mathnum = #fab387
+    matherr = #f38ba8,bold
+
+    [for-loop]
+    forvar  = #cdd6f4
+    fornum  = #fab387
+    foroper = #89b4fa
+    forsep  = #89b4fa
+
+    [case]
+    case-input       = #fab387
+    case-parentheses = #9399b2
+    case-condition   = #cba6f7
+  '';
+
   programs.zsh = {
     enable = true;
     dotDir = "${config.xdg.configHome}/zsh";
     autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
+    syntaxHighlighting.enable = false;
     historySubstringSearch.enable = true;
     enableCompletion = true;
     autocd = true;
@@ -48,8 +131,6 @@
       t = "tmux new-session -A -s";
       ta = "tmux attach";
 
-      rebuild = "darwin-rebuild switch --flake ~/.dotfiles";
-      update = "nix flake update --flake ~/.dotfiles && rebuild";
       cleanup = "nix-collect-garbage -d";
     };
 
@@ -64,6 +145,11 @@
         src = pkgs.zsh-vi-mode;
         file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
       }
+      {
+        name = "fast-syntax-highlighting";
+        src = pkgs.zsh-fast-syntax-highlighting;
+        file = "share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh";
+      }
     ];
 
     initContent = lib.mkMerge [
@@ -74,10 +160,17 @@
       '')
       ''
         ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
-        ZVM_CURSOR_STYLE_ENABLED=false
 
         function zvm_after_init() {
           source <(fzf --zsh)
+        }
+
+        function rebuild() {
+          sudo darwin-rebuild switch --flake ~/.dotfiles "$@"
+        }
+
+        function update() {
+          nix flake update --flake ~/.dotfiles && rebuild
         }
 
         eval "$(mise activate zsh)"
@@ -86,6 +179,8 @@
         [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
 
         zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
+
+        [[ -v functions[fast-theme] ]] && fast-theme XDG:catppuccin-mocha -q
       ''
     ];
   };

@@ -28,7 +28,10 @@
       buffer_font_size = lib.mkForce 22;
       agent_ui_font_size = 24;
       agent_buffer_font_size = 22;
-      buffer_font_family = "MonaspiceNe Nerd Font";
+      buffer_font_family = "MonaspiceNe Nerd Font Mono";
+      buffer_font_fallbacks = [
+        "JetBrainsMono Nerd Font Mono"
+      ];
       buffer_font_features = {
         calt = true;
         liga = true;

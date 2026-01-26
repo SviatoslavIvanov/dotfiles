@@ -12,7 +12,7 @@
     fonts = {
       monospace = {
         package = pkgs.nerd-fonts.monaspace;
-        name = "MonaspiceNe Nerd Font";
+        name = "MonaspiceNe Nerd Font Mono";
       };
       sansSerif = {
         package = pkgs.inter;
