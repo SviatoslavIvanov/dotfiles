@@ -5,7 +5,7 @@ let
     owner = "yazi-rs";
     repo = "plugins";
     rev = "6c71385af67c71cb3d62359e94077f2e940b15df";
-    hash = "";
+    hash = "sha256-+M0ZFh2jKts5GP9KgKsbpeNe0ldXQGyUZlYjDbp4yhw=";
   };
 in
 {
@@ -46,19 +46,19 @@ in
         owner = "ndtoan96";
         repo = "ouch.yazi";
         rev = "594b8a2b246633d46b03a3261c9aebd1c4b5abf3";
-        hash = "";
+        hash = "sha256-9i6x/VxGOA3bB3FPieB7mQ1zGaMK5wnMhYqsq4CvaM4=";
       };
       relative-motions = pkgs.fetchFromGitHub {
         owner = "dedukun";
         repo = "relative-motions.yazi";
         rev = "a603d9ea924dfc0610bcf9d3129e7cba605d4501";
-        hash = "";
+        hash = "sha256-9i6x/VxGOA3bB3FPieB7mQ1zGaMK5wnMhYqsq4CvaM4=";
       };
       glow = pkgs.fetchFromGitHub {
         owner = "Reledia";
         repo = "glow.yazi";
         rev = "bd3eaa58c065eaf216a8d22d64c62d8e0e9277e9";
-        hash = "";
+        hash = "sha256-9i6x/VxGOA3bB3FPieB7mQ1zGaMK5wnMhYqsq4CvaM4=";
       };
     };
 

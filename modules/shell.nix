@@ -1,8 +1,9 @@
-{ pkgs, config, ... }:
+{ pkgs, lib, config, ... }:
 
 {
   programs.zsh = {
     enable = true;
+    dotDir = "${config.xdg.configHome}/zsh";
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     historySubstringSearch.enable = true;
@@ -65,27 +66,28 @@
       }
     ];
 
-    initExtraFirst = ''
-      if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-      fi
-    '';
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+          source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+        fi
+      '')
+      ''
+        ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
+        ZVM_CURSOR_STYLE_ENABLED=false
 
-    initExtra = ''
-      ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
-      ZVM_CURSOR_STYLE_ENABLED=false
+        function zvm_after_init() {
+          source <(fzf --zsh)
+        }
 
-      function zvm_after_init() {
-        source <(fzf --zsh)
-      }
+        eval "$(mise activate zsh)"
 
-      eval "$(mise activate zsh)"
+        source "$(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme"
+        [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
 
-      source "$(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme"
-      [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
-
-      zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
-    '';
+        zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
+      ''
+    ];
   };
 
   programs.fzf = {

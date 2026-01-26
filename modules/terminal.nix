@@ -1,21 +1,8 @@
 { pkgs, ... }:
 
 {
-  programs.ghostty = {
-    enable = true;
-    enableZshIntegration = true;
-    settings = {
-      macos-titlebar-style = "tabs";
-      macos-option-as-alt = true;
-      window-padding-x = 10;
-      window-padding-y = 10;
-      window-save-state = "always";
-      confirm-close-surface = false;
-      cursor-style-blink = false;
-      copy-on-select = "clipboard";
-      font-feature = "calt,liga,ss01,ss02,ss03,ss04,ss06,ss07,ss08,ss09";
-    };
-  };
+  # Ghostty installed via Homebrew (not available in nixpkgs for darwin)
+  # programs.ghostty = { ... };
 
   programs.tmux = {
     enable = true;

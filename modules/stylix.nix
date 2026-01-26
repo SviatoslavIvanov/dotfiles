@@ -29,5 +29,6 @@
     };
 
     targets.tmux.enable = false;
+    targets.zed.enable = false;
   };
 }

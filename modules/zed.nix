@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   programs.zed-editor = {
@@ -24,8 +24,8 @@
       # Appearance
       which_key.enabled = true;
       autosave = "on_focus_change";
-      ui_font_size = 24;
-      buffer_font_size = 22;
+      ui_font_size = lib.mkForce 24;
+      buffer_font_size = lib.mkForce 22;
       agent_ui_font_size = 24;
       agent_buffer_font_size = 22;
       buffer_font_family = "MonaspiceNe Nerd Font";

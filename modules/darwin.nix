@@ -4,15 +4,8 @@
   system.stateVersion = 5;
   nixpkgs.config.allowUnfree = true;
 
-  nix = {
-    settings.experimental-features = [ "nix-command" "flakes" ];
-    optimise.automatic = true;
-    gc = {
-      automatic = true;
-      interval = { Weekday = 0; Hour = 2; Minute = 0; };
-      options = "--delete-older-than 30d";
-    };
-  };
+  # Determinate Nix manages itself
+  nix.enable = false;
 
   networking = {
     computerName = hostname;
@@ -25,7 +18,9 @@
     home = "/Users/${username}";
   };
 
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
+
+  system.primaryUser = username;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -56,23 +51,21 @@
       "claude"
       "cursor"
       "discord"
-      "exodus"
       "figma"
       "ghostty"
       "google-chrome"
       "iina"
       "jetbrains-toolbox"
       "jordanbaird-ice"
-      "ledger-live"
+      "ledger-wallet"
       "linear-linear"
       "mac-mouse-fix"
       "moonlight"
       "obsidian"
-      "ollama"
+      "ollama-app"
       "orbstack"
       "parallels"
       "pritunl"
-      "proton-mail"
       "qbittorrent"
       "qobuz"
       "raycast"
@@ -81,7 +74,7 @@
       "spotify"
       "steam"
       "tidal"
-      "todoist"
+      "todoist-app"
       "utm"
       "via"
       "visual-studio-code"

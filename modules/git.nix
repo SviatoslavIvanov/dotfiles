@@ -3,15 +3,32 @@
 {
   programs.git = {
     enable = true;
-    userName = "Svyatoslav Ivanov";
-    userEmail = "si.ivanov1212@gmail.com";
+    lfs.enable = true;
 
     signing = {
       key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF/WOifKMBKVekeC55DS/EHPM5yDxnoqQ0KlcZyBvVNU";
       signByDefault = true;
     };
 
-    extraConfig = {
+    ignores = [
+      ".DS_Store"
+      "*.swp"
+      "*.swo"
+      "*~"
+      ".direnv"
+      ".envrc"
+      ".idea"
+      ".vscode"
+      "*.log"
+      ".mise.local.toml"
+      "**/.claude/settings.local.json"
+    ];
+
+    settings = {
+      user = {
+        name = "Svyatoslav Ivanov";
+        email = "si.ivanov1212@gmail.com";
+      };
       gpg = {
         format = "ssh";
         ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
@@ -31,31 +48,16 @@
         ignorecase = false;
       };
     };
+  };
 
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        side-by-side = true;
-        line-numbers = true;
-      };
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      side-by-side = true;
+      line-numbers = true;
     };
-
-    lfs.enable = true;
-
-    ignores = [
-      ".DS_Store"
-      "*.swp"
-      "*.swo"
-      "*~"
-      ".direnv"
-      ".envrc"
-      ".idea"
-      ".vscode"
-      "*.log"
-      ".mise.local.toml"
-      "**/.claude/settings.local.json"
-    ];
   };
 
   programs.gh = {
