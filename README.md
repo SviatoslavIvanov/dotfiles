@@ -61,6 +61,7 @@ darwin-rebuild switch --flake .
 | **powerlevel10k** | Prompt theme |
 | **fzf** | Fuzzy finder |
 | **zoxide** | Smarter `cd` with frecency |
+| **atuin** | Shell history with fuzzy search |
 | **bat** | `cat` with syntax highlighting |
 | **eza** | `ls` with icons and git status |
 | **yazi** | Terminal file manager with image previews |
@@ -111,6 +112,7 @@ darwin-rebuild switch --flake .
 | Tool | Description |
 |------|-------------|
 | **jq** / **yq** | JSON/YAML processors |
+| **fx** | Interactive JSON viewer |
 | **httpie** | HTTP client |
 | **yaak** | API client |
 
