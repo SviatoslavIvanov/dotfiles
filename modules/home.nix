@@ -3,7 +3,6 @@
 {
   imports = [
     ./stylix.nix
-    ./fonts.nix
     ./packages.nix
     ./shell.nix
     ./git.nix
@@ -26,9 +25,6 @@
       ".config/nvim".source = ../configs/nvim-lazyvim;
       ".config/nvim-vscode".source = ../configs/nvim-vscode;
       ".config/p10k/config.zsh".source = ../configs/p10k.zsh;
-      ".ssh/config".source = "${inputs.dotfiles-private}/.ssh/config";
-      ".ssh/authorized_keys".source = "${inputs.dotfiles-private}/.ssh/authorized_keys";
-      ".config/1Password".source = "${inputs.dotfiles-private}/.config/1Password";
     };
   };
 

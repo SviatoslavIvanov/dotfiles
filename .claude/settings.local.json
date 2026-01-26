@@ -12,7 +12,8 @@
       "Bash(nix-prefetch-url:*)",
       "WebFetch(domain:formulae.brew.sh)",
       "Bash(ls:*)",
-      "Bash(brew --version:*)"
+      "Bash(brew --version:*)",
+      "mcp__acp__Edit"
     ]
   }
 }

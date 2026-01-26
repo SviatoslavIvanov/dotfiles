@@ -280,6 +280,9 @@
           "space g b" = "git::Blame";
           "space g d" = "git::Diff";
           "space g D" = "editor::ExpandAllDiffHunks";
+
+          # Docker
+          "space d d" = [ "task::Spawn" { task_name = "lazydocker"; reveal_target = "center"; } ];
           "] h" = "editor::GoToHunk";
           "[ h" = "editor::GoToPreviousHunk";
           "] c" = "editor::GoToHunk";
@@ -500,6 +503,14 @@
       {
         label = "lazygit";
         command = "lazygit";
+        use_new_terminal = true;
+        reveal = "always";
+        hide = "on_success";
+        reveal_target = "center";
+      }
+      {
+        label = "lazydocker";
+        command = "lazydocker";
         use_new_terminal = true;
         reveal = "always";
         hide = "on_success";

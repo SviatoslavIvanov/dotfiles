@@ -23,11 +23,11 @@
 
     dotfiles-private = {
       url = "git+ssh://git@github.com/IvanovSvyatoslav/dotfiles-private";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ nixpkgs, nix-darwin, home-manager, nix-homebrew, stylix, ... }:
+  outputs = inputs@{ nixpkgs, nix-darwin, home-manager, nix-homebrew, stylix, dotfiles-private, ... }:
     let
       system = "aarch64-darwin";
       hostname = "svyat-mac";
@@ -40,6 +40,8 @@
         modules = [
           ./modules/darwin.nix
           stylix.darwinModules.stylix
+          inputs.dotfiles-private.darwinModules.default
+          dotfiles-private.darwinModules.default
 
           nix-homebrew.darwinModules.nix-homebrew
           {
@@ -58,7 +60,10 @@
               useUserPackages = true;
               backupFileExtension = "backup";
               extraSpecialArgs = { inherit inputs username; };
-              sharedModules = [ stylix.homeModules.stylix ];
+              sharedModules = [
+                stylix.homeModules.stylix
+                dotfiles-private.homeModules.default
+              ];
               users.${username} = import ./modules/home.nix;
             };
           }

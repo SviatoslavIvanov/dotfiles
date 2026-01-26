@@ -1,23 +1,18 @@
-# Nix
 result
 result-*
 .direnv
 
-# macOS
 .DS_Store
 ._*
 
-# Local config (personal paths, not in git)
 .local/
 
-# Editor
 *.swp
 *.swo
 *~
 .idea/
 .vscode/
 
-# Secrets (should never be here, but just in case)
 *.gpg
 *.asc
 .env

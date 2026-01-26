@@ -4,8 +4,8 @@ let
   yazi-plugins = pkgs.fetchFromGitHub {
     owner = "yazi-rs";
     repo = "plugins";
-    rev = "6c71385af67c71cb3d62359e94077f2e940b15df";
-    hash = "sha256-+M0ZFh2jKts5GP9KgKsbpeNe0ldXQGyUZlYjDbp4yhw=";
+    rev = "e07bf41442a7f6fdd003069f380e1ae469a86211";
+    hash = "sha256-aC8DUZpzNHEf9MW3tX3XcDYY/mWClAHkw+nZaxDQHp8=";
   };
 in
 {
@@ -30,6 +30,7 @@ in
     dust
     gnused
     glow
+    agenix-cli
   ];
 
   programs.yazi = {

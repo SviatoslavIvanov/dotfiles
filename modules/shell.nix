@@ -131,6 +131,8 @@
       t = "tmux new-session -A -s";
       ta = "tmux attach";
 
+      c = "__zoxide_z";
+
       cleanup = "nix-collect-garbage -d";
     };
 
