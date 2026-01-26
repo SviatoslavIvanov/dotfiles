@@ -6,10 +6,7 @@ Declarative, reproducible setup managed entirely through Nix flakes. Includes sy
 
 ## Prerequisites
 
-**Nix** via [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer):
-```bash
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
+**Nix** via [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)
 
 ## Installation
 
