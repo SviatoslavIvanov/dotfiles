@@ -21,7 +21,6 @@
     ];
 
     userSettings = {
-      # Appearance
       which_key.enabled = true;
       autosave = "on_focus_change";
       ui_font_size = lib.mkForce 24;
@@ -52,13 +51,9 @@
       };
       icon_theme = "Material Icon Theme";
 
-      # Terminal
       terminal.toolbar.breadcrumbs = false;
-
-      # Preview tabs
       preview_tabs.enable_preview_from_file_finder = false;
 
-      # Title bar
       title_bar = {
         show_menus = false;
         show_user_picture = true;
@@ -69,20 +64,15 @@
         show_branch_icon = true;
       };
 
-      # Status bar
       status_bar = {
         active_language_button = true;
         cursor_position_button = false;
       };
 
-      # Search & Debugger
       search.button = true;
       debugger.button = false;
-
-      # Diagnostics
       diagnostics.inline.enabled = true;
 
-      # Vim mode
       vim_mode = true;
       vim = {
         use_system_clipboard = "on_yank";
@@ -90,7 +80,6 @@
       };
       relative_line_numbers = "enabled";
 
-      # Editor UI
       tab_bar.show = true;
       scrollbar.show = "auto";
       tabs = {
@@ -103,7 +92,6 @@
         coloring = "indent_aware";
       };
 
-      # Panels
       project_panel = {
         entry_spacing = "comfortable";
         hide_hidden = false;
@@ -123,13 +111,11 @@
       };
       notification_panel.dock = "right";
 
-      # Zen mode
       centered_layout = {
         left_padding = 0.2;
         right_padding = 0.2;
       };
 
-      # AI
       features.edit_prediction_provider = "copilot";
       agent = {
         inline_assistant_model = {
@@ -143,14 +129,12 @@
         model_parameters = [ ];
       };
 
-      # LSP
       inlay_hints.enabled = true;
       lsp.tailwindcss-language-server.settings = {
         classAttributes = [ "class" "className" "ngClass" "styles" ];
         EDITOR = "zed --wait";
       };
 
-      # File exclusions
       file_scan_exclusions = [
         "**/.git"
         "**/.svn"
@@ -177,15 +161,16 @@
         "**/.dotnet"
       ];
 
-      # Telemetry
       telemetry = {
-        diagnostics = true;
-        metrics = true;
+        diagnostics = false;
+        metrics = false;
       };
+
+      confirm_quit = false;
+      use_system_prompts = false;
     };
 
     userKeymaps = [
-      # Global workspace bindings
       {
         context = "Workspace";
         bindings = {
@@ -195,7 +180,6 @@
         };
       }
 
-      # Window navigation
       {
         context = "Dock || Terminal || Editor";
         bindings = {
@@ -206,31 +190,25 @@
         };
       }
 
-      # Normal + Visual mode (shared)
       {
         context = "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu";
         bindings = {
-          # Git
           "space g h d" = "editor::ExpandAllDiffHunks";
           "space g h r" = "git::Restore";
           "space g s" = "git_panel::ToggleFocus";
 
-          # Toggle
           "space u i" = "editor::ToggleInlayHints";
           "space u w" = "editor::ToggleSoftWrap";
           "space u z" = "workspace::ToggleCenteredLayout";
           "space z" = "workspace::ToggleZoom";
 
-          # Markdown
           "space m p" = "markdown::OpenPreview";
           "space m P" = "markdown::OpenPreviewToTheSide";
 
-          # Find/files
           "space f p" = "projects::OpenRecent";
           "space f f" = "file_finder::Toggle";
           "space f n" = "workspace::NewFile";
 
-          # Search
           "space s w" = "buffer_search::Deploy";
           "space s W" = "pane::DeploySearch";
           "space s g" = "workspace::NewSearch";
@@ -239,21 +217,17 @@
           "space s S" = "project_symbols::Toggle";
           "space s d" = "diagnostics::Deploy";
 
-          # AI
           "space a a" = "agent::ToggleFocus";
           "space a e" = "assistant::InlineAssist";
           "space a t" = "workspace::ToggleRightDock";
 
-          # Go to file
           "g f" = "editor::OpenExcerpts";
         };
       }
 
-      # Normal mode only
       {
         context = "Editor && vim_mode == normal && !VimWaiting && !menu";
         bindings = {
-          # LSP
           "space c a" = "editor::ToggleCodeActions";
           "space ." = "editor::ToggleCodeActions";
           "space c r" = "editor::Rename";
@@ -268,27 +242,23 @@
           "g y" = "editor::GoToTypeDefinition";
           "g r" = "editor::FindAllReferences";
 
-          # Diagnostics
           "] d" = "editor::GoToDiagnostic";
           "[ d" = "editor::GoToPreviousDiagnostic";
           "] e" = "editor::GoToDiagnostic";
           "[ e" = "editor::GoToPreviousDiagnostic";
           "space x x" = "diagnostics::Deploy";
 
-          # Git
           "space g g" = [ "task::Spawn" { task_name = "lazygit"; reveal_target = "center"; } ];
           "space g b" = "git::Blame";
           "space g d" = "git::Diff";
           "space g D" = "editor::ExpandAllDiffHunks";
 
-          # Docker
           "space d d" = [ "task::Spawn" { task_name = "lazydocker"; reveal_target = "center"; } ];
           "] h" = "editor::GoToHunk";
           "[ h" = "editor::GoToPreviousHunk";
           "] c" = "editor::GoToHunk";
           "[ c" = "editor::GoToPreviousHunk";
 
-          # Buffers
           "shift-h" = "pane::ActivatePreviousItem";
           "shift-l" = "pane::ActivateNextItem";
           "] b" = "pane::ActivateNextItem";
@@ -301,7 +271,6 @@
           "space b n" = "workspace::NewFile";
           "space ," = "tab_switcher::Toggle";
 
-          # Quick tab access
           "space 1" = [ "pane::ActivateItem" 0 ];
           "space 2" = [ "pane::ActivateItem" 1 ];
           "space 3" = [ "pane::ActivateItem" 2 ];
@@ -313,14 +282,12 @@
           "space 9" = [ "pane::ActivateItem" 8 ];
           "space 0" = "pane::ActivateLastItem";
 
-          # File
           "ctrl-s" = "workspace::Save";
           "space space" = "file_finder::Toggle";
           "space /" = "workspace::NewSearch";
           "space e" = "workspace::ToggleLeftDock";
           "space f E" = "pane::RevealInProjectPanel";
 
-          # Windows
           "space -" = "pane::SplitDown";
           "space |" = "pane::SplitRight";
           "space w s" = "pane::SplitDown";
@@ -328,10 +295,8 @@
           "space w d" = "pane::CloseAllItems";
           "space w c" = "pane::CloseAllItems";
 
-          # Quit
           "space q q" = "zed::Quit";
 
-          # Tasks
           "space r t" = "task::Spawn";
           "space r b" = [ "task::Spawn" { task_name = "Build"; } ];
           "space r r" = [ "task::Spawn" { task_name = "Start"; } ];
@@ -340,13 +305,11 @@
           "space t u" = [ "task::Spawn" { task_name = "Test: Unit"; } ];
           "space a c" = [ "task::Spawn" { task_name = "Claude Code"; } ];
 
-          # Excerpts
           "] q" = "editor::MoveToStartOfNextExcerpt";
           "[ q" = "editor::MoveToStartOfExcerpt";
         };
       }
 
-      # Visual mode only
       {
         context = "Editor && vim_mode == visual && !VimWaiting && !menu";
         bindings = {
@@ -356,7 +319,6 @@
         };
       }
 
-      # Insert mode
       {
         context = "Editor && vim_mode == insert && !menu";
         bindings = {
@@ -364,7 +326,6 @@
         };
       }
 
-      # Vim operators
       {
         context = "Editor && vim_operator == c";
         bindings = {
@@ -387,7 +348,6 @@
         };
       }
 
-      # Sneak motion
       {
         context = "vim_mode == normal || vim_mode == visual";
         bindings = {
@@ -396,7 +356,6 @@
         };
       }
 
-      # Center after motions
       {
         context = "VimControl && !menu";
         bindings = {
@@ -408,7 +367,6 @@
         };
       }
 
-      # Empty pane
       {
         context = "EmptyPane || SharedScreen";
         bindings = {
@@ -422,7 +380,6 @@
         };
       }
 
-      # Project panel
       {
         context = "ProjectPanel && not_editing";
         bindings = {
@@ -460,7 +417,6 @@
         };
       }
 
-      # Git panel
       {
         context = "GitPanel";
         bindings = {
@@ -468,7 +424,6 @@
         };
       }
 
-      # AI Agent panel
       {
         context = "AssistantPanel && vim_mode == normal";
         bindings = {
@@ -476,7 +431,6 @@
         };
       }
 
-      # Terminal
       {
         context = "Terminal";
         bindings = {
@@ -487,7 +441,6 @@
         };
       }
 
-      # Dock
       {
         context = "Dock";
         bindings = {
