@@ -8,6 +8,7 @@
     ./git.nix
     ./terminal.nix
     ./zed.nix
+    ./claude-code.nix
   ];
 
   home = {

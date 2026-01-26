@@ -34,6 +34,7 @@ in
     nixpkgs-fmt
     statix
     deadnix
+    codex
   ];
 
   programs.btop.enable = true;
