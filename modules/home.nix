@@ -22,7 +22,11 @@
     };
 
     file = {
-      ".config/nvim".source = ../configs/nvim-lazyvim;
+      ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
+      ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
+      ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
+      ".config/nvim/.neoconf.json".source = ../configs/nvim-lazyvim/.neoconf.json;
+      ".config/nvim/lua".source = ../configs/nvim-lazyvim/lua;
       ".config/nvim-vscode".source = ../configs/nvim-vscode;
       ".config/p10k/config.zsh".source = ../configs/p10k.zsh;
     };
