@@ -1,7 +1,8 @@
-{ pkgs
-, lib
-, config
-, ...
+{
+  pkgs,
+  lib,
+  config,
+  ...
 }:
 
 {
@@ -113,6 +114,9 @@
         v = "nvim";
         nvim-vscode = "NVIM_APPNAME=nvim-vscode nvim";
         lt = "eza --tree --level=2";
+
+        rst = "exec zsh";
+        cl = "reset";
 
         g = "git";
         gs = "git status";
