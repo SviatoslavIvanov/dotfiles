@@ -31,12 +31,14 @@ in
     glow
     ragenix
     age
+    nil
     nixd
     nixpkgs-fmt
     statix
     deadnix
     codex
     fx
+    _1password-cli
   ];
 
   programs.btop.enable = true;

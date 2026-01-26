@@ -29,6 +29,8 @@
     };
 
     claude-code-nix.url = "github:sadjow/claude-code-nix";
+
+    _1password-shell-plugins.url = "github:1Password/shell-plugins";
   };
 
   outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, claude-code-nix, ... }:
@@ -67,6 +69,7 @@
                 stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default
+                inputs._1password-shell-plugins.hmModules.default
               ];
               users.${username} = import ./modules/home.nix;
             };

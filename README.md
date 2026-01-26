@@ -93,7 +93,7 @@ darwin-rebuild switch --flake .
 | Tool | Description |
 |------|-------------|
 | **neovim** | LazyVim configuration |
-| **zed** | Fast GUI editor |
+| **zed** | Fast GUI editor (Biome for JS/TS formatting) |
 | **cursor** | AI-powered editor |
 | **VS Code** | When you need extensions |
 | **JetBrains Toolbox** | JetBrains IDEs manager |
@@ -104,7 +104,7 @@ darwin-rebuild switch --flake .
 |------|-------------|
 | **orbstack** | Docker & Linux VMs for macOS |
 | **lazydocker** | Docker TUI |
-| **ansible** | Infrastructure automation |
+| **ansible** | Infrastructure automation (pipelining enabled) |
 | **utm** / **parallels** | Virtual machines |
 
 ### Data & HTTP
@@ -144,6 +144,7 @@ darwin-rebuild switch --flake .
 | Tool | Description |
 |------|-------------|
 | **nixd** | Nix LSP |
+| **nil** | Nix LSP (alternative) |
 | **nixpkgs-fmt** | Formatter |
 | **statix** | Linter |
 | **deadnix** | Dead code finder |
@@ -160,7 +161,7 @@ darwin-rebuild switch --flake .
 
 **Design:** Figma
 
-**Security:** 1Password, AmneziaVPN, Pritunl
+**Security:** 1Password (+ CLI + shell plugins), AmneziaVPN, Pritunl
 
 **Gaming:** Steam, Moonlight
 

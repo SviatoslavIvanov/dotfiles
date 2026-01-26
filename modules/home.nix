@@ -23,6 +23,14 @@
     };
 
     file = {
+      ".ansible.cfg".text = ''
+        [defaults]
+        forks = 20
+
+        [ssh_connection]
+        pipelining = True
+      '';
+
       ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
       ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
       ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
@@ -35,6 +43,12 @@
 
   xdg.enable = true;
   programs.home-manager.enable = true;
+
+  programs._1password-shell-plugins = {
+    enable = true;
+    plugins = [
+    ];
+  };
 
   catppuccin = {
     enable = true;
