@@ -44,7 +44,6 @@
         modules = [
           ./modules/darwin.nix
           stylix.darwinModules.stylix
-          inputs.dotfiles-private.darwinModules.default
           dotfiles-private.darwinModules.default
 
           nix-homebrew.darwinModules.nix-homebrew
