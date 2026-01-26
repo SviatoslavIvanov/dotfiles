@@ -30,6 +30,7 @@ in
     gnused
     glow
     ragenix
+    age
     nixd
     nixpkgs-fmt
     statix
