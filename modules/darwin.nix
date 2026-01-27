@@ -7,7 +7,7 @@
 
 {
   networking = {
-    computerName = hostname;
+    computerName = "Святослав MacBook Pro";
     hostName = hostname;
     localHostName = hostname;
   };

@@ -1,3 +1,0 @@
-#!/bin/zsh
-
-exec -a nvim env NVIM_APPNAME="nvim-vscode" nvim "$@"

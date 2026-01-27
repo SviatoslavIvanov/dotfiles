@@ -77,9 +77,9 @@
           if [ -n "$branch" ]; then
               if ${pkgs.git}/bin/git -c core.useBuiltinFSMonitor=false diff --quiet 2>/dev/null && \
                  ${pkgs.git}/bin/git -c core.useBuiltinFSMonitor=false diff --cached --quiet 2>/dev/null; then
-                  git_branch=" \033[38;5;10m  $branch\033[0m"
+                  git_branch=" \033[38;5;10m $branch\033[0m"
               else
-                  git_branch=" \033[38;5;11m  $branch ●\033[0m"
+                  git_branch=" \033[38;5;11m $branch ●\033[0m"
               fi
           fi
       fi
@@ -91,7 +91,7 @@
           context_info=" \033[38;5;8m$pct%\033[0m"
       fi
 
-      printf "\033[38;5;12m  %s\033[0m%b%s" "$dir_name" "$git_branch" "$context_info"
+      printf "\033[38;5;12m %s\033[0m%b%b" "$dir_name" "$git_branch" "$context_info"
     '';
   };
 }

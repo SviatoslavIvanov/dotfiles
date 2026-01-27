@@ -31,6 +31,8 @@
 
     confirm-close-surface = false
     quit-after-last-window-closed = true
+
+    macos-option-as-alt = true
   '';
 
   programs.tmux = {
