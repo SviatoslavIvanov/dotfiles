@@ -83,6 +83,7 @@
 
     casks = [
       "1password"
+      "claude-code"
       "alt-tab"
       "amneziavpn"
       "arc"

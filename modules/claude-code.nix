@@ -1,54 +1,77 @@
-{ pkgs, inputs, system, ... }:
+{ pkgs, ... }:
 
-{
-  programs.claude-code = {
-    enable = true;
-    package = inputs.claude-code-nix.packages.${system}.default;
+let
+  settings = {
+    "$schema" = "https://json.schemastore.org/claude-code-settings.json";
 
-    settings = {
-      permissions = {
-        allow = [
-          "mcp__acp__*"
-          "mcp__plugin_context7_context7__resolve-library-id"
-          "mcp__plugin_context7_context7__query-docs"
-          "WebFetch"
-          "WebSearch"
-          "Bash(ls:*)"
-          "Bash(cat:*)"
-          "Bash(tree:*)"
-          "Bash(find:*)"
-          "Bash(grep:*)"
-          "Bash(rg:*)"
-          "Bash(fd:*)"
-          "Bash(which:*)"
-          "Bash(pwd:*)"
-        ];
+    permissions = {
+      allow = [
+        "mcp__acp__*"
+        "mcp__plugin_context7_context7__*"
+        "WebFetch"
+        "WebSearch"
+      ];
 
-        deny = [
-          "Read(**/.env*)"
-          "Read(**/secrets/**)"
-          "Read(**/*.key)"
-          "Read(**/*.pem)"
-          "Bash(rm -rf:*)"
-          "Bash(curl:*)"
-          "Bash(wget:*)"
-        ];
-      };
+      ask = [
+        # Sensitive files
+        "Read(**/.env*)"
+        "Read(**/secrets/**)"
+        "Read(**/*secret*)"
+        "Read(**/*credential*)"
 
-      statusLine = {
-        type = "command";
-        command = "~/.config/claude-code/statusline.sh";
-        padding = 0;
-      };
+        # Destructive operations
+        "Bash(rm -rf *)"
+        "Bash(rm -r *)"
 
-      attribution = {
-        commit = "";
-        pr = "";
-      };
+        # Network requests
+        "Bash(curl *)"
+        "Bash(wget *)"
 
-      outputStyle = "explanatory";
+        # Git write operations
+        "Bash(git add *)"
+        "Bash(git commit *)"
+        "Bash(git push *)"
+        "Bash(git push)"
+        "Bash(git reset *)"
+        "Bash(git checkout *)"
+        "Bash(git restore *)"
+        "Bash(git revert *)"
+        "Bash(git merge *)"
+        "Bash(git rebase *)"
+        "Bash(git stash *)"
+        "Bash(git branch -d *)"
+        "Bash(git branch -D *)"
+        "Bash(git tag *)"
+        "Bash(git cherry-pick *)"
+        "Bash(git clean *)"
+      ];
+
+      deny = [
+        # Private keys - never read
+        "Read(**/*.key)"
+        "Read(**/*.pem)"
+        "Read(**/*_rsa)"
+        "Read(**/*_ed25519)"
+        "Read(**/*.p12)"
+      ];
     };
+
+    statusLine = {
+      type = "command";
+      command = "~/.config/claude-code/statusline.sh";
+      padding = 0;
+    };
+
+    attribution = {
+      commit = "";
+      pr = "";
+    };
+
+    outputStyle = "explanatory";
   };
+in
+{
+  home.file.".claude/settings.json".text = builtins.toJSON settings;
 
   xdg.configFile."claude-code/statusline.sh" = {
     executable = true;

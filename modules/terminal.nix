@@ -8,6 +8,7 @@
 
     font-thicken = true
     font-family = MonaspiceNe Nerd Font Mono
+    font-family = JetBrainsMono Nerd Font Mono
     font-size = 22
     font-feature = ss01
     font-feature = ss02

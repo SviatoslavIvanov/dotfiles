@@ -28,12 +28,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-code-nix.url = "github:sadjow/claude-code-nix";
-
     _1password-shell-plugins.url = "github:1Password/shell-plugins";
   };
 
-  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, claude-code-nix, ... }:
+  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, ... }:
     let
       system = "aarch64-darwin";
       hostname = "svyat-mac";
