@@ -68,10 +68,32 @@ let
     };
 
     outputStyle = "explanatory";
+
+    enabledPlugins = {
+      "frontend-design@claude-plugins-official" = true;
+    };
+
+    pluginMarketplaces = [
+      {
+        source = "github";
+        repo = "anthropics/claude-plugins-official";
+      }
+    ];
   };
+  settingsJson = builtins.toJSON settings;
 in
 {
-  home.file.".claude/settings.json".text = builtins.toJSON settings;
+  home.activation.claudeConfig = ''
+    mkdir -p "$HOME/.claude"
+
+    # Remove symlink if exists (migration from old config)
+    [ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
+
+    # Settings - always overwrite (nix is source of truth)
+    cat > "$HOME/.claude/settings.json" << 'EOF'
+${settingsJson}
+EOF
+  '';
 
   xdg.configFile."claude-code/statusline.sh" = {
     executable = true;

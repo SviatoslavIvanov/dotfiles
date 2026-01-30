@@ -131,7 +131,8 @@
 
         d = "docker";
         dc = "docker compose";
-        dcu = "docker compose up -d";
+        dcu = "docker compose up";
+        dcud = "docker compose up -d";
         dcd = "docker compose down";
         dps = "docker ps";
         dlg = "lazydocker";
