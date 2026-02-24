@@ -115,15 +115,14 @@
         right_padding = 0.2;
       };
 
-      features.edit_prediction_provider = "copilot";
       agent = {
         inline_assistant_model = {
           provider = "copilot_chat";
-          model = "gpt-5.2-codex";
+          model = "gpt-5.3-codex";
         };
         default_model = {
           provider = "copilot_chat";
-          model = "gpt-5.2-codex";
+          model = "gpt-5.3-codex";
         };
         model_parameters = [ ];
       };
@@ -435,7 +434,6 @@
           "shift-k" = "editor::MoveLineUp";
         };
       }
-
 
       {
         context = "Editor && vim_operator == c";
