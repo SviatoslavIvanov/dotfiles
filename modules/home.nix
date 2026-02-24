@@ -9,6 +9,7 @@
     ./terminal.nix
     ./zed.nix
     ./claude-code.nix
+    ./aerospace.nix
   ];
 
   home = {
@@ -71,6 +72,9 @@
 
     gtk.icon.enable = false;
     cursors.enable = false;
-    zed.enable = false;
+    zed = {
+      enable = true;
+      icons.enable = false;
+    };
   };
 }

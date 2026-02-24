@@ -10,6 +10,16 @@ let
         "mcp__plugin_context7_context7__*"
         "WebFetch"
         "WebSearch"
+        "Bash(ls *)"
+        "Bash(cat *)"
+        "Bash(tree *)"
+        "Bash(head *)"
+        "Bash(tail *)"
+        "Bash(wc *)"
+        "Bash(file *)"
+        "Bash(find *)"
+        "Bash(which *)"
+        "Bash(stat *)"
       ];
 
       ask = [
@@ -71,6 +81,9 @@ let
 
     enabledPlugins = {
       "frontend-design@claude-plugins-official" = true;
+      "context7@claude-plugins-official" = true;
+      "code-simplifier@claude-plugins-official" = true;
+      "playwright@claude-plugins-official" = true;
     };
 
     pluginMarketplaces = [
@@ -84,15 +97,15 @@ let
 in
 {
   home.activation.claudeConfig = ''
-    mkdir -p "$HOME/.claude"
+        mkdir -p "$HOME/.claude"
 
-    # Remove symlink if exists (migration from old config)
-    [ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
+        # Remove symlink if exists (migration from old config)
+        [ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
 
-    # Settings - always overwrite (nix is source of truth)
-    cat > "$HOME/.claude/settings.json" << 'EOF'
-${settingsJson}
-EOF
+        # Settings - always overwrite (nix is source of truth)
+        cat > "$HOME/.claude/settings.json" << 'EOF'
+    ${settingsJson}
+    EOF
   '';
 
   xdg.configFile."claude-code/statusline.sh" = {

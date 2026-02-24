@@ -170,8 +170,6 @@
           fi
         '')
         ''
-          ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
-
           function zvm_after_init() {
             source <(fzf --zsh)
             eval "$(atuin init zsh)"

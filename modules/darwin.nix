@@ -32,20 +32,25 @@
     defaults = {
       dock = {
         autohide = true;
+        autohide-delay = 0.0;
+        autohide-time-modifier = 0.2;
         show-recents = false;
         mru-spaces = false;
+        minimize-to-application = true;
       };
 
       finder = {
         ShowPathbar = true;
         ShowStatusBar = true;
         FXPreferredViewStyle = "Nlsv";
+        FXDefaultSearchScope = "SCcf";
         FXEnableExtensionChangeWarning = false;
         AppleShowAllFiles = true;
         AppleShowAllExtensions = true;
       };
 
       NSGlobalDomain = {
+        _HIHideMenuBar = false;
         KeyRepeat = 2;
         InitialKeyRepeat = 15;
         ApplePressAndHoldEnabled = false;
@@ -56,6 +61,7 @@
         NSAutomaticQuoteSubstitutionEnabled = false;
       };
 
+      LaunchServices.LSQuarantine = false;
       screencapture.location = "~/Pictures/Screenshots";
       loginwindow.GuestEnabled = false;
     };
@@ -79,9 +85,15 @@
       "mas"
       "powerlevel10k"
       "gemini-cli"
+      "FelixKratz/formulae/borders"
+    ];
+
+    taps = [
+      "nikitabobko/tap"
     ];
 
     casks = [
+      "nikitabobko/tap/aerospace"
       "1password"
       "claude-code"
       "alt-tab"
@@ -126,6 +138,8 @@
       "yaak"
       "zed"
       "zoom"
+      "actual"
+      "homerow"
     ];
 
     masApps = {

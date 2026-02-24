@@ -47,8 +47,6 @@
 
       theme = {
         mode = "dark";
-        light = "One Light";
-        dark = "Catppuccin Mocha";
       };
       icon_theme = "Material Icon Theme";
 
@@ -121,18 +119,23 @@
       agent = {
         inline_assistant_model = {
           provider = "copilot_chat";
-          model = "gpt-5.1-codex";
+          model = "gpt-5.2-codex";
         };
         default_model = {
           provider = "copilot_chat";
-          model = "gpt-5";
+          model = "gpt-5.2-codex";
         };
         model_parameters = [ ];
       };
 
       inlay_hints.enabled = true;
       lsp.tailwindcss-language-server.settings = {
-        classAttributes = [ "class" "className" "ngClass" "styles" ];
+        classAttributes = [
+          "class"
+          "className"
+          "ngClass"
+          "styles"
+        ];
         EDITOR = "zed --wait";
       };
 
@@ -141,6 +144,13 @@
       };
 
       languages = {
+        Python = {
+          language_servers = [
+            "ty"
+            "!basedpyright"
+            "..."
+          ];
+        };
         JavaScript = {
           formatter = {
             language_server.name = "biome";
@@ -265,7 +275,6 @@
           "space m P" = "markdown::OpenPreviewToTheSide";
 
           "space f p" = "projects::OpenRecent";
-          "space f f" = "file_finder::Toggle";
           "space f n" = "workspace::NewFile";
 
           "space s w" = "buffer_search::Deploy";
@@ -278,6 +287,9 @@
 
           "space a a" = "agent::ToggleFocus";
           "space a e" = "assistant::InlineAssist";
+          "space a h" = "agent::OpenHistory";
+          "space a n" = "agent::NewThread";
+          "space a s" = "agent::AddSelectionToThread";
           "space a t" = "workspace::ToggleRightDock";
 
           "g f" = "editor::OpenExcerpts";
@@ -303,8 +315,6 @@
 
           "] d" = "editor::GoToDiagnostic";
           "[ d" = "editor::GoToPreviousDiagnostic";
-          "] e" = "editor::GoToDiagnostic";
-          "[ e" = "editor::GoToPreviousDiagnostic";
           "space x x" = "diagnostics::Deploy";
 
           "space g g" = [
@@ -327,17 +337,11 @@
           ];
           "] h" = "editor::GoToHunk";
           "[ h" = "editor::GoToPreviousHunk";
-          "] c" = "editor::GoToHunk";
-          "[ c" = "editor::GoToPreviousHunk";
-
-          "shift-h" = "pane::ActivatePreviousItem";
-          "shift-l" = "pane::ActivateNextItem";
           "] b" = "pane::ActivateNextItem";
           "[ b" = "pane::ActivatePreviousItem";
           "space b d" = "pane::CloseActiveItem";
           "shift-q" = "pane::CloseActiveItem";
           "space b o" = "pane::CloseOtherItems";
-          "space b q" = "pane::CloseOtherItems";
           "space b b" = "pane::AlternateFile";
           "space b n" = "workspace::NewFile";
           "space ," = "tab_switcher::Toggle";
@@ -388,10 +392,7 @@
 
           "space -" = "pane::SplitDown";
           "space |" = "pane::SplitRight";
-          "space w s" = "pane::SplitDown";
-          "space w v" = "pane::SplitRight";
           "space w d" = "pane::CloseAllItems";
-          "space w c" = "pane::CloseAllItems";
 
           "space q q" = "zed::Quit";
 
@@ -435,12 +436,6 @@
         };
       }
 
-      {
-        context = "Editor && vim_mode == insert && !menu";
-        bindings = {
-          "j j" = "vim::NormalBefore";
-        };
-      }
 
       {
         context = "Editor && vim_operator == c";
@@ -518,12 +513,9 @@
         context = "ProjectPanel && not_editing";
         bindings = {
           "a" = "project_panel::NewFile";
-          "%" = "project_panel::NewFile";
           "A" = "project_panel::NewDirectory";
           "r" = "project_panel::Rename";
-          "shift-r" = "project_panel::Rename";
           "d" = "project_panel::Delete";
-          "shift-d" = "project_panel::Delete";
           "x" = "project_panel::Cut";
           "c" = "project_panel::Copy";
           "p" = "project_panel::Paste";
@@ -606,6 +598,15 @@
       {
         label = "Claude Code";
         command = "claude";
+        use_new_terminal = true;
+        allow_concurrent_runs = false;
+        reveal = "always";
+        hide = "on_success";
+        reveal_target = "center";
+      }
+      {
+        label = "Yazi (open file)";
+        command = "yazi $ZED_WORKTREE_ROOT --chooser-file /tmp/zed-yazi-choice && [ -s /tmp/zed-yazi-choice ] && xargs zeditor -a < /tmp/zed-yazi-choice; rm -f /tmp/zed-yazi-choice";
         use_new_terminal = true;
         allow_concurrent_runs = false;
         reveal = "always";

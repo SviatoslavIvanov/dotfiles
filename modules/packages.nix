@@ -42,6 +42,8 @@ in
     codex
     fx
     _1password-cli
+    cloudflared
+    postgresql
   ];
 
   programs.btop.enable = true;
