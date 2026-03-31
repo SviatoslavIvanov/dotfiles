@@ -140,6 +140,9 @@
       "zoom"
       "actual"
       "homerow"
+      "input-source-pro"
+      "mactex"
+      "skim"
     ];
 
     masApps = {

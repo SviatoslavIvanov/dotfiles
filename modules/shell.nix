@@ -183,6 +183,8 @@
             nix flake update --flake ~/.dotfiles && rebuild
           }
 
+          export PATH="/usr/local/texlive/2026/bin/universal-darwin:$PATH"
+
           eval "$(mise activate zsh)"
 
           source "$(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme"

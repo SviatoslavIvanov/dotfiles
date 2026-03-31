@@ -16,7 +16,9 @@
       "mcp__acp__Edit",
       "Bash(gh api:*)",
       "Bash(python3 -c \"import sys,base64; sys.stdout.write\\(base64.b64decode\\(sys.stdin.read\\(\\)\\).decode\\(\\)\\)\")",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(/Library/TeX/texbin/pdflatex --version)",
+      "Bash(/usr/local/texlive/2026/bin/universal-darwin/pdflatex --version)"
     ]
   }
 }
