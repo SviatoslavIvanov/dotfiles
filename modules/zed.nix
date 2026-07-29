@@ -127,6 +127,18 @@
         model_parameters = [ ];
       };
 
+      agent_servers = {
+        claude-acp = {
+          type = "registry";
+          env = {
+            CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude";
+          };
+        };
+        codex = {
+          type = "registry";
+        };
+      };
+
       inlay_hints.enabled = true;
       lsp.tailwindcss-language-server.settings = {
         classAttributes = [
@@ -286,7 +298,7 @@
 
           "space a a" = "agent::ToggleFocus";
           "space a e" = "assistant::InlineAssist";
-          "space a h" = "agent::OpenHistory";
+          "space a h" = "agents_sidebar::ToggleThreadHistory";
           "space a n" = "agent::NewThread";
           "space a s" = "agent::AddSelectionToThread";
           "space a t" = "workspace::ToggleRightDock";
