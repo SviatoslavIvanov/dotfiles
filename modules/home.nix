@@ -10,6 +10,7 @@
     ./zed.nix
     ./claude-code.nix
     ./aerospace.nix
+    ./homebrew-trust.nix
   ];
 
   home = {
