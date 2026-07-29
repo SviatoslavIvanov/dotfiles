@@ -114,7 +114,10 @@
       "mac-mouse-fix"
       "mattermost"
       "moonlight"
-      "obs"
+      # "obs" — temporarily disabled, same problem as the codex cask below:
+      # the cask now uses the `command_wrapper` DSL method, which this brew
+      # does not know, and the parse error aborts the entire bundle.
+      # OBS is already installed and self-updates. Re-enable once brew catches up.
       "obsidian"
       "ollama-app"
       "orbstack"
