@@ -1,7 +1,11 @@
 { pkgs, ... }:
 
 let
-  settings = {
+  # Keys here are owned by Nix and will be overwritten on every activation.
+  # Everything else in ~/.claude/settings.json (mcpServers, enabledPlugins,
+  # pluginMarketplaces, ...) is left untouched so that `claude mcp add`,
+  # `/plugin install` etc. work without being reverted on next rebuild.
+  managed = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
 
     permissions = {
@@ -78,34 +82,28 @@ let
     };
 
     outputStyle = "explanatory";
-
-    enabledPlugins = {
-      "frontend-design@claude-plugins-official" = true;
-      "context7@claude-plugins-official" = true;
-      "code-simplifier@claude-plugins-official" = true;
-      "playwright@claude-plugins-official" = true;
-    };
-
-    pluginMarketplaces = [
-      {
-        source = "github";
-        repo = "anthropics/claude-plugins-official";
-      }
-    ];
   };
-  settingsJson = builtins.toJSON settings;
+  managedFile = pkgs.writeText "claude-managed.json" (builtins.toJSON managed);
 in
 {
   home.activation.claudeConfig = ''
-        mkdir -p "$HOME/.claude"
+    mkdir -p "$HOME/.claude"
 
-        # Remove symlink if exists (migration from old config)
-        [ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
+    SETTINGS="$HOME/.claude/settings.json"
 
-        # Settings - always overwrite (nix is source of truth)
-        cat > "$HOME/.claude/settings.json" << 'EOF'
-    ${settingsJson}
-    EOF
+    # Remove symlink if exists (migration from old config)
+    [ -L "$SETTINGS" ] && rm "$SETTINGS"
+    [ ! -f "$SETTINGS" ] && echo '{}' > "$SETTINGS"
+
+    # Merge: Nix owns the keys present in managed.json; everything else
+    # (mcpServers, enabledPlugins, pluginMarketplaces, ...) is preserved
+    # so CLI-driven changes survive `darwin-rebuild switch`.
+    tmpfile=$(mktemp)
+    ${pkgs.jq}/bin/jq --slurpfile managed ${managedFile} '
+      ($managed[0] | keys) as $mkeys
+      | with_entries(select(.key as $k | $mkeys | index($k) | not))
+      + $managed[0]
+    ' "$SETTINGS" > "$tmpfile" && mv "$tmpfile" "$SETTINGS"
   '';
 
   xdg.configFile."claude-code/statusline.sh" = {
