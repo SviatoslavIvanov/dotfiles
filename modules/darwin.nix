@@ -77,8 +77,22 @@
     enable = true;
     onActivation = {
       autoUpdate = true;
-      cleanup = "uninstall";
-      upgrade = true;
+
+      # Both of these are deliberately defensive while brew lags behind the
+      # cask definitions it fetches from the API.
+      #
+      # upgrade = true destroyed the Parallels install: brew removed the old
+      # version, failed to parse the new cask ("unknown install step: run"),
+      # and the revert did not restore the backup. Any cask whose definition
+      # outruns brew can do the same, so upgrades are now manual and visible:
+      #   brew upgrade --cask <name>
+      #
+      # cleanup = "uninstall" removes anything not in the lists below, which
+      # turns "comment out a cask that fails to parse" into "uninstall the
+      # app". Several casks are commented out for exactly that reason, so this
+      # stays "none" until they can be listed again.
+      cleanup = "none";
+      upgrade = false;
     };
 
     brews = [
@@ -121,7 +135,11 @@
       "obsidian"
       "ollama-app"
       "orbstack"
-      "parallels"
+      # "parallels" — disabled: the cask uses an install step ("run") this brew
+      # does not know. Attempting the upgrade uninstalled Parallels Desktop and
+      # then failed to reinstall it, so it has to be installed by hand from the
+      # vendor. Re-enable once brew catches up. VMs in ~/Parallels are separate
+      # from the app bundle and were unaffected.
       "pritunl"
       "qbittorrent"
       "qobuz"
