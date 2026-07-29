@@ -27,8 +27,8 @@
 
       settings = {
         user = {
-          name = "Svyatoslav Ivanov";
-          email = "si.ivanov1212@gmail.com";
+          name = "Sviatoslav Ivanov";
+          email = "66922372+SviatoslavIvanov@users.noreply.github.com";
         };
         gpg = {
           format = "ssh";
