@@ -11,7 +11,7 @@ Declarative, reproducible setup managed entirely through Nix flakes. Includes sy
 ## Installation
 
 ```bash
-git clone git@github.com:IvanovSvyatoslav/dotfiles.git ~/.dotfiles
+git clone git@github.com:SviatoslavIvanov/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 darwin-rebuild switch --flake .
 ```

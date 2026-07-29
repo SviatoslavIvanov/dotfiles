@@ -24,7 +24,7 @@
     catppuccin.url = "github:catppuccin/nix";
 
     dotfiles-private = {
-      url = "git+ssh://git@github.com/IvanovSvyatoslav/dotfiles-private";
+      url = "git+ssh://git@github.com/SviatoslavIvanov/dotfiles-private";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
