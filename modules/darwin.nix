@@ -95,7 +95,7 @@
     casks = [
       "nikitabobko/tap/aerospace"
       "1password"
-      "claude-code"
+      "claude-code@latest"
       "alt-tab"
       "amneziavpn"
       "arc"
@@ -110,7 +110,7 @@
       "iina"
       "jetbrains-toolbox"
       "jordanbaird-ice"
-      "linear-linear"
+      "linear"
       "mac-mouse-fix"
       "mattermost"
       "moonlight"
@@ -141,16 +141,20 @@
       "actual"
       "homerow"
       "input-source-pro"
-      "mactex"
       "skim"
+      # "codex" — temporarily disabled: nix-built brew (5.0.12-patched) doesn't
+      # know the `generate_completions_from_executable` DSL method used by the
+      # current codex cask. Re-enable once nix-darwin bumps brew.
+      # Codex is already installed and self-updates.
     ];
 
-    masApps = {
-      "1Password for Safari" = 1569813296;
-      "Keynote" = 409183694;
-      "Numbers" = 409203825;
-      "Pages" = 409201541;
-    };
+    # masApps intentionally empty: brew bundle's mas integration is brittle
+    # (currently in brew 5.1.10 it raises "mas installation failed" even when
+    # mas + the app are clearly installed), and the bundle aborts on the first
+    # failure. App Store apps auto-update on their own — manage them by hand:
+    #   Apple iWork (15.x): Pages=361309726, Numbers=361304891, Keynote=361285480
+    #   1Password for Safari: 1569813296 (bundled with the 1password.app cask)
+    masApps = { };
   };
 
   programs.zsh.enable = true;
