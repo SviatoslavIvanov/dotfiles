@@ -14,6 +14,7 @@ let
   # writes FelixKratz/formulae/borders, brew stores felixkratz/formulae/borders.
   declared = {
     trustedformulae = [ "felixkratz/formulae/borders" ];
+    trustedcasks = [ "nikitabobko/tap/aerospace" ];
   };
   declaredFile = pkgs.writeText "homebrew-trust-declared.json" (builtins.toJSON declared);
 in
