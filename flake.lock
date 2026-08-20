@@ -177,11 +177,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785915194,
-        "narHash": "sha256-tVgBeRX9ay7iW+riMTYD2y1FV/ZkmwomU5MnqWxQBa4=",
+        "lastModified": 1787246254,
+        "narHash": "sha256-OLDjMmiAHaWEL0n+ZRmQPjNAeAFpX4WB/yBneAGDqqc=",
         "ref": "refs/heads/main",
-        "rev": "429bcbf40bb9e146b4ba237ae878733403848299",
-        "revCount": 30,
+        "rev": "c86d5965a0f59ff9567d66c6108e07f4be45e3c5",
+        "revCount": 31,
         "type": "git",
         "url": "ssh://git@github.com/SviatoslavIvanov/dotfiles-private"
       },
