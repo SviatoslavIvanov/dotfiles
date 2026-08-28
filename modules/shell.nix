@@ -241,7 +241,6 @@
           "^la"
           "^l$"
           "^lt"
-          "^tree"
           "^pwd$"
           "^clear$"
           "^reset$"

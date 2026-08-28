@@ -31,10 +31,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    _1password-shell-plugins = {
-      url = "github:1Password/shell-plugins";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -85,7 +81,6 @@
                 stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default
-                inputs._1password-shell-plugins.hmModules.default
               ];
               users.${username} = import ./modules/home.nix;
             };

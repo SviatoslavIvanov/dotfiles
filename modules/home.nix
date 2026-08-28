@@ -53,12 +53,6 @@
   # scheduled again forever and continuously grows its logs.
   launchd.agents."activate-agenix".config.KeepAlive = lib.mkForce false;
 
-  programs._1password-shell-plugins = {
-    enable = true;
-    plugins = [
-    ];
-  };
-
   catppuccin = {
     enable = true;
     autoEnable = true;

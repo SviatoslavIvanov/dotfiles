@@ -18,7 +18,6 @@ in
     wget
     ripgrep
     fd
-    tree
     jq
     yq
     sd
@@ -35,12 +34,10 @@ in
     glow
     ragenix
     age
-    nil
     nixd
     nixfmt
     statix
     deadnix
-    fx
     _1password-cli
     cloudflared
     postgresql

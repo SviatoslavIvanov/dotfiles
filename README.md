@@ -72,7 +72,6 @@ darwin-rebuild switch --flake .
 | **tree-sitter** | Parser CLI used by Neovim |
 | **sd** | Simple `sed` |
 | **dust** | `du` with visualization |
-| **tree** | Directory tree |
 
 ### Git
 
@@ -97,9 +96,7 @@ darwin-rebuild switch --flake .
 |------|-------------|
 | **neovim** | LazyVim configuration |
 | **zed** | Fast GUI editor (Biome for JS/TS formatting) |
-| **cursor** | AI-powered editor |
 | **VS Code** | When you need extensions |
-| **JetBrains Toolbox** | JetBrains IDEs manager |
 
 ### DevOps & Containers
 
@@ -115,9 +112,7 @@ darwin-rebuild switch --flake .
 | Tool | Description |
 |------|-------------|
 | **jq** / **yq** | JSON/YAML processors |
-| **fx** | Interactive JSON viewer |
 | **httpie** | HTTP client |
-| **yaak** | API client |
 
 ### Utilities
 
@@ -139,35 +134,31 @@ darwin-rebuild switch --flake .
 | **claude** | Claude desktop app |
 | **claude-code** | Claude CLI agent |
 | **codex** | OpenAI Codex CLI |
-| **ollama** | Local LLMs |
 
 ### Nix Tooling
 
 | Tool | Description |
 |------|-------------|
 | **nixd** | Nix LSP |
-| **nil** | Nix LSP (alternative) |
 | **nixfmt** | Official Nix formatter |
 | **statix** | Linter |
 | **deadnix** | Dead code finder |
 
 ## GUI Apps (via Homebrew)
 
-**Productivity:** Raycast, Obsidian, Capacities, Todoist, Raindrop.io, Linear
+**Productivity:** Raycast, Obsidian, Todoist, Raindrop.io, Linear
 
 **Browsers:** Arc, Google Chrome
 
 **Communication:** Telegram, WhatsApp, Signal, Discord, Mattermost, Zoom
 
-**Media:** Spotify, Qobuz, IINA, OBS
+**Media:** Spotify, IINA
 
-**Design:** Figma
-
-**Security:** 1Password (+ CLI + shell plugins), AmneziaVPN, Pritunl
+**Security:** 1Password (+ CLI), AmneziaVPN, Pritunl
 
 **Gaming:** Steam, Moonlight
 
-**Utilities:** Alt-Tab, Ice (menu bar), Mac Mouse Fix, balenaEtcher, RustDesk
+**Utilities:** Ice (menu bar), Mac Mouse Fix
 
 **Unmanaged exceptions:** qBittorrent stays installed until upstream ships a
 Gatekeeper-compliant build; Parallels Desktop uses its vendor installer; VIA

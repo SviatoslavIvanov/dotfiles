@@ -157,6 +157,12 @@
       };
 
       languages = {
+        Nix = {
+          language_servers = [
+            "nixd"
+            "!nil"
+          ];
+        };
         Python = {
           language_servers = [
             "ty"

@@ -13,7 +13,6 @@ let
         "mcp__plugin_context7_context7__*"
         "WebFetch"
         "WebSearch"
-        "Bash(tree *)"
         "Bash(file *)"
         "Bash(which *)"
       ];

@@ -90,7 +90,6 @@
     };
 
     brews = [
-      "mas"
       {
         name = "FelixKratz/formulae/borders";
         trusted = true;
@@ -108,27 +107,19 @@
       }
       "1password"
       "claude-code@latest"
-      "alt-tab"
       "amneziavpn"
       "arc"
-      "balenaetcher"
-      "capacities"
       "claude"
-      "cursor"
       "discord"
-      "figma"
       "ghostty"
       "google-chrome"
       "iina"
-      "jetbrains-toolbox"
       "jordanbaird-ice"
       "linear"
       "mac-mouse-fix"
       "mattermost"
       "moonlight"
-      "obs"
       "obsidian"
-      "ollama-app"
       "orbstack"
       # "parallels" — the current app was restored with the vendor installer
       # after an old Homebrew upgrade failure. Leave it vendor-managed until it
@@ -137,10 +128,8 @@
       # qBittorrent 5.2.3 fails Gatekeeper (self-signed, not notarized), and
       # Homebrew disables the cask on 2026-09-01. Keep the verified current app
       # installed but unmanaged until upstream ships a Developer ID build.
-      "qobuz"
       "raindropio"
       "raycast"
-      "rustdesk"
       "signal"
       "spotify"
       "steam"
@@ -151,7 +140,6 @@
       # Configure keyboards with the maintained WebHID app at usevia.app.
       "visual-studio-code"
       "whatsapp"
-      "yaak"
       "zed"
       "zoom"
       "homerow"
@@ -160,11 +148,8 @@
       "codex"
     ];
 
-    # App Store apps are intentionally outside the Brewfile so activation does
-    # not depend on the current App Store account. They auto-update separately:
-    #   Apple iWork (15.x): Pages=361309726, Numbers=361304891, Keynote=361285480
-    #   1Password for Safari: 1569813296 (bundled with the 1password.app cask)
-    masApps = { };
+    # Pages, Numbers, and Keynote Creator Studio are intentionally retained
+    # and remain managed by the App Store rather than Homebrew/mas.
   };
 
   programs.zsh.enable = true;

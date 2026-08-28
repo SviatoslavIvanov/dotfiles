@@ -181,11 +181,6 @@ in
           "if" = "test %{app-bundle-id} = dev.zed.Zed";
           run = "move-node-to-workspace E";
         }
-        {
-          "if" = "test %{app-bundle-id} = com.todesktop.230313mzl4w4u92";
-          run = "move-node-to-workspace E";
-        }
-
         # Communication
         {
           "if" = "test %{app-bundle-id} = ru.keepcoder.Telegram";
@@ -209,11 +204,6 @@ in
           "if" = "test %{app-bundle-id} = com.spotify.client";
           run = "move-node-to-workspace M";
         }
-        {
-          "if" = "test %{app-bundle-id} = com.qobuz.desktop";
-          run = "move-node-to-workspace M";
-        }
-
         # Work
         {
           "if" = "test %{app-bundle-id} = com.mattermost.desktop";
@@ -266,10 +256,6 @@ in
         }
         {
           "if" = "test %{app-bundle-id} = com.parallels.desktop.console";
-          run = "layout floating";
-        }
-        {
-          "if" = "test %{app-bundle-id} = com.orbstack.OrbStack";
           run = "layout floating";
         }
       ];
