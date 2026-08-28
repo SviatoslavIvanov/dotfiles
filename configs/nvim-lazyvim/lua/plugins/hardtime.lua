@@ -1,6 +1,6 @@
 return {
   "m4xshen/hardtime.nvim",
-  dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
+  dependencies = { "MunifTanjim/nui.nvim" },
   opts = {
     disable_mouse = false,
 
@@ -29,6 +29,7 @@ return {
       "prompt",
       "qf",
       "query",
+      "snacks_dashboard",
       "oil",
       "undotree",
       "trouble",
@@ -38,7 +39,7 @@ return {
       "copilot-chat",
     },
   },
-  command = "Hardtime",
+  cmd = "Hardtime",
   event = "BufEnter",
   -- keys = {
   --   { "n", "j", "<cmd>Hardtime<CR>", desc = "Hardtime" },

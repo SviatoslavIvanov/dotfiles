@@ -10,20 +10,12 @@ let
 
     permissions = {
       allow = [
-        "mcp__acp__*"
         "mcp__plugin_context7_context7__*"
         "WebFetch"
         "WebSearch"
-        "Bash(ls *)"
-        "Bash(cat *)"
         "Bash(tree *)"
-        "Bash(head *)"
-        "Bash(tail *)"
-        "Bash(wc *)"
         "Bash(file *)"
-        "Bash(find *)"
         "Bash(which *)"
-        "Bash(stat *)"
       ];
 
       ask = [
@@ -40,6 +32,7 @@ let
         # Network requests
         "Bash(curl *)"
         "Bash(wget *)"
+        "Bash(dangerouslyDisableSandbox:true)"
 
         # Git write operations
         "Bash(git add *)"
@@ -67,6 +60,58 @@ let
         "Read(**/*_rsa)"
         "Read(**/*_ed25519)"
         "Read(**/*.p12)"
+      ];
+    };
+
+    # Claude Code now has a native macOS Seatbelt sandbox. Read-only shell
+    # commands are auto-approved by Claude itself, while these paths stay
+    # inaccessible even through `cat`, interpreters, or other subprocesses.
+    sandbox = {
+      enabled = true;
+      failIfUnavailable = true;
+      autoAllowBashIfSandboxed = true;
+      excludedCommands = [ "docker *" ];
+
+      credentials = {
+        files =
+          map
+            (path: {
+              inherit path;
+              mode = "deny";
+            })
+            [
+              "~/.ssh"
+              "~/.aws"
+              "~/.config/gcloud"
+              "~/.kube"
+              "~/.docker/config.json"
+              "~/.netrc"
+              "~/.npmrc"
+            ];
+        envVars =
+          map
+            (name: {
+              inherit name;
+              mode = "deny";
+            })
+            [
+              "AWS_ACCESS_KEY_ID"
+              "AWS_SECRET_ACCESS_KEY"
+              "AWS_SESSION_TOKEN"
+              "GITHUB_TOKEN"
+              "GH_TOKEN"
+              "NPM_TOKEN"
+              "OPENAI_API_KEY"
+              "ANTHROPIC_API_KEY"
+            ];
+      };
+
+      filesystem.denyRead = [
+        "~/**/.env"
+        "~/**/.env.*"
+        "~/**/secrets/**"
+        "~/**/*secret*"
+        "~/**/*credential*"
       ];
     };
 
@@ -113,17 +158,15 @@ in
 
       input=$(cat)
 
-      read -r cwd context_size < <(echo "$input" | ${pkgs.jq}/bin/jq -r '
-        .workspace.current_dir,
-        .context_window.context_window_size
-      ' | tr '\n' ' ')
-
-      read -r input_tokens cache_create cache_read < <(echo "$input" | ${pkgs.jq}/bin/jq -r '
-        .context_window.current_usage |
-        if . == null then "0 0 0" else
-          "\(.input_tokens // 0) \(.cache_creation_input_tokens // 0) \(.cache_read_input_tokens // 0)"
-        end
-      ')
+      IFS=$'\x1f' read -r cwd model context_pct five_hour_pct seven_day_pct < <(
+        echo "$input" | ${pkgs.jq}/bin/jq -r '[
+          (.workspace.current_dir // .cwd // ""),
+          (.model.display_name // .model.id // ""),
+          (.context_window.used_percentage // ""),
+          (.rate_limits.five_hour.used_percentage // ""),
+          (.rate_limits.seven_day.used_percentage // "")
+        ] | map(tostring) | join("\u001f")'
+      )
 
       dir_name=$(basename "$cwd")
 
@@ -140,14 +183,24 @@ in
           fi
       fi
 
-      context_info=""
-      if [ "$input_tokens" != "0" ] || [ "$cache_create" != "0" ] || [ "$cache_read" != "0" ]; then
-          current=$((input_tokens + cache_create + cache_read))
-          pct=$((current * 100 / context_size))
-          context_info=" \033[38;5;8m$pct%\033[0m"
+      model_info=""
+      [ -n "$model" ] && model_info=" \033[38;5;13m$model\033[0m"
+
+      usage_info=""
+      if [ -n "$context_pct" ]; then
+          context_pct=$(printf '%.0f' "$context_pct")
+          usage_info=" \033[38;5;8mctx $context_pct%\033[0m"
+      fi
+      if [ -n "$five_hour_pct" ]; then
+          five_hour_pct=$(printf '%.0f' "$five_hour_pct")
+          usage_info="$usage_info \033[38;5;8m5h $five_hour_pct%\033[0m"
+      fi
+      if [ -n "$seven_day_pct" ]; then
+          seven_day_pct=$(printf '%.0f' "$seven_day_pct")
+          usage_info="$usage_info \033[38;5;8m7d $seven_day_pct%\033[0m"
       fi
 
-      printf "\033[38;5;12m %s\033[0m%b%b" "$dir_name" "$git_branch" "$context_info"
+      printf "\033[38;5;12m %s\033[0m%b%b%b" "$dir_name" "$git_branch" "$model_info" "$usage_info"
     '';
   };
 }

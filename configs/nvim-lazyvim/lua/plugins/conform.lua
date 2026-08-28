@@ -6,9 +6,9 @@ return {
       ["java"] = { "google-java-format" },
       ["xml"] = { "xmlformatter" },
       -- ["sql"] = { "sleek" },
-      ["python"] = { "ruff" },
+      ["python"] = { "ruff_fix", "ruff_format" },
       ["kotlin"] = { "ktlint" },
-      ["sql"] = { "pgformatter" },
+      ["sql"] = { "pg_format" },
     },
   },
 }

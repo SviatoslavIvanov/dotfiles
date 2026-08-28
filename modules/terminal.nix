@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
-{
-  xdg.configFile."ghostty/config".text = ''
+let
+  ghosttyConfig = ''
     theme = Catppuccin Mocha
 
     auto-update = check
@@ -30,11 +30,29 @@
     window-inherit-working-directory = true
     window-inherit-font-size = true
 
+    notify-on-command-finish = unfocused
+    notify-on-command-finish-action = no-bell,notify
+    notify-on-command-finish-after = 30s
+
     confirm-close-surface = false
     quit-after-last-window-closed = true
 
     macos-option-as-alt = true
   '';
+in
+{
+  # `config.ghostty` is the canonical name since Ghostty 1.2.3.
+  xdg.configFile."ghostty/config.ghostty".text = ghosttyConfig;
+
+  # Ghostty also loads the legacy macOS path after the XDG path. An old
+  # auto-generated file at this location contains invalid bytes, so keep the
+  # compatibility path valid and intentionally empty.
+  home.file."Library/Application Support/com.mitchellh.ghostty/config" = {
+    force = true;
+    text = ''
+      # Managed by Home Manager. See ~/.config/ghostty/config.ghostty.
+    '';
+  };
 
   programs.tmux = {
     enable = true;
@@ -51,16 +69,18 @@
       vim-tmux-navigator
       yank
       resurrect
-      continuum
+      {
+        plugin = continuum;
+        extraConfig = "set -g @continuum-restore 'on'";
+      }
     ];
 
     extraConfig = ''
 
-      set -ga terminal-overrides ",*256col*:Tc"
-      set -ga terminal-overrides ",xterm-256color:Tc"
+      set -as terminal-features ",xterm-ghostty:RGB:clipboard"
       set -g status-position top
       set -g renumber-windows on
-      set -g set-clipboard on
+      set -s set-clipboard external
 
       bind h select-pane -L
       bind j select-pane -D
@@ -89,8 +109,6 @@
       bind -T copy-mode-vi v send-keys -X begin-selection
       bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
       bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-
-      set -g @continuum-restore 'on'
     '';
   };
 }

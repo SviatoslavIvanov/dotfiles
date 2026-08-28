@@ -41,8 +41,11 @@
         fetch.pruneTags = true;
         rebase.autoStash = true;
         branch.sort = "-committerdate";
-        merge.conflictstyle = "diff3";
-        rerere.enabled = true;
+        merge.conflictstyle = "zdiff3";
+        rerere = {
+          enabled = true;
+          autoupdate = true;
+        };
         diff.algorithm = "histogram";
         core = {
           editor = "nvim";

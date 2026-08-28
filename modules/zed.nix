@@ -3,6 +3,9 @@
 {
   programs.zed-editor = {
     enable = true;
+    # Homebrew owns the macOS app and CLI; Home Manager only owns its config.
+    # This avoids shadowing the current `zed` cask with nixpkgs' `zeditor`.
+    package = null;
     mutableUserSettings = false;
     mutableUserKeymaps = false;
     mutableUserTasks = false;
@@ -60,7 +63,7 @@
         show_onboarding_banner = true;
         show_project_items = true;
         show_branch_name = true;
-        show_branch_icon = true;
+        show_branch_status_icon = true;
       };
 
       status_bar = {
@@ -118,11 +121,11 @@
       agent = {
         inline_assistant_model = {
           provider = "copilot_chat";
-          model = "gpt-5.3-codex";
+          model = "gpt-5.6-sol";
         };
         default_model = {
           provider = "copilot_chat";
-          model = "gpt-5.3-codex";
+          model = "gpt-5.6-sol";
         };
         model_parameters = [ ];
       };
@@ -147,7 +150,6 @@
           "ngClass"
           "styles"
         ];
-        EDITOR = "zed --wait";
       };
 
       lsp.biome.settings = {
@@ -216,6 +218,7 @@
       };
 
       file_scan_exclusions = [
+        "..."
         "**/.git"
         "**/.svn"
         "**/.hg"
@@ -616,7 +619,7 @@
       }
       {
         label = "Yazi (open file)";
-        command = "yazi $ZED_WORKTREE_ROOT --chooser-file /tmp/zed-yazi-choice && [ -s /tmp/zed-yazi-choice ] && xargs zeditor -a < /tmp/zed-yazi-choice; rm -f /tmp/zed-yazi-choice";
+        command = ''choice="$(mktemp -t zed-yazi)"; trap 'rm -f "$choice"' EXIT; yazi "$ZED_WORKTREE_ROOT" --chooser-file "$choice" && while IFS= read -r path; do zed -a "$path"; done < "$choice"'';
         use_new_terminal = true;
         allow_concurrent_runs = false;
         reveal = "always";

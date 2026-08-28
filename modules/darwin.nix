@@ -49,6 +49,8 @@
         AppleShowAllExtensions = true;
       };
 
+      LaunchServices.LSQuarantine = true;
+
       NSGlobalDomain = {
         _HIHideMenuBar = false;
         KeyRepeat = 2;
@@ -61,7 +63,6 @@
         NSAutomaticQuoteSubstitutionEnabled = false;
       };
 
-      LaunchServices.LSQuarantine = false;
       screencapture.location = "~/Pictures/Screenshots";
       loginwindow.GuestEnabled = false;
     };
@@ -69,7 +70,6 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-    nerd-fonts.monaspace
     nerd-fonts.symbols-only
   ];
 
@@ -78,28 +78,23 @@
     onActivation = {
       autoUpdate = true;
 
-      # Both of these are deliberately defensive while brew lags behind the
-      # cask definitions it fetches from the API.
-      #
-      # upgrade = true destroyed the Parallels install: brew removed the old
-      # version, failed to parse the new cask ("unknown install step: run"),
-      # and the revert did not restore the backup. Any cask whose definition
-      # outruns brew can do the same, so upgrades are now manual and visible:
+      # Cask upgrades stay explicit: Homebrew may remove the old app before a
+      # new installer fails, as happened with Parallels. Keep that operation
+      # visible instead of making every rebuild an implicit GUI-app upgrade:
       #   brew upgrade --cask <name>
       #
-      # cleanup = "uninstall" removes anything not in the lists below, which
-      # turns "comment out a cask that fails to parse" into "uninstall the
-      # app". Several casks are commented out for exactly that reason, so this
-      # stays "none" until they can be listed again.
+      # `cleanup = "uninstall"` would also remove apps intentionally managed
+      # outside this Brewfile, so activation remains non-destructive.
       cleanup = "none";
       upgrade = false;
     };
 
     brews = [
       "mas"
-      "powerlevel10k"
-      "gemini-cli"
-      "FelixKratz/formulae/borders"
+      {
+        name = "FelixKratz/formulae/borders";
+        trusted = true;
+      }
     ];
 
     taps = [
@@ -107,7 +102,10 @@
     ];
 
     casks = [
-      "nikitabobko/tap/aerospace"
+      {
+        name = "nikitabobko/tap/aerospace";
+        trusted = true;
+      }
       "1password"
       "claude-code@latest"
       "alt-tab"
@@ -128,20 +126,17 @@
       "mac-mouse-fix"
       "mattermost"
       "moonlight"
-      # "obs" — temporarily disabled, same problem as the codex cask below:
-      # the cask now uses the `command_wrapper` DSL method, which this brew
-      # does not know, and the parse error aborts the entire bundle.
-      # OBS is already installed and self-updates. Re-enable once brew catches up.
+      "obs"
       "obsidian"
       "ollama-app"
       "orbstack"
-      # "parallels" — disabled: the cask uses an install step ("run") this brew
-      # does not know. Attempting the upgrade uninstalled Parallels Desktop and
-      # then failed to reinstall it, so it has to be installed by hand from the
-      # vendor. Re-enable once brew catches up. VMs in ~/Parallels are separate
-      # from the app bundle and were unaffected.
+      # "parallels" — the current app was restored with the vendor installer
+      # after an old Homebrew upgrade failure. Leave it vendor-managed until it
+      # is deliberately adopted by Homebrew; VMs in ~/Parallels are separate.
       "pritunl"
-      "qbittorrent"
+      # qBittorrent 5.2.3 fails Gatekeeper (self-signed, not notarized), and
+      # Homebrew disables the cask on 2026-09-01. Keep the verified current app
+      # installed but unmanaged until upstream ships a Developer ID build.
       "qobuz"
       "raindropio"
       "raycast"
@@ -150,29 +145,23 @@
       "spotify"
       "steam"
       "telegram"
-      "tidal"
       "todoist-app"
       "utm"
-      "via"
+      # VIA desktop 3.0.0 is an obsolete, non-Gatekeeper-compliant wrapper.
+      # Configure keyboards with the maintained WebHID app at usevia.app.
       "visual-studio-code"
       "whatsapp"
       "yaak"
       "zed"
       "zoom"
-      "actual"
       "homerow"
       "input-source-pro"
       "skim"
-      # "codex" — temporarily disabled: nix-built brew (5.0.12-patched) doesn't
-      # know the `generate_completions_from_executable` DSL method used by the
-      # current codex cask. Re-enable once nix-darwin bumps brew.
-      # Codex is already installed and self-updates.
+      "codex"
     ];
 
-    # masApps intentionally empty: brew bundle's mas integration is brittle
-    # (currently in brew 5.1.10 it raises "mas installation failed" even when
-    # mas + the app are clearly installed), and the bundle aborts on the first
-    # failure. App Store apps auto-update on their own — manage them by hand:
+    # App Store apps are intentionally outside the Brewfile so activation does
+    # not depend on the current App Store account. They auto-update separately:
     #   Apple iWork (15.x): Pages=361309726, Numbers=361304891, Keynote=361285480
     #   1Password for Safari: 1569813296 (bundled with the 1password.app cask)
     masApps = { };

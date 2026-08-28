@@ -19,7 +19,7 @@
 -- })
 
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
-  pattern = { "*compose*.y?ml" },
+  pattern = { "*compose*.yml", "*compose*.yaml" },
   callback = function()
     vim.bo.filetype = "yaml.docker-compose"
   end,
@@ -35,6 +35,9 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
 -- })
 vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
   callback = function()
-    require("zen-mode").close()
+    local zen_mode = package.loaded["zen-mode"]
+    if zen_mode then
+      zen_mode.close()
+    end
   end,
 })

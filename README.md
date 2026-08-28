@@ -46,6 +46,8 @@ darwin-rebuild switch --flake .
 │   ├── shell.nix       # Zsh, fzf, zoxide, bat, eza
 │   ├── terminal.nix    # Ghostty, tmux
 │   ├── git.nix         # Git, delta, lazygit, gh
+│   ├── aerospace.nix   # AeroSpace workspaces and window rules
+│   ├── stylix.nix      # Shared fonts and base16 theme
 │   ├── zed.nix         # Zed editor settings
 │   └── claude-code.nix # Claude Code settings
 └── configs/            # Non-Nix configs (nvim, p10k)
@@ -67,6 +69,7 @@ darwin-rebuild switch --flake .
 | **yazi** | Terminal file manager with image previews |
 | **fd** | Fast `find` |
 | **ripgrep** | Fast `grep` |
+| **tree-sitter** | Parser CLI used by Neovim |
 | **sd** | Simple `sed` |
 | **dust** | `du` with visualization |
 | **tree** | Directory tree |
@@ -105,7 +108,7 @@ darwin-rebuild switch --flake .
 | **orbstack** | Docker & Linux VMs for macOS |
 | **lazydocker** | Docker TUI |
 | **ansible** | Infrastructure automation (pipelining enabled) |
-| **utm** / **parallels** | Virtual machines |
+| **utm** | Virtual machines |
 
 ### Data & HTTP
 
@@ -124,7 +127,7 @@ darwin-rebuild switch --flake .
 | **tokei** | Lines of code counter |
 | **glow** | Markdown viewer |
 | **ouch** | Universal archiver |
-| **agenix-cli** | Secrets management |
+| **ragenix** | Secrets management |
 | **coreutils** | GNU core utilities |
 | **gnused** | GNU sed |
 | **curl** / **wget** | HTTP clients |
@@ -136,7 +139,6 @@ darwin-rebuild switch --flake .
 | **claude** | Claude desktop app |
 | **claude-code** | Claude CLI agent |
 | **codex** | OpenAI Codex CLI |
-| **gemini-cli** | Google Gemini CLI |
 | **ollama** | Local LLMs |
 
 ### Nix Tooling
@@ -145,7 +147,7 @@ darwin-rebuild switch --flake .
 |------|-------------|
 | **nixd** | Nix LSP |
 | **nil** | Nix LSP (alternative) |
-| **nixpkgs-fmt** | Formatter |
+| **nixfmt** | Official Nix formatter |
 | **statix** | Linter |
 | **deadnix** | Dead code finder |
 
@@ -157,7 +159,7 @@ darwin-rebuild switch --flake .
 
 **Communication:** Telegram, WhatsApp, Signal, Discord, Mattermost, Zoom
 
-**Media:** Spotify, Tidal, Qobuz, IINA, OBS
+**Media:** Spotify, Qobuz, IINA, OBS
 
 **Design:** Figma
 
@@ -165,7 +167,11 @@ darwin-rebuild switch --flake .
 
 **Gaming:** Steam, Moonlight
 
-**Utilities:** Alt-Tab, Ice (menu bar), Mac Mouse Fix, balenaEtcher, RustDesk, qBittorrent, VIA (keyboard)
+**Utilities:** Alt-Tab, Ice (menu bar), Mac Mouse Fix, balenaEtcher, RustDesk
+
+**Unmanaged exceptions:** qBittorrent stays installed until upstream ships a
+Gatekeeper-compliant build; Parallels Desktop uses its vendor installer; VIA
+keyboards are configured with the maintained [VIA web app](https://usevia.app/).
 
 ## Fonts
 

@@ -21,23 +21,42 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    catppuccin.url = "github:catppuccin/nix";
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     dotfiles-private = {
       url = "git+ssh://git@github.com/SviatoslavIvanov/dotfiles-private";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    _1password-shell-plugins.url = "github:1Password/shell-plugins";
+    _1password-shell-plugins = {
+      url = "github:1Password/shell-plugins";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ nix-darwin, home-manager, nix-homebrew, stylix, catppuccin, dotfiles-private, ... }:
+  outputs =
+    inputs@{
+      nix-darwin,
+      home-manager,
+      nix-homebrew,
+      stylix,
+      catppuccin,
+      dotfiles-private,
+      ...
+    }:
     let
       system = "aarch64-darwin";
       hostname = "svyat-mac";
       username = "ivsv";
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
+      formatter.${system} = pkgs.nixfmt-tree;
+      packages.${system}.nixfmt = pkgs.nixfmt;
+
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
         inherit system;
         specialArgs = { inherit inputs username hostname; };
@@ -59,7 +78,6 @@
           home-manager.darwinModules.home-manager
           {
             home-manager = {
-              useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "backup";
               extraSpecialArgs = { inherit inputs username system; };

@@ -10,8 +10,8 @@ return {
     vim.o.foldenable = true
   end,
   opts = {
-    provider_selector = function(bufnr, filetype, buftype)
-      return { "lsp" }
+    provider_selector = function()
+      return { "lsp", "treesitter" }
     end,
     close_fold_kinds_for_ft = {
       default = { "imports", "comment" },
@@ -42,7 +42,7 @@ return {
       function()
         local winid = require("ufo").peekFoldedLinesUnderCursor()
         if not winid then
-          vim.lsp.buf.hower()
+          vim.lsp.buf.hover()
         end
       end,
       mode = "n",

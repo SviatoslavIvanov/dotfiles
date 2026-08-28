@@ -10,6 +10,20 @@ in
     launchd.enable = false; # managed manually below (module can't handle package = null)
 
     settings = {
+      # Version 2 makes persistent workspaces explicit instead of inferring them
+      # from workspace bindings.
+      config-version = 2;
+      persistent-workspaces = [
+        "1"
+        "2"
+        "3"
+        "B"
+        "T"
+        "E"
+        "C"
+        "M"
+        "W"
+      ];
 
       # JankyBorders — Catppuccin Mocha colors (peach active, surface0 inactive)
       after-startup-command = [
@@ -42,12 +56,16 @@ in
 
       # Gaps
       gaps = {
-        inner.horizontal = 10;
-        inner.vertical = 10;
-        outer.left = 10;
-        outer.bottom = 10;
-        outer.top = 10;
-        outer.right = 10;
+        inner = {
+          horizontal = 10;
+          vertical = 10;
+        };
+        outer = {
+          left = 10;
+          bottom = 10;
+          top = 10;
+          right = 10;
+        };
       };
 
       # Ensure homebrew bins are available for exec commands
@@ -116,21 +134,8 @@ in
         alt-shift-m = "move-node-to-workspace M";
         alt-shift-w = "move-node-to-workspace W";
 
-        # Modes
-        alt-r = "mode resize";
+        # Service mode
         alt-shift-semicolon = "mode service";
-      };
-
-      # ── Resize mode ──
-      mode.resize.binding = {
-        h = "resize width -50";
-        l = "resize width +50";
-        j = "resize height +50";
-        k = "resize height -50";
-        minus = "resize smart -50";
-        equal = "resize smart +50";
-        enter = "mode main";
-        esc = "mode main";
       };
 
       # ── Service mode ──
@@ -153,123 +158,118 @@ in
         ];
       };
 
-
       # ── Auto-assign apps to workspaces ──
       on-window-detected = [
         # Browser
         {
-          "if".app-id = "company.thebrowser.Browser";
+          "if" = "test %{app-bundle-id} = company.thebrowser.Browser";
           run = "move-node-to-workspace B";
         }
         {
-          "if".app-id = "com.google.Chrome";
+          "if" = "test %{app-bundle-id} = com.google.Chrome";
           run = "move-node-to-workspace B";
         }
 
         # Terminal
         {
-          "if".app-id = "com.mitchellh.ghostty";
+          "if" = "test %{app-bundle-id} = com.mitchellh.ghostty";
           run = "move-node-to-workspace T";
         }
 
         # Editor
         {
-          "if".app-id = "dev.zed.Zed";
+          "if" = "test %{app-bundle-id} = dev.zed.Zed";
           run = "move-node-to-workspace E";
         }
         {
-          "if".app-id = "com.todesktop.230313mzl4w4u92";
+          "if" = "test %{app-bundle-id} = com.todesktop.230313mzl4w4u92";
           run = "move-node-to-workspace E";
         }
 
         # Communication
         {
-          "if".app-id = "ru.keepcoder.Telegram";
+          "if" = "test %{app-bundle-id} = ru.keepcoder.Telegram";
           run = "move-node-to-workspace C";
         }
         {
-          "if".app-id = "com.hnc.Discord";
+          "if" = "test %{app-bundle-id} = com.hnc.Discord";
           run = "move-node-to-workspace C";
         }
         {
-          "if".app-id = "org.whispersystems.signal-desktop";
+          "if" = "test %{app-bundle-id} = org.whispersystems.signal-desktop";
           run = "move-node-to-workspace C";
         }
         {
-          "if".app-id = "net.whatsapp.WhatsApp";
+          "if" = "test %{app-bundle-id} = net.whatsapp.WhatsApp";
           run = "move-node-to-workspace C";
         }
 
         # Media
         {
-          "if".app-id = "com.spotify.client";
+          "if" = "test %{app-bundle-id} = com.spotify.client";
           run = "move-node-to-workspace M";
         }
         {
-          "if".app-id = "com.tidal.desktop";
-          run = "move-node-to-workspace M";
-        }
-        {
-          "if".app-id = "com.qobuz.desktop";
+          "if" = "test %{app-bundle-id} = com.qobuz.desktop";
           run = "move-node-to-workspace M";
         }
 
         # Work
         {
-          "if".app-id = "com.mattermost.desktop";
+          "if" = "test %{app-bundle-id} = com.mattermost.desktop";
           run = "move-node-to-workspace W";
         }
         {
-          "if".app-id = "com.linear";
+          "if" = "test %{app-bundle-id} = com.linear";
           run = "move-node-to-workspace W";
         }
         # Force float — apps that don't tile well
         {
-          "if".app-id = "com.electron.pritunl";
+          "if" = "test %{app-bundle-id} = com.electron.pritunl";
           run = "layout floating";
         }
         {
-          "if".app-name-regex-substring = "AmneziaVPN";
+          "if" = "test %{app-name} ~= AmneziaVPN";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.apple.systempreferences";
+          "if" = "test %{app-bundle-id} = com.apple.systempreferences";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.apple.calculator";
+          "if" = "test %{app-bundle-id} = com.apple.calculator";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.apple.finder";
+          "if" = "test %{app-bundle-id} = com.apple.finder";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.raycast.macos";
+          "if" = "test %{app-bundle-id} = com.raycast.macos";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.1password.1password";
+          "if" = "test %{app-bundle-id} = com.1password.1password";
           run = "layout floating";
         }
         {
-          "if".app-id = "us.zoom.xos";
+          "if" = "test %{app-bundle-id} = us.zoom.xos";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.valvesoftware.steam";
+          "if" = "test %{app-bundle-id} = com.valvesoftware.steam";
           run = "layout floating";
         }
         {
-          "if".app-id = "dev.kdrag0n.MacVirt";
+          "if" = "test %{app-bundle-id} = dev.kdrag0n.MacVirt";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.parallels.desktop.console";
+          "if" = "test %{app-bundle-id} = com.parallels.desktop.console";
           run = "layout floating";
         }
         {
-          "if".app-id = "com.orbstack.OrbStack";
+          "if" = "test %{app-bundle-id} = com.orbstack.OrbStack";
           run = "layout floating";
         }
       ];

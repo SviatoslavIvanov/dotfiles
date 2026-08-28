@@ -140,12 +140,15 @@
         t = "tmux new-session -A -s";
         ta = "tmux attach";
 
-        c = "__zoxide_z";
-
         cleanup = "nix-collect-garbage -d";
       };
 
       plugins = [
+        {
+          name = "powerlevel10k";
+          src = pkgs.zsh-powerlevel10k;
+          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+        }
         {
           name = "fzf-tab";
           src = pkgs.zsh-fzf-tab;
@@ -183,11 +186,6 @@
             nix flake update --flake ~/.dotfiles && rebuild
           }
 
-          export PATH="/usr/local/texlive/2026/bin/universal-darwin:$PATH"
-
-          eval "$(mise activate zsh)"
-
-          source "$(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme"
           [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
 
           zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
@@ -211,6 +209,10 @@
     zoxide = {
       enable = true;
       enableZshIntegration = true;
+      options = [
+        "--cmd"
+        "c"
+      ];
     };
 
     bat.enable = true;
@@ -254,6 +256,12 @@
           "^false$"
         ];
       };
+    };
+
+    mise = {
+      enable = true;
+      enableZshIntegration = true;
+      enableMutableConfig = true;
     };
   };
 }

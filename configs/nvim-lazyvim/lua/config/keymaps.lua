@@ -11,7 +11,8 @@ map("x", "<leader>p", [["_dP]])
 
 -- Yank into system clipboard
 map({ "n", "v" }, "<leader>y", '"+y', { desc = "Yank to system clipboard" }) -- yank motion
-map({ "n", "v" }, "<leader>Y", '"+y$', { desc = "Yank to the end of line to system clipboard" }) -- yank line
+map("n", "<leader>Y", '"+y$', { desc = "Yank to the end of line to system clipboard" })
+map("v", "<leader>Y", '"+y', { desc = "Yank selection to system clipboard" })
 
 -- Paste from system clipboard
 map({ "n" }, "<leader>p", '"+p', { desc = "Paste after from system clipboard" }) -- paste after cursor

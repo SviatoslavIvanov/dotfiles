@@ -1,6 +1,8 @@
-{ username, ... }:
+{ lib, username, ... }:
 
 {
+  nixpkgs.config.allowUnfree = true;
+
   imports = [
     ./stylix.nix
     ./packages.nix
@@ -10,7 +12,6 @@
     ./zed.nix
     ./claude-code.nix
     ./aerospace.nix
-    ./homebrew-trust.nix
   ];
 
   home = {
@@ -24,6 +25,8 @@
       SSH_AUTH_SOCK = "$HOME/.1password/agent.sock";
     };
 
+    sessionPath = [ "/Library/TeX/texbin" ];
+
     file = {
       ".ansible.cfg".text = ''
         [defaults]
@@ -36,7 +39,6 @@
       ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
       ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
       ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
-      ".config/nvim/.neoconf.json".source = ../configs/nvim-lazyvim/.neoconf.json;
       ".config/nvim/lua".source = ../configs/nvim-lazyvim/lua;
       ".config/nvim-vscode".source = ../configs/nvim-vscode;
       ".config/p10k/config.zsh".source = ../configs/p10k.zsh;
@@ -46,6 +48,11 @@
   xdg.enable = true;
   programs.home-manager.enable = true;
 
+  # The upstream agenix agent currently emits two negated KeepAlive
+  # conditions. launchd ORs them, so a successful one-shot activation is
+  # scheduled again forever and continuously grows its logs.
+  launchd.agents."activate-agenix".config.KeepAlive = lib.mkForce false;
+
   programs._1password-shell-plugins = {
     enable = true;
     plugins = [
@@ -54,6 +61,7 @@
 
   catppuccin = {
     enable = true;
+    autoEnable = true;
     flavor = "mocha";
     accent = "peach";
 
