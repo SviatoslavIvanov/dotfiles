@@ -140,7 +140,6 @@
         t = "tmux new-session -A -s";
         ta = "tmux attach";
 
-        cleanup = "nix-collect-garbage -d";
       };
 
       plugins = [
@@ -179,11 +178,22 @@
           }
 
           function rebuild() {
-            sudo darwin-rebuild switch --flake ~/.dotfiles "$@"
+            nix flake archive --no-update-lock-file "$HOME/.dotfiles" >/dev/null && \
+              sudo darwin-rebuild switch --flake "$HOME/.dotfiles#svyat-mac" --no-update-lock-file "$@"
           }
 
           function update() {
-            nix flake update --flake ~/.dotfiles && rebuild
+            nix flake update --flake "$HOME/.dotfiles" && \
+              mise --cd "$HOME/.dotfiles" run lint && \
+              rebuild
+          }
+
+          function generations() {
+            sudo darwin-rebuild --list-generations "$@"
+          }
+
+          function rollback() {
+            sudo darwin-rebuild switch --rollback "$@"
           }
 
           [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
@@ -260,7 +270,6 @@
     mise = {
       enable = true;
       enableZshIntegration = true;
-      enableMutableConfig = true;
     };
   };
 }

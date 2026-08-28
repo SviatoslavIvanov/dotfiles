@@ -1,8 +1,11 @@
-{ lib, username, ... }:
+{
+  config,
+  lib,
+  username,
+  ...
+}:
 
 {
-  nixpkgs.config.allowUnfree = true;
-
   imports = [
     ./stylix.nix
     ./packages.nix
@@ -38,6 +41,8 @@
 
       ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
       ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
+      ".config/nvim/lazy-lock.json".source =
+        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/nvim-lazyvim/lazy-lock.json";
       ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
       ".config/nvim/lua".source = ../configs/nvim-lazyvim/lua;
       ".config/nvim-vscode".source = ../configs/nvim-vscode;
@@ -45,8 +50,13 @@
     };
   };
 
-  xdg.enable = true;
-  programs.home-manager.enable = true;
+  xdg = {
+    enable = true;
+    configFile."mise/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/mise/mise.toml";
+    configFile."mise/mise.lock".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/mise/mise.lock";
+  };
 
   # The upstream agenix agent currently emits two negated KeepAlive
   # conditions. launchd ORs them, so a successful one-shot activation is

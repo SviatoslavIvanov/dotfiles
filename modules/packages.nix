@@ -38,6 +38,8 @@ in
     nixfmt
     statix
     deadnix
+    stylua
+    gitleaks
     _1password-cli
     cloudflared
     postgresql

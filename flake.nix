@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -35,6 +35,7 @@
 
   outputs =
     inputs@{
+      self,
       nix-darwin,
       home-manager,
       nix-homebrew,
@@ -54,9 +55,9 @@
       packages.${system}.nixfmt = pkgs.nixfmt;
 
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-        inherit system;
         specialArgs = { inherit inputs username hostname; };
         modules = [
+          { nixpkgs.hostPlatform = system; }
           ./modules/darwin.nix
           stylix.darwinModules.stylix
           dotfiles-private.darwinModules.default
@@ -74,6 +75,7 @@
           home-manager.darwinModules.home-manager
           {
             home-manager = {
+              useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "backup";
               extraSpecialArgs = { inherit inputs username system; };
@@ -81,11 +83,14 @@
                 stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default
+                { stylix.overlays.enable = false; }
               ];
               users.${username} = import ./modules/home.nix;
             };
           }
         ];
       };
+
+      checks.${system}.darwin = self.darwinConfigurations.${hostname}.system;
     };
 }

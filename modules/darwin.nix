@@ -1,4 +1,6 @@
 {
+  inputs,
+  lib,
   pkgs,
   username,
   hostname,
@@ -17,7 +19,20 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  networking.applicationFirewall = {
+    enable = true;
+    enableStealthMode = true;
+  };
+
   security.pam.services.sudo_local.touchIdAuth = true;
+
+  power.sleep.display = 10;
+
+  # `power.sleep.display` uses `systemsetup`, which only updates the active
+  # power profile on current macOS. Keep the battery profile declarative too.
+  system.activationScripts.postActivation.text = lib.mkAfter ''
+    pmset -b displaysleep 10
+  '';
 
   users.users.${username} = {
     name = username;
@@ -25,6 +40,7 @@
   };
 
   system = {
+    configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
     stateVersion = 5;
 
     primaryUser = username;
@@ -48,6 +64,19 @@
         AppleShowAllFiles = true;
         AppleShowAllExtensions = true;
       };
+
+      screensaver = {
+        askForPassword = true;
+        askForPasswordDelay = 0;
+      };
+
+      SoftwareUpdate.AutomaticallyInstallMacOSUpdates = true;
+      CustomSystemPreferences."/Library/Preferences/com.apple.SoftwareUpdate" = {
+        AutomaticDownload = true;
+        ConfigDataInstall = true;
+        CriticalUpdateInstall = true;
+      };
+      CustomSystemPreferences."com.apple.commerce".AutoUpdate = true;
 
       LaunchServices.LSQuarantine = true;
 
@@ -76,7 +105,7 @@
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
+      autoUpdate = false;
 
       # Cask upgrades stay explicit: Homebrew may remove the old app before a
       # new installer fails, as happened with Parallels. Keep that operation
@@ -90,6 +119,7 @@
     };
 
     brews = [
+      "openssh"
       {
         name = "FelixKratz/formulae/borders";
         trusted = true;

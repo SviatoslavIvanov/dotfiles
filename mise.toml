@@ -7,7 +7,7 @@ run = "statix check ."
 description = "Lint Nix files"
 
 [tasks.fmt-check]
-run = "rg --files -g '*.nix' -0 | xargs -0 nix run .#nixfmt -- --check"
+run = "rg --files -g '*.nix' -0 | xargs -0 nix run --no-update-lock-file .#nixfmt -- --check"
 description = "Check Nix formatting without editing files"
 
 [tasks.fix]
@@ -25,9 +25,21 @@ description = "Remove dead code"
 confirm = "Remove code that Deadnix considers unused?"
 
 [tasks.flake-check]
-run = "nix flake check"
+run = "nix flake check --no-update-lock-file"
 description = "Check flake validity"
 
+[tasks.lua-check]
+run = "stylua --check configs/nvim-lazyvim configs/nvim-vscode"
+description = "Check Lua formatting"
+
+[tasks.lock-check]
+run = "mise --cd configs/mise lock --dry-run --json | jq -e 'length == 0' && jq -e 'type == \"object\"' configs/nvim-lazyvim/lazy-lock.json >/dev/null"
+description = "Check mise and Neovim lock files"
+
+[tasks.secret-check]
+run = "gitleaks dir --redact --no-banner . && gitleaks git --redact --no-banner ."
+description = "Scan the working tree and Git history for secrets"
+
 [tasks.lint]
-depends = ["fmt-check", "check", "dead", "flake-check"]
+depends = ["fmt-check", "check", "dead", "flake-check", "lua-check", "lock-check", "secret-check"]
 description = "Run all checks"

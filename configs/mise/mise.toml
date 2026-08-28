@@ -1,0 +1,15 @@
+[settings]
+lockfile = true
+lockfile_platforms = ["macos-arm64"]
+
+[tools]
+biome = "latest"
+buf = "latest"
+dotnet = "10"
+lefthook = "latest"
+node = "lts"
+"npm:turbo" = "latest"
+pnpm = "latest"
+python = "3.14"
+rust = "latest"
+uv = "latest"

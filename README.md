@@ -2,22 +2,31 @@
 
 Personal Nix-powered macOS configuration. Terminal-first workflow.
 
-Declarative, reproducible setup managed entirely through Nix flakes. Includes system preferences, CLI tools, GUI apps, editor configs, and shell customizations. One `darwin-rebuild switch` to bootstrap or restore a machine.
+Nix pins the system configuration and CLI tools. Git pins the writable editor
+and tool-manager lock files. Homebrew, App Store, vendor-managed apps,
+credentials, and application data remain external state and are intentionally
+not presented as fully reproducible.
 
 ## Prerequisites
 
-**Nix** via [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)
+1. Install **Nix** with the [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer).
+2. Install and sign in to **1Password**, then enable its CLI integration and
+   SSH Agent. The private flake input must be accessible before nix-darwin can
+   install the declared applications and activate secrets.
+3. Verify GitHub SSH access with `ssh -T git@github.com`.
 
 ## Installation
 
 ```bash
-git clone git@github.com:SviatoslavIvanov/dotfiles.git ~/.dotfiles
+git clone https://github.com/SviatoslavIvanov/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-darwin-rebuild switch --flake .
+nix flake archive --no-update-lock-file .
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .#svyat-mac --no-update-lock-file
 ```
 
 > **Note:** This config references a private `dotfiles-private` flake input.
-> Fork this repo and remove it from `flake.nix` or replace with your own secrets management.
+> Forks must remove both the input and its Darwin/Home Manager module references
+> from `flake.nix`, or replace them with their own private configuration.
 
 ## What's Inside
 
@@ -123,6 +132,7 @@ darwin-rebuild switch --flake .
 | **glow** | Markdown viewer |
 | **ouch** | Universal archiver |
 | **ragenix** | Secrets management |
+| **openssh** | Homebrew OpenSSH with FIDO2 support |
 | **coreutils** | GNU core utilities |
 | **gnused** | GNU sed |
 | **curl** / **wget** | HTTP clients |
@@ -176,10 +186,14 @@ Dev tasks for this repo (`mise.toml`):
 
 ```bash
 mise run fmt          # Format .nix files
+mise run fmt-check    # Check Nix formatting
 mise run check        # Lint with statix
 mise run dead         # Find dead code
 mise run clean        # Remove dead code
 mise run flake-check  # Validate flake
+mise run lua-check    # Check Lua formatting
+mise run lock-check   # Validate writable lock files
+mise run secret-check # Scan the tree and history for secrets
 mise run lint         # Run all checks
 ```
 
@@ -187,7 +201,7 @@ mise run lint         # Run all checks
 
 Apply changes:
 ```bash
-darwin-rebuild switch --flake .
+sudo darwin-rebuild switch --flake .#svyat-mac
 # or shell alias:
 rebuild
 ```
@@ -199,11 +213,23 @@ nix flake update
 update
 ```
 
-Clean Nix store:
+List generations and roll back Nix-managed system and Home Manager state:
 ```bash
-nix-collect-garbage -d
-# or:
-cleanup
+sudo darwin-rebuild --list-generations
+sudo darwin-rebuild switch --rollback
+sudo darwin-rebuild switch --switch-generation <generation>
+```
+
+Homebrew, App Store, and vendor-managed application changes are outside Nix
+generations and are not reverted by `darwin-rebuild --rollback`.
+
+The mise config/lock and Neovim plugin lock are writable links into this
+working tree so their own tools can update them. Git, rather than Nix
+generations, is their rollback mechanism.
+
+Collect unreachable Nix store paths without deleting profile generations:
+```bash
+nix-collect-garbage
 ```
 
 ## macOS Defaults
@@ -213,5 +239,7 @@ Automatically configured:
 - **Dock:** auto-hide, no recent apps, stable spaces order
 - **Finder:** show hidden files, extensions, path bar, status bar
 - **Keyboard:** fast key repeat (2/15), no auto-corrections
-- **Security:** Touch ID for sudo, guest login disabled
+- **Security:** firewall + stealth mode, Touch ID for sudo, guest login disabled, immediate lock
+- **Power:** displays sleep after 10 minutes
+- **Updates:** automatic macOS and App Store updates
 - **Screenshots:** saved to `~/Pictures/Screenshots`
