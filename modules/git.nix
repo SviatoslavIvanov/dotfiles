@@ -1,13 +1,19 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  gitEmail = "66922372+SviatoslavIvanov@users.noreply.github.com";
+  gitSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF/WOifKMBKVekeC55DS/EHPM5yDxnoqQ0KlcZyBvVNU";
+in
 {
+  xdg.configFile."git/allowed_signers".text = "${gitEmail} ${gitSigningKey}\n";
+
   programs = {
     git = {
       enable = true;
       lfs.enable = true;
 
       signing = {
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF/WOifKMBKVekeC55DS/EHPM5yDxnoqQ0KlcZyBvVNU";
+        key = gitSigningKey;
         signByDefault = true;
       };
 
@@ -28,11 +34,14 @@
       settings = {
         user = {
           name = "Sviatoslav Ivanov";
-          email = "66922372+SviatoslavIvanov@users.noreply.github.com";
+          email = gitEmail;
         };
         gpg = {
           format = "ssh";
-          ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          ssh = {
+            allowedSignersFile = "${config.xdg.configHome}/git/allowed_signers";
+            program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          };
         };
         init.defaultBranch = "main";
         pull.rebase = true;
