@@ -15,6 +15,9 @@ let
         "WebSearch"
         "Bash(file *)"
         "Bash(which *)"
+        "Bash(curl *)"
+        "Bash(wget *)"
+        "Bash(git *)"
       ];
 
       ask = [
@@ -28,27 +31,16 @@ let
         "Bash(rm -rf *)"
         "Bash(rm -r *)"
 
-        # Network requests
-        "Bash(curl *)"
-        "Bash(wget *)"
+        # Sandbox escape
         "Bash(dangerouslyDisableSandbox:true)"
 
-        # Git write operations
-        "Bash(git add *)"
-        "Bash(git commit *)"
+        # Irreversible or externally visible Git operations
         "Bash(git push *)"
-        "Bash(git push)"
-        "Bash(git reset *)"
-        "Bash(git checkout *)"
+        "Bash(git reset --hard *)"
         "Bash(git restore *)"
-        "Bash(git revert *)"
-        "Bash(git merge *)"
-        "Bash(git rebase *)"
-        "Bash(git stash *)"
-        "Bash(git branch -d *)"
+        "Bash(git checkout -- *)"
+        "Bash(git checkout -f *)"
         "Bash(git branch -D *)"
-        "Bash(git tag *)"
-        "Bash(git cherry-pick *)"
         "Bash(git clean *)"
       ];
 
