@@ -1,5 +1,6 @@
 {
   inputs,
+  homeDirectory,
   lib,
   pkgs,
   username,
@@ -36,7 +37,7 @@
 
   users.users.${username} = {
     name = username;
-    home = "/Users/${username}";
+    home = homeDirectory;
   };
 
   system = {

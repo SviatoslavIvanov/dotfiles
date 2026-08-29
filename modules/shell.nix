@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  dotfilesDir,
   ...
 }:
 
@@ -178,13 +179,13 @@
           }
 
           function rebuild() {
-            nix flake archive --no-update-lock-file "$HOME/.dotfiles" >/dev/null && \
-              sudo darwin-rebuild switch --flake "$HOME/.dotfiles#svyat-mac" --no-update-lock-file "$@"
+            nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
+              sudo darwin-rebuild switch --flake "${dotfilesDir}#svyat-mac" --no-update-lock-file "$@"
           }
 
           function update() {
-            nix flake update --flake "$HOME/.dotfiles" && \
-              mise --cd "$HOME/.dotfiles" run lint && \
+            nix flake update --flake "${dotfilesDir}" && \
+              mise --cd "${dotfilesDir}" run lint && \
               rebuild
           }
 

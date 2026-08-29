@@ -18,11 +18,17 @@ not presented as fully reproducible.
 ## Installation
 
 ```bash
-git clone https://github.com/SviatoslavIvanov/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
+export DOTFILES_DIR="$HOME/Developer/github.com/SviatoslavIvanov/dotfiles"
+mkdir -p "$(dirname "$DOTFILES_DIR")"
+git clone https://github.com/SviatoslavIvanov/dotfiles.git "$DOTFILES_DIR"
+cd "$DOTFILES_DIR"
 nix flake archive --no-update-lock-file .
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .#svyat-mac --no-update-lock-file
 ```
+
+Home Manager keeps `DOTFILES_DIR` set to this canonical working tree after the
+first activation. Writable lock-file links and maintenance commands derive from
+the same value.
 
 > **Note:** This config references a private `dotfiles-private` flake input.
 > Forks must remove both the input and its Darwin/Home Manager module references
@@ -201,16 +207,17 @@ mise run lint         # Run all checks
 
 Apply changes:
 ```bash
-sudo darwin-rebuild switch --flake .#svyat-mac
-# or shell alias:
 rebuild
+# or directly:
+nix flake archive --no-update-lock-file "$DOTFILES_DIR"
+sudo darwin-rebuild switch --flake "$DOTFILES_DIR#svyat-mac" --no-update-lock-file
 ```
 
 Update all inputs:
 ```bash
-nix flake update
-# or:
 update
+# or directly:
+nix flake update --flake "$DOTFILES_DIR"
 ```
 
 List generations and roll back Nix-managed system and Home Manager state:
@@ -223,8 +230,8 @@ sudo darwin-rebuild switch --switch-generation <generation>
 Homebrew, App Store, and vendor-managed application changes are outside Nix
 generations and are not reverted by `darwin-rebuild --rollback`.
 
-The mise config/lock and Neovim plugin lock are writable links into this
-working tree so their own tools can update them. Git, rather than Nix
+The mise config/lock and Neovim plugin lock are writable links into
+`$DOTFILES_DIR` so their own tools can update them. Git, rather than Nix
 generations, is their rollback mechanism.
 
 Collect unreachable Nix store paths without deleting profile generations:

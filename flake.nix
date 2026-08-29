@@ -48,6 +48,8 @@
       system = "aarch64-darwin";
       hostname = "svyat-mac";
       username = "ivsv";
+      homeDirectory = "/Users/${username}";
+      dotfilesDir = "${homeDirectory}/Developer/github.com/SviatoslavIvanov/dotfiles";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
@@ -55,7 +57,14 @@
       packages.${system}.nixfmt = pkgs.nixfmt;
 
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs username hostname; };
+        specialArgs = {
+          inherit
+            inputs
+            username
+            hostname
+            homeDirectory
+            ;
+        };
         modules = [
           { nixpkgs.hostPlatform = system; }
           ./modules/darwin.nix
@@ -78,7 +87,15 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "backup";
-              extraSpecialArgs = { inherit inputs username system; };
+              extraSpecialArgs = {
+                inherit
+                  inputs
+                  username
+                  system
+                  homeDirectory
+                  dotfilesDir
+                  ;
+              };
               sharedModules = [
                 stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin

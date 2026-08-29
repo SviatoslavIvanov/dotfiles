@@ -1,5 +1,7 @@
 {
   config,
+  dotfilesDir,
+  homeDirectory,
   lib,
   username,
   ...
@@ -18,11 +20,11 @@
   ];
 
   home = {
-    inherit username;
-    homeDirectory = "/Users/${username}";
+    inherit username homeDirectory;
     stateVersion = "24.11";
 
     sessionVariables = {
+      DOTFILES_DIR = dotfilesDir;
       EDITOR = "nvim";
       VISUAL = "nvim";
       SSH_AUTH_SOCK = "$HOME/.1password/agent.sock";
@@ -42,7 +44,7 @@
       ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
       ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
       ".config/nvim/lazy-lock.json".source =
-        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/nvim-lazyvim/lazy-lock.json";
+        config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/configs/nvim-lazyvim/lazy-lock.json";
       ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
       ".config/nvim/lua".source = ../configs/nvim-lazyvim/lua;
       ".config/nvim-vscode".source = ../configs/nvim-vscode;
@@ -53,9 +55,9 @@
   xdg = {
     enable = true;
     configFile."mise/config.toml".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/mise/mise.toml";
+      config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/configs/mise/mise.toml";
     configFile."mise/mise.lock".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/configs/mise/mise.lock";
+      config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/configs/mise/mise.lock";
   };
 
   # The upstream agenix agent currently emits two negated KeepAlive
