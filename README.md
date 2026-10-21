@@ -260,6 +260,7 @@ Automatically configured:
 - **Finder:** show hidden files, extensions, path bar, status bar
 - **Keyboard:** fast key repeat (2/15), no auto-corrections
 - **Security:** firewall + stealth mode, Touch ID for sudo, guest login disabled, immediate lock
-- **Power:** displays sleep after 10 minutes
+- **Power:** displays sleep after 10 minutes; computer sleep is disabled on AC
+  and delayed to 30 minutes on battery
 - **Updates:** automatic macOS and App Store updates
 - **Screenshots:** saved to `~/Pictures/Screenshots`

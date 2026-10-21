@@ -27,12 +27,18 @@
 
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  power.sleep.display = 10;
+  power.sleep = {
+    computer = "never";
+    display = 10;
+  };
 
-  # `power.sleep.display` uses `systemsetup`, which only updates the active
-  # power profile on current macOS. Keep the battery profile declarative too.
+  # `power.sleep.*` uses `systemsetup`, which only updates the active power
+  # profile on current macOS. Pin both profiles explicitly: brief power loss
+  # from the home dock must not turn the one-minute battery default into an
+  # immediate sleep, while a real battery session still gets a safety timeout.
   system.activationScripts.postActivation.text = lib.mkAfter ''
-    pmset -b displaysleep 10
+    pmset -c displaysleep 10 sleep 0
+    pmset -b displaysleep 10 sleep 30
   '';
 
   users.users.${username} = {
