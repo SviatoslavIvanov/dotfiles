@@ -3,6 +3,10 @@
 {
   stylix = {
     enable = true;
+    # Application themes are managed explicitly below or by Catppuccin. An
+    # allow-list prevents Stylix from emitting Linux-only GTK, Xresources,
+    # Blender, gedit, Vencord, and similar files on macOS.
+    autoEnable = false;
     polarity = "dark";
 
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
@@ -29,6 +33,9 @@
     };
 
     targets = {
+      "font-packages".enable = true;
+      fontconfig.enable = true;
+
       bat.enable = false;
       fzf.enable = false;
       yazi.enable = false;
