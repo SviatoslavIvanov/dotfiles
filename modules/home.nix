@@ -61,9 +61,13 @@
   };
 
   # The upstream agenix agent currently emits two negated KeepAlive
-  # conditions. launchd ORs them, so a successful one-shot activation is
-  # scheduled again forever and continuously grows its logs.
-  launchd.agents."activate-agenix".config.KeepAlive = lib.mkForce false;
+  # conditions. Keep only SuccessfulExit so launchd retries failed activation
+  # (for example while the machine identity is unavailable), then stops after
+  # the first successful run. Throttle retries to avoid a tight failure loop.
+  launchd.agents."activate-agenix".config = {
+    KeepAlive = lib.mkForce { SuccessfulExit = false; };
+    ThrottleInterval = 30;
+  };
 
   catppuccin = {
     enable = true;

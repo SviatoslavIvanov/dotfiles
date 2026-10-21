@@ -11,8 +11,9 @@ not presented as fully reproducible.
 
 1. Install **Nix** with the [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer).
 2. Install and sign in to **1Password**, then enable its CLI integration and
-   SSH Agent. The private flake input must be accessible before nix-darwin can
-   install the declared applications and activate secrets.
+   SSH Agent. The private flake input must be accessible during bootstrap; once
+   configured, agenix activation uses a local machine identity and does not
+   depend on 1Password login timing.
 3. Verify GitHub SSH access with `ssh -T git@github.com`.
 
 ## Installation
