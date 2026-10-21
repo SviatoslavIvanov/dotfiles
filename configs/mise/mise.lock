@@ -24,6 +24,14 @@ provenance = "minisign"
 version = "10.0.400"
 backend = "core:dotnet"
 
+[[tools."http:nebius"]]
+version = "0.12.288"
+backend = "http:nebius"
+
+[tools."http:nebius"."platforms.macos-arm64"]
+checksum = "blake3:fa9f75704f7b3a3acc275a0b4041f6e14610c2be19d1b761b90867815cd8adfc"
+url = "https://artifacts.nebius.cloud/cli/release/0.12.288/darwin/arm64/nebius"
+
 [[tools.lefthook]]
 version = "2.1.11"
 backend = "aqua:evilmartians/lefthook"

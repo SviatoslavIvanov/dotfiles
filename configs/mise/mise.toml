@@ -6,6 +6,7 @@ lockfile_platforms = ["macos-arm64"]
 biome = "latest"
 buf = "latest"
 dotnet = "10"
+"http:nebius" = { version = "0.12.288", url = "https://artifacts.nebius.cloud/cli/release/{{version}}/darwin/arm64/nebius" }
 lefthook = "latest"
 node = "lts"
 "npm:turbo" = "latest"
