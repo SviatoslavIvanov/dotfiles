@@ -8,103 +8,12 @@ let
   managed = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
 
-    permissions = {
-      allow = [
-        "mcp__plugin_context7_context7__*"
-        "WebFetch"
-        "WebSearch"
-        "Bash(file *)"
-        "Bash(which *)"
-        "Bash(curl *)"
-        "Bash(wget *)"
-        "Bash(git *)"
-      ];
+    # Apply globally: Claude ignores bypassPermissions in project settings.
+    permissions.defaultMode = "bypassPermissions";
+    skipDangerousModePermissionPrompt = true;
 
-      ask = [
-        # Sensitive files
-        "Read(**/.env*)"
-        "Read(**/secrets/**)"
-        "Read(**/*secret*)"
-        "Read(**/*credential*)"
-
-        # Destructive operations
-        "Bash(rm -rf *)"
-        "Bash(rm -r *)"
-
-        # Sandbox escape
-        "Bash(dangerouslyDisableSandbox:true)"
-
-        # Irreversible or externally visible Git operations
-        "Bash(git push *)"
-        "Bash(git reset --hard *)"
-        "Bash(git restore *)"
-        "Bash(git checkout -- *)"
-        "Bash(git checkout -f *)"
-        "Bash(git branch -D *)"
-        "Bash(git clean *)"
-      ];
-
-      deny = [
-        # Private keys - never read
-        "Read(**/*.key)"
-        "Read(**/*.pem)"
-        "Read(**/*_rsa)"
-        "Read(**/*_ed25519)"
-        "Read(**/*.p12)"
-      ];
-    };
-
-    # Claude Code now has a native macOS Seatbelt sandbox. Read-only shell
-    # commands are auto-approved by Claude itself, while these paths stay
-    # inaccessible even through `cat`, interpreters, or other subprocesses.
-    sandbox = {
-      enabled = true;
-      failIfUnavailable = true;
-      autoAllowBashIfSandboxed = true;
-      excludedCommands = [ "docker *" ];
-
-      credentials = {
-        files =
-          map
-            (path: {
-              inherit path;
-              mode = "deny";
-            })
-            [
-              "~/.ssh"
-              "~/.aws"
-              "~/.config/gcloud"
-              "~/.kube"
-              "~/.docker/config.json"
-              "~/.netrc"
-              "~/.npmrc"
-            ];
-        envVars =
-          map
-            (name: {
-              inherit name;
-              mode = "deny";
-            })
-            [
-              "AWS_ACCESS_KEY_ID"
-              "AWS_SECRET_ACCESS_KEY"
-              "AWS_SESSION_TOKEN"
-              "GITHUB_TOKEN"
-              "GH_TOKEN"
-              "NPM_TOKEN"
-              "OPENAI_API_KEY"
-              "ANTHROPIC_API_KEY"
-            ];
-      };
-
-      filesystem.denyRead = [
-        "~/**/.env"
-        "~/**/.env.*"
-        "~/**/secrets/**"
-        "~/**/*secret*"
-        "~/**/*credential*"
-      ];
-    };
+    # Keep this explicit so activation replaces the previous sandbox rules.
+    sandbox.enabled = false;
 
     statusLine = {
       type = "command";
