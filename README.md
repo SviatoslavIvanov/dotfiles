@@ -58,6 +58,7 @@ the same value.
 ├── modules/
 │   ├── darwin.nix      # macOS settings, fonts, Homebrew casks
 │   ├── home.nix        # Home Manager entry point
+│   ├── hygiene.nix     # XDG paths and home-directory audit
 │   ├── packages.nix    # CLI tools and yazi config
 │   ├── shell.nix       # Zsh, fzf, zoxide, bat, eza
 │   ├── terminal.nix    # Ghostty, tmux
@@ -239,6 +240,17 @@ Collect unreachable Nix store paths without deleting profile generations:
 ```bash
 nix-collect-garbage
 ```
+
+Audit top-level home-directory entries without changing or deleting anything:
+
+```bash
+home-audit           # fast inventory
+home-audit --sizes   # include recursive disk usage (slower)
+```
+
+Node, Python, and PostgreSQL histories, npm and Ansible caches, Wget state, and
+the Ansible config use explicit XDG paths. Existing legacy files and stateful
+SDK homes are intentionally left in place for manual review.
 
 ## macOS Defaults
 

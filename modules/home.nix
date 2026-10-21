@@ -10,6 +10,7 @@
 {
   imports = [
     ./stylix.nix
+    ./hygiene.nix
     ./packages.nix
     ./shell.nix
     ./git.nix
@@ -22,6 +23,7 @@
   home = {
     inherit username homeDirectory;
     stateVersion = "24.11";
+    preferXdgDirectories = true;
 
     sessionVariables = {
       DOTFILES_DIR = dotfilesDir;
@@ -33,14 +35,6 @@
     sessionPath = [ "/Library/TeX/texbin" ];
 
     file = {
-      ".ansible.cfg".text = ''
-        [defaults]
-        forks = 20
-
-        [ssh_connection]
-        pipelining = True
-      '';
-
       ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
       ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
       ".config/nvim/lazy-lock.json".source =
