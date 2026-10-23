@@ -178,15 +178,29 @@
             eval "$(atuin init zsh)"
           }
 
+          # A generation built from uncommitted files cannot be rebuilt on
+          # another machine, and the flake silently ignores untracked ones.
+          function _dotfiles_require_clean() {
+            local changes
+            changes=$(git -C "${dotfilesDir}" status --porcelain) || return
+            [[ -z $changes || -n $REBUILD_DIRTY ]] && return 0
+            print -u2 "dotfiles have uncommitted changes; commit them or rerun with REBUILD_DIRTY=1:"
+            print -u2 -r -- "$changes"
+            return 1
+          }
+
           function rebuild() {
-            nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
+            _dotfiles_require_clean && \
+              nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
               sudo darwin-rebuild switch --flake "${dotfilesDir}#svyat-mac" --no-update-lock-file "$@"
           }
 
+          # Only the refreshed flake.lock may be uncommitted when it rebuilds.
           function update() {
-            nix flake update --flake "${dotfilesDir}" && \
+            _dotfiles_require_clean && \
+              nix flake update --flake "${dotfilesDir}" && \
               mise --cd "${dotfilesDir}" run lint && \
-              rebuild
+              REBUILD_DIRTY=1 rebuild
           }
 
           function generations() {

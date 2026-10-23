@@ -207,7 +207,8 @@ mise run lint         # Run all checks
 
 ## Usage
 
-Apply changes:
+Apply changes (commit them first; `rebuild` refuses a dirty tree unless
+`REBUILD_DIRTY=1` is set):
 ```bash
 rebuild
 # or directly:
