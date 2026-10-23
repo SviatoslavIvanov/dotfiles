@@ -134,12 +134,17 @@
     ];
 
     taps = [
+      "netbirdio/tap"
       "nikitabobko/tap"
     ];
 
     casks = [
       {
         name = "nikitabobko/tap/aerospace";
+        trusted = true;
+      }
+      {
+        name = "netbirdio/tap/netbird-ui";
         trusted = true;
       }
       "1password"
