@@ -43,6 +43,9 @@ in
     _1password-cli
     cloudflared
     postgresql
+    ffmpeg
+    poppler-utils
+    tesseract
   ];
 
   programs.btop.enable = true;
