@@ -8,12 +8,6 @@ _: {
       auto-update = "check";
 
       font-thicken = true;
-      font-family = [
-        "MonaspiceNe Nerd Font Mono"
-        "JetBrainsMono Nerd Font Mono"
-      ];
-      font-size = 22;
-      font-feature = map (n: "ss0${toString n}") (builtins.genList (i: i + 1) 9);
 
       background-opacity = 0.95;
       background-blur = 20;

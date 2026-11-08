@@ -1,4 +1,4 @@
-{ lib, ... }:
+_:
 
 {
   programs.zed-editor = {
@@ -39,50 +39,12 @@
       minimum_split_diff_width = 100;
       word_diff_enabled = true;
       ui_font_family = ".ZedSans";
-      # Scale navigation and agent prose independently for the external display.
-      ui_font_size = lib.mkForce 26;
-      buffer_font_size = lib.mkForce 22;
+      ui_font_size = 26;
       buffer_line_height.custom = 1.4;
       agent_ui_font_size = 28;
       agent_buffer_font_size = 24;
       cursor_blink = false;
-      buffer_font_family = "MonaspiceNe Nerd Font Mono";
-      buffer_font_fallbacks = [
-        "JetBrainsMono Nerd Font Mono"
-      ];
-      buffer_font_features = {
-        calt = true;
-        liga = true;
-        ss01 = true;
-        ss02 = true;
-        ss03 = true;
-        ss04 = true;
-        ss06 = true;
-        ss07 = true;
-        ss08 = true;
-        ss09 = true;
-      };
-
-      theme = {
-        mode = "dark";
-      };
       icon_theme = "Zed (Default)";
-      # Keep the Catppuccin syntax and peach accent, with quiet, consistent chrome.
-      theme_overrides."Catppuccin Mocha (peach)" = {
-        background = "#1e1e2e";
-        "title_bar.background" = "#1e1e2e";
-        "title_bar.inactive_background" = "#1e1e2e";
-        "tab_bar.background" = "#1e1e2e";
-        "tab.inactive_background" = "#1e1e2e";
-        "tab.active_background" = "#262637";
-        "toolbar.background" = "#1e1e2e";
-        "status_bar.background" = "#1e1e2e";
-        "panel.background" = "#1e1e2e";
-        "panel.focused_border" = "#45475a";
-        border = "#313244";
-        "border.variant" = "#313244";
-        "editor.active_line.background" = "#cdd6f408";
-      };
 
       # Keep navigation, editing, and agent conversations in separate areas.
       bottom_dock_layout = "contained";

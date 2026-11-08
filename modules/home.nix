@@ -9,7 +9,7 @@
 
 {
   imports = [
-    ./stylix.nix
+    ./theme.nix
     ./hygiene.nix
     ./packages.nix
     ./shell.nix
@@ -54,29 +54,5 @@
   launchd.agents."activate-agenix".config = {
     KeepAlive = lib.mkForce { SuccessfulExit = false; };
     ThrottleInterval = 30;
-  };
-
-  catppuccin = {
-    enable = true;
-    autoEnable = true;
-    flavor = "mocha";
-    accent = "peach";
-
-    bat.enable = true;
-    btop.enable = true;
-    delta.enable = true;
-    eza.enable = true;
-    fzf.enable = true;
-    lazygit.enable = true;
-    tmux.enable = true;
-    yazi.enable = true;
-
-    gtk.icon.enable = false;
-    cursors.enable = false;
-    zed = {
-      enable = true;
-      icons.enable = false;
-    };
-    zsh-syntax-highlighting.enable = false;
   };
 }

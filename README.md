@@ -44,7 +44,7 @@ the same value.
 | **Nix Flakes** | Reproducible, declarative system configuration |
 | **nix-darwin** | macOS system settings management |
 | **Home Manager** | User environment and dotfiles |
-| **Stylix** + **Catppuccin Mocha** | Unified theming across all apps |
+| **Catppuccin Mocha** | Theme across all apps; fonts and palette live in `theme.nix` |
 | **Homebrew** (via nix-homebrew) | GUI apps and casks |
 | **mise** | Runtime version manager + task runner |
 
@@ -56,7 +56,7 @@ the same value.
 ├── flake.lock          # Pinned dependency versions
 ├── mise.toml           # Dev tasks (lint, format, check)
 ├── modules/
-│   ├── darwin.nix      # macOS settings, fonts, Homebrew casks
+│   ├── darwin.nix      # macOS settings, Homebrew casks
 │   ├── home.nix        # Home Manager entry point
 │   ├── hygiene.nix     # XDG paths and home-directory audit
 │   ├── packages.nix    # CLI tools and yazi config
@@ -65,7 +65,7 @@ the same value.
 │   ├── tmux.nix        # tmux
 │   ├── git.nix         # Git, delta, lazygit, gh
 │   ├── aerospace.nix   # AeroSpace workspaces and window rules
-│   ├── stylix.nix      # Shared fonts and base16 theme
+│   ├── theme.nix       # Catppuccin, fonts and palette
 │   ├── zed.nix         # Zed editor settings
 │   ├── agents.nix      # Rules, skills and MCP servers shared by all agents
 │   ├── claude-code.nix # Claude Code settings, LSP and statusline
@@ -293,9 +293,7 @@ keyboards are configured with the maintained [VIA web app](https://usevia.app/).
 
 ## Fonts
 
-- JetBrains Mono Nerd Font
-- Monaspace Nerd Font
-- Nerd Fonts Symbols
+Monaspace Nerd Font, with JetBrains Mono Nerd Font as fallback.
 
 ## mise Tasks
 

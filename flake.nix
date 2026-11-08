@@ -40,11 +40,6 @@
     # 3.1 needs FastMCP 4, which nixpkgs lacks; upstream builds it on its own nixpkgs pin.
     mcp-nixos.url = "github:utensils/mcp-nixos/v3.1.0";
 
-    stylix = {
-      url = "github:nix-community/stylix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -68,7 +63,6 @@
       nix-darwin,
       home-manager,
       nix-homebrew,
-      stylix,
       catppuccin,
       dotfiles-private,
       ...
@@ -97,7 +91,6 @@
         modules = [
           { nixpkgs.hostPlatform = system; }
           ./modules/darwin.nix
-          stylix.darwinModules.stylix
           dotfiles-private.darwinModules.default
 
           nix-homebrew.darwinModules.nix-homebrew
@@ -125,10 +118,8 @@
                   ;
               };
               sharedModules = [
-                stylix.homeModules.stylix
                 catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default
-                { stylix.overlays.enable = false; }
               ];
               users.${username} = import ./modules/home.nix;
             };
