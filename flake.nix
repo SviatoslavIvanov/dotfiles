@@ -21,6 +21,25 @@
       flake = false;
     };
 
+    # Agent skills: release tags where upstream publishes them, otherwise the default branch.
+    claude-plugins-official = {
+      url = "github:anthropics/claude-plugins-official";
+      flake = false;
+    };
+
+    playwright-cli = {
+      url = "github:microsoft/playwright-cli/v0.1.23";
+      flake = false;
+    };
+
+    sentry-plugin-claude = {
+      url = "github:getsentry/plugin-claude/v1.4.6";
+      flake = false;
+    };
+
+    # 3.1 needs FastMCP 4, which nixpkgs lacks; upstream builds it on its own nixpkgs pin.
+    mcp-nixos.url = "github:utensils/mcp-nixos/v3.1.0";
+
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";

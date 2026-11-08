@@ -58,11 +58,27 @@ let
         '';
       });
   stt = builtins.fromJSON (builtins.readFile (source + "/stt.json"));
+  piMcpFields = {
+    context7 = {
+      exposure = "direct";
+      description = "Current library and CLI documentation. Resolve the library ID, then query docs.";
+    };
+    linear.description = "Work issues and projects in Linear.";
+    sentry.description = "Investigate Sentry issues, events, traces and releases.";
+    posthog.description = "Query PostHog product analytics, feature flags and experiments.";
+  };
+  mcpServers = lib.mapAttrs (
+    name: server:
+    lib.hm.mcp.transformMcpServer {
+      inherit server;
+      extraTransforms = [ lib.hm.mcp.addType ];
+    }
+    // piMcpFields.${name} or { }
+  ) config.programs.mcp.servers;
   managedFiles = [
     "README.md"
     "LICENSES"
     "extension-sources.json"
-    "mcp.json"
     "subagents-lite.json"
     "interactive-shell.json"
     "next-prompt.json"
@@ -79,7 +95,9 @@ in
     package = pi;
     keybindings = builtins.fromJSON (builtins.readFile (source + "/keybindings.json"));
     models = builtins.fromJSON (builtins.readFile (source + "/models.json"));
-    # This Home Manager revision lacks mutableSettings; do not symlink settings.json.
+    mutableSettings = true;
+    settings = builtins.fromJSON (builtins.readFile (source + "/settings.json"));
+    appendSystem = source + "/APPEND_SYSTEM.md";
   };
 
   # pi-web-access uses XDG paths even though Pi uses ~/.pi/agent.
@@ -93,14 +111,7 @@ in
         recursive = true;
       })
       // {
-        # Pi loads one context file per directory and has no imports.
-        ".pi/agent/AGENTS.md".text =
-          builtins.readFile ../configs/agents/AGENTS.md + "\n" + builtins.readFile (source + "/AGENTS.md");
-        # Pi reads skills from the Agent Skills location, shared with other harnesses.
-        ".agents/skills" = {
-          source = ../configs/agents/skills;
-          recursive = true;
-        };
+        ".pi/agent/mcp.json".text = builtins.toJSON { inherit mcpServers; };
         ".pi/agent/stt.json".text = builtins.toJSON (
           stt
           // {
@@ -113,17 +124,6 @@ in
           }
         );
       };
-
-    activation.piSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      run env PATH="${
-        lib.makeBinPath [
-          pkgs.jq
-          pkgs.coreutils
-        ]
-      }:$PATH" \
-        ${pkgs.bash}/bin/bash ${source}/merge-settings.sh \
-        "$HOME/.pi/agent/settings.json" ${source}/settings.json
-    '';
 
     activation.piLauncher = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       run env PATH="${lib.makeBinPath [ pkgs.coreutils ]}:$PATH" \

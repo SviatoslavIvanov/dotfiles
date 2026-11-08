@@ -16,7 +16,9 @@
     ./git.nix
     ./terminal.nix
     ./zed.nix
+    ./agents.nix
     ./claude-code.nix
+    ./codex.nix
     ./pi.nix
     ./aerospace.nix
   ];

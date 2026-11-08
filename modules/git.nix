@@ -29,6 +29,7 @@ in
         "*.log"
         ".mise.local.toml"
         "**/.claude/settings.local.json"
+        ".playwright-cli/"
       ];
 
       settings = {

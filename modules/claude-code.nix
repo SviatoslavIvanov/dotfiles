@@ -1,51 +1,52 @@
-{ pkgs, lib, ... }:
-
-let
-  # Nix owns only the declared leaves; local permissions.deny/allow/ask,
-  # plugins and other undeclared settings survive activation.
-  managed = {
-    "$schema" = "https://json.schemastore.org/claude-code-settings.json";
-
-    # Apply globally: Claude ignores bypassPermissions in project settings.
-    permissions.defaultMode = "bypassPermissions";
-    skipDangerousModePermissionPrompt = true;
-
-    # Keep the existing opt-out explicit without discarding other sandbox settings.
-    sandbox.enabled = false;
-
-    statusLine = {
-      type = "command";
-      command = "~/.config/claude-code/statusline.sh";
-      padding = 0;
-    };
-
-    attribution = {
-      commit = "";
-      pr = "";
-    };
-
-    outputStyle = "default";
-  };
-  managedFile = pkgs.writeText "claude-managed.json" (builtins.toJSON managed);
-in
 {
-  home = {
-    activation.claudeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run ${pkgs.coreutils}/bin/env PATH=${
-        lib.makeBinPath [
-          pkgs.coreutils
-          pkgs.jq
-        ]
-      } \
-        ${pkgs.bash}/bin/bash ${../configs/claude-code/merge-settings.sh} \
-        "$HOME/.claude/settings.json" ${managedFile}
-    '';
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
-    file = {
-      ".claude/CLAUDE.md".source = ../configs/agents/AGENTS.md;
-      ".claude/skills" = {
-        source = ../configs/agents/skills;
-        recursive = true;
+{
+  programs.claude-code = {
+    enable = true;
+    # Homebrew installs and self-updates the CLI.
+    package = null;
+    # The desktop app and Cowork read ~/.claude and never see CLAUDE_CONFIG_DIR.
+    configDir = "${config.home.homeDirectory}/.claude";
+    mutableSettings = true;
+    enableMcpIntegration = true;
+
+    settings = {
+      # Apply globally: Claude ignores bypassPermissions in project settings.
+      permissions.defaultMode = "bypassPermissions";
+      skipDangerousModePermissionPrompt = true;
+      sandbox.enabled = false;
+
+      statusLine = {
+        type = "command";
+        command = "~/.config/claude-code/statusline.sh";
+        padding = 0;
+      };
+
+      attribution = {
+        commit = "";
+        pr = "";
+      };
+
+      outputStyle = "default";
+    };
+
+    lspServers.typescript = {
+      command = lib.getExe pkgs.typescript-language-server;
+      args = [ "--stdio" ];
+      extensionToLanguage = {
+        ".ts" = "typescript";
+        ".tsx" = "typescriptreact";
+        ".mts" = "typescript";
+        ".cts" = "typescript";
+        ".js" = "javascript";
+        ".jsx" = "javascriptreact";
+        ".mjs" = "javascript";
+        ".cjs" = "javascript";
       };
     };
   };

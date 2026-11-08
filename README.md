@@ -66,9 +66,11 @@ the same value.
 │   ├── aerospace.nix   # AeroSpace workspaces and window rules
 │   ├── stylix.nix      # Shared fonts and base16 theme
 │   ├── zed.nix         # Zed editor settings
-│   ├── claude-code.nix # Claude Code settings and global instructions
+│   ├── agents.nix      # Rules, skills and MCP servers shared by all agents
+│   ├── claude-code.nix # Claude Code settings, LSP and statusline
+│   ├── codex.nix       # Codex config merge
 │   └── pi.nix          # Pi CLI, configuration and extension restore command
-└── configs/            # Non-Nix configs (agents, claude-code, p10k, pi)
+└── configs/            # Non-Nix configs (agents, mise, p10k, pi)
 ```
 
 ## CLI Tools
@@ -223,11 +225,33 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 | **codex** | OpenAI Codex CLI |
 | **pi** | Extensible coding harness; pinned CLI and non-secret config via Nix |
 
-Personal agent instructions live in [`configs/agents/AGENTS.md`](configs/agents/AGENTS.md):
-Claude Code reads them as `~/.claude/CLAUDE.md`, Pi as the head of
-`~/.pi/agent/AGENTS.md` (followed by the Pi-only part from `configs/pi`).
-Skills from [`configs/agents/skills`](configs/agents/skills) load only when a task
-needs them: Claude Code finds them in `~/.claude/skills`, Pi in `~/.agents/skills`.
+One source in [`modules/agents.nix`](modules/agents.nix) feeds all three agents:
+
+| What | Source | Claude Code | Codex | Pi |
+|---|---|---|---|---|
+| Rules | [`configs/agents/AGENTS.md`](configs/agents/AGENTS.md) | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` | `~/.pi/agent/AGENTS.md` |
+| Skills | `skills` attrset | `~/.claude/skills` | `~/.agents/skills` | `~/.agents/skills` |
+| MCP | `programs.mcp.servers` | personal plugin `hm` | `config.toml` | `mcp.json` |
+
+Third-party skills come from pinned flake inputs (`claude-plugins-official`,
+`playwright-cli`, `sentry-plugin-claude`); `nix flake update` brings their
+changes as a reviewable lock diff. The `playwright-cli` input tag follows the
+CLI version in the mise lock. Skills keep to the open Agent Skills frontmatter
+so every agent can load them. Claude Code also gets a TypeScript LSP from Nix.
+
+Settings files stay writable: Home Manager merges declared keys into them on
+activation (`mutableSettings` for Claude Code and Pi, `mkImpureConfigMerger`
+for Codex), so `/config`, plugin toggles, project trust and the desktop app's
+state survive. `programs.codex` is not used: with `preferXdgDirectories` it
+moves `CODEX_HOME` away from `~/.codex`, which the ChatGPT desktop app reads.
+The global `bypassPermissions` mode, Codex `danger-full-access` and the
+disabled sandbox are intentional; use them only with trusted projects.
+
+Servers needed in one repository live in that repository: `.mcp.json` for
+Claude Code, `.pi/mcp.json` as a symlink to it, `.codex/config.toml` for Codex,
+and `enabledMcpjsonServers` in `.claude/settings.json`. This repository adds
+`mcp-nixos` that way. Work plugins are declared in the private flake, disabled
+globally and enabled by the repositories that use them.
 
 Pi configuration lives in [`configs/pi`](configs/pi/README.md), managed by
 [`modules/pi.nix`](modules/pi.nix). Credentials, sessions, trust decisions, and
@@ -283,9 +307,8 @@ mise run check        # Lint with statix
 mise run dead         # Find dead code
 mise run clean        # Remove dead code
 mise run flake-check  # Validate flake
-mise run claude-check # Validate lossless Claude settings merge
 mise run lock-check   # Validate mise lock file
-mise run pi-check     # Check Pi settings preservation and launcher migration
+mise run pi-check     # Check Pi extension versions and launcher migration
 mise run pi-extensions-check # Check installed Pi extensions and critical regressions
 mise run secret-check # Scan the tree and history for secrets
 mise run lint         # Run all checks
@@ -321,12 +344,6 @@ generations and are not reverted by `darwin-rebuild --rollback`.
 
 The mise config/lock are writable links into `$DOTFILES_DIR` so mise can update
 them. Git, rather than Nix generations, is their rollback mechanism.
-
-Claude settings are merged recursively and atomically during Home Manager
-activation, preserving local permission rules and undeclared settings. Invalid
-JSON aborts the merge without replacing the old file. The existing global
-`bypassPermissions` mode and disabled sandbox remain intentional opt-outs;
-use them only with trusted projects.
 
 CLI tools belong to Nix. When migrating an existing Brew installation, build
 and activate Nix first, verify command paths, then remove Brew duplicates
