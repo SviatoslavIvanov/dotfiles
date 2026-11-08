@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "exposure": "direct",
+      "description": "Current library and CLI documentation. Resolve the library ID, then query docs."
+    },
+    "linear": {
+      "url": "https://mcp.linear.app/mcp",
+      "exposure": "codemode",
+      "description": "Work issues and projects in Linear."
+    }
+  }
+}

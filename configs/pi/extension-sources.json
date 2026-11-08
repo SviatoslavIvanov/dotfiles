@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/mitsuhiko/agent-stuff",
+  "commit": "0865c849befd2021490679f96a8dee58c84ac857",
+  "files": [
+    "files.ts",
+    "notify.ts",
+    "no-sleep.ts"
+  ],
+  "localExtensions": {
+    "tasks.ts": "Unified local task browser; synchronous event-bus adapters in versioned manager patches; no model calls.",
+    "ui-polish.ts": "House style for all short menus: shared title/hint/focus helpers, Pi 1.5.0 native selectors restyled (❯ marker, grey rules, keyHint rows, sentence-case titles), non-exported screens patched on first show, compact interactive-shell messages; native handlers, row counts and child indices preserved; restored on shutdown."
+  },
+  "localChanges": {
+    "notify.ts": "Notify only on non-aborted agent_settled in TUI+TTY; capture text from agent_end, sanitize terminal sequences, preserve RPC JSON output.",
+    "files.ts": "Alt+O shortcut; house-style title/hints via ui-polish helpers and Pi's select-list theme; search focus propagated for IME."
+  }
+}

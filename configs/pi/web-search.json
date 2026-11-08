@@ -1,0 +1,16 @@
+{
+  "provider": "exa",
+  "exaApiKey": "!/usr/bin/security find-generic-password -s pi-exa-api-key -w",
+  "workflow": "none",
+  "fetchRouting": {
+    "providers": [
+      "http"
+    ],
+    "allowRemoteHostedProviders": false
+  },
+  "webSearch": {
+    "allowedProviders": [
+      "exa"
+    ]
+  }
+}

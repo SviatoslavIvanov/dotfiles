@@ -1,0 +1,24 @@
+{
+  "concurrency": {
+    "default": 4
+  },
+  "agent": {
+    "default": null,
+    "forceBackground": true,
+    "defaultThinking": "parent",
+    "systemPromptMode": "replace",
+    "includeContextFiles": true,
+    "widgetCompact": true,
+    "widgetShowModel": true,
+    "widgetShowThinking": false,
+    "widgetNavHint": true,
+    "showInput": false,
+    "showOutput": false,
+    "showTurns": false,
+    "showCost": false,
+    "showContext": false,
+    "showTime": true,
+    "statusBarFormat": "compact",
+    "exposeDescriptions": true
+  }
+}

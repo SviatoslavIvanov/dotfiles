@@ -1,0 +1,206 @@
+diff --git a/node_modules/pi-bg-tasks/extensions/bg-tasks/index.ts b/node_modules/pi-bg-tasks/extensions/bg-tasks/index.ts
+index 329238b..7ef13bc 100644
+--- a/node_modules/pi-bg-tasks/extensions/bg-tasks/index.ts
++++ b/node_modules/pi-bg-tasks/extensions/bg-tasks/index.ts
+@@ -16,7 +16,7 @@ import { BgRegistry, sweepStaleLogs } from "./registry.ts";
+ import { detectNonInteractive, terminateJobSilently } from "./lifecycle.ts";
+ import { registerBashTool } from "./tools-bash.ts";
+ import { registerTaskTools } from "./tools-tasks.ts";
+-import { registerUi } from "./ui.ts";
++import { installTaskWidget, registerUi } from "./ui.ts";
+ 
+ /** Extension entry point. */
+ export default function (pi: ExtensionAPI): void {
+@@ -53,7 +53,8 @@ export default function (pi: ExtensionAPI): void {
+     });
+ 
+     // ── Session start ─────────────────────────────────────────────
+-    pi.on("session_start", async () => {
++    pi.on("session_start", async (_event, ctx) => {
++        if (ctx.mode === "tui") installTaskWidget(reg, ctx);
+         reg.nonInteractive = detectNonInteractive(
+             process.argv,
+             Boolean(process.stdin.isTTY)
+diff --git a/node_modules/pi-bg-tasks/extensions/bg-tasks/types.ts b/node_modules/pi-bg-tasks/extensions/bg-tasks/types.ts
+index 81fc157..248ce78 100644
+--- a/node_modules/pi-bg-tasks/extensions/bg-tasks/types.ts
++++ b/node_modules/pi-bg-tasks/extensions/bg-tasks/types.ts
+@@ -5,6 +5,8 @@
+  * from here, and it imports nothing from its siblings.
+  */
+ 
++import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
++
+ // --- Configuration constants ---
+ export const DEFAULT_TIMEOUT_MS = 120_000;
+ export const QUICK_COMPLETION_MS = 2_000;
+@@ -97,11 +99,7 @@ export const DELIVER_STEER = { deliverAs: "steer", triggerTurn: true } as const;
+ export interface UiContext {
+     ui: {
+         notify(message: string, level?: "info" | "warning" | "error"): void;
+-        setWidget(
+-            name: string,
+-            content: string[] | undefined,
+-            options?: { placement?: "aboveEditor" | "belowEditor" }
+-        ): void;
++        setWidget: ExtensionContext["ui"]["setWidget"];
+         setStatus(name: string, content: unknown): void;
+         theme: { fg(colour: string, text: string): string };
+     };
+diff --git a/node_modules/pi-bg-tasks/extensions/bg-tasks/ui.ts b/node_modules/pi-bg-tasks/extensions/bg-tasks/ui.ts
+index db833f0..fa56aba 100644
+--- a/node_modules/pi-bg-tasks/extensions/bg-tasks/ui.ts
++++ b/node_modules/pi-bg-tasks/extensions/bg-tasks/ui.ts
+@@ -8,10 +8,11 @@
+  */
+ 
+ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+-import { truncateToWidth } from "@earendil-works/pi-tui";
++import { Text, stripTerminalSequences, truncateToWidth } from "@earendil-works/pi-tui";
+ import type { BgRegistry } from "./registry.ts";
+ import { isTerminalStatus, type BgJob, type UiContext } from "./types.ts";
+-import { readLastLine } from "./output.ts";
++import { readLastLine, readBoundedTail } from "./output.ts";
++import { terminateJob } from "./lifecycle.ts";
+ 
+ // --- Background hint widget ----------------------------------------------
+ 
+@@ -25,12 +26,12 @@ const HINT_KEY = "bg-hint";
+  */
+ let activeHints = 0;
+ 
+-/** Show the background hint below the editor (idempotent across parallel commands). */
++/** Show the background hint above the editor, so the prompt never moves (idempotent across parallel commands). */
+ export function showBackgroundHint(ctx: UiContext): void {
+     activeHints++;
+     if (activeHints === 1) {
+         ctx.ui.setWidget(HINT_KEY, ["(ctrl+shift+b to run in background)"], {
+-            placement: "belowEditor",
++            placement: "aboveEditor",
+         });
+     }
+ }
+@@ -47,6 +48,36 @@ export function clearBackgroundHint(ctx: UiContext): void {
+ // --- Status-bar pill ------------------------------------------------------
+ 
+ const STATUS_KEY = "bg-tasks";
++const redrawTasks = new WeakMap<BgRegistry, () => void>();
++const clean = (text: string) => stripTerminalSequences(text).replace(/\s+/g, " ").trim();
++
++/** One bounded activity list above the editor, matching interactive-shell; the prompt stays anchored. */
++export function installTaskWidget(reg: BgRegistry, ctx: UiContext): void {
++    ctx.ui.setWidget("bg-task-list", (tui, theme) => {
++        redrawTasks.set(reg, () => tui.requestRender());
++        const timer = setInterval(() => {
++            if ([...reg.jobs.values()].some((job) => job.status === "running" && job.isBackgrounded)) tui.requestRender();
++        }, 10_000);
++        timer.unref();
++        return {
++            render(width: number): string[] {
++                const jobs = [...reg.jobs.values()].filter((job) => job.status === "running" && job.isBackgrounded);
++                if (!jobs.length) return [];
++                const maxRows = Math.max(1, Math.min(3, Math.floor((tui.terminal?.rows ?? 24) * 0.15)));
++                const shown = jobs.slice(0, jobs.length > maxRows ? maxRows - 1 : maxRows);
++                const lines = shown.map((job) => {
++                    const label = clean(job.name || job.id);
++                    const line = ` ${theme.fg("accent", "●")} ${theme.fg("text", label)}  ${theme.fg("accent", "running")} ${theme.fg("dim", formatDuration(Date.now() - job.startTime))} · ${theme.fg("muted", clean(job.command))}`;
++                    return truncateToWidth(line, width, "…");
++                });
++                if (jobs.length > shown.length) lines.push(truncateToWidth(theme.fg("dim", ` … +${jobs.length - shown.length} bash tasks · /tasks`), width, "…"));
++                return lines;
++            },
++            invalidate() {},
++            dispose() { clearInterval(timer); redrawTasks.delete(reg); },
++        };
++    }, { placement: "aboveEditor" });
++}
+ 
+ /**
+  * Render the aggregate status-bar text: running / completed / failed counts
+@@ -72,6 +103,7 @@ export function renderStatusPill(reg: BgRegistry, ctx: UiContext): void {
+     if (done > 0) parts.push(ctx.ui.theme.fg("success", `✓ ${done}`));
+     if (failed > 0) parts.push(ctx.ui.theme.fg("error", `✗ ${failed}`));
+     ctx.ui.setStatus(STATUS_KEY, parts.join(ctx.ui.theme.fg("muted", " · ")));
++    redrawTasks.get(reg)?.();
+ }
+ 
+ // --- Foreground backgrounding ----------------------------------------------
+@@ -107,7 +139,7 @@ function formatDuration(ms: number): string {
+     const totalSecs = Math.floor(ms / 1000);
+     const mins = Math.floor(totalSecs / 60);
+     const secs = totalSecs % 60;
+-    return mins > 0 ? `${mins}m${secs}s` : `${secs}s`;
++    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`; // local: same "1m 4s" as other widgets
+ }
+ 
+ /** "bash-ab12cd34 [▶ 1m23s] cmd… (last line)" — one line per job. */
+@@ -148,6 +180,21 @@ export function formatJobList(reg: BgRegistry): string {
+ 
+ /** Register the /bg and /bg-tasks commands and the Ctrl+Shift+B shortcut. */
+ export function registerUi(pi: ExtensionAPI, reg: BgRegistry): void {
++    pi.events.on("sv:tasks:collect", (request: any) => {
++        const jobs = [...reg.jobs.values(), ...reg.recentTerminal];
++        const seen = new Set<string>();
++        for (const job of jobs) {
++            if (seen.has(job.id) || !job.isBackgrounded) continue;
++            seen.add(job.id);
++            request.tasks.push({
++                id: job.id, kind: "bash", label: job.name || job.command,
++                status: `${job.status}${job.exitCode !== undefined ? ` · exit ${job.exitCode}` : ""}`,
++                active: !isTerminalStatus(job.status),
++                read: () => `Task: ${job.id}\nCommand: ${job.command}\nLog: ${job.logPath}\n\n${readBoundedTail(job.logPath, 32768)}`,
++                stop: () => terminateJob(job, "Stopped by user in /tasks"),
++            });
++        }
++    });
+     // Ctrl+Shift+B — Ctrl+B itself is pi's built-in cursor-left binding and
+     // must not be claimed (registering it triggers pi's startup "extension
+     // shortcut conflict" diagnostic and breaks cursor-left in the editor).
+@@ -168,15 +215,18 @@ export function registerUi(pi: ExtensionAPI, reg: BgRegistry): void {
+     pi.registerCommand("bg-tasks", {
+         description: "List background tasks",
+         handler: async (_args, ctx) => {
+-            ctx.ui.notify(formatJobList(reg), "info");
++            const request: any = { ctx, kind: "bash" };
++            pi.events.emit("sv:tasks:open", request);
++            if (request.open) await request.open();
++            else ctx.ui.notify(formatJobList(reg), "info");
+         },
+     });
+ 
+     // <task-notification> messages render as one colored line: green for
+     // completed, red for failed, yellow for killed.
+-    pi.registerMessageRenderer("bg-task-notification", (message, _options, theme) => {
++    pi.registerMessageRenderer("bg-task-notification", (message, options, theme) => {
+         const details = message.details as
+-            | { status?: string; summary?: string }
++            | { status?: string; summary?: string; jobId?: string; outputFile?: string }
+             | undefined;
+         const colour =
+             details?.status === "completed"
+@@ -184,10 +234,22 @@ export function registerUi(pi: ExtensionAPI, reg: BgRegistry): void {
+                 : details?.status === "failed"
+                   ? "error"
+                   : "warning";
+-        const text = `● ${details?.summary ?? String(message.content)}`;
++        const summary = clean(details?.summary ?? "Background task");
++        const glyph = details?.status === "completed" ? "✓" : details?.status === "failed" ? "✗" : "■";
++        const raw = typeof message.content === "string" ? message.content : "";
++        const tail = /<tail_preview>([\s\S]*?)<\/tail_preview>/.exec(raw)?.[1]
++            ?.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+         return {
+-            render: (width: number) => [theme.fg(colour, truncateToWidth(text, width))],
+-            invalidate: () => {},
++            render(width: number): string[] {
++                const heading = `${theme.fg(colour, glyph)} ${summary}`;
++                if (!options.expanded) return [truncateToWidth(heading, width, "…")];
++                const lines = [heading];
++                if (details?.jobId) lines.push(theme.fg("dim", `Task: ${clean(details.jobId)}`));
++                if (details?.outputFile) lines.push(theme.fg("dim", `Log: ${clean(details.outputFile)}`));
++                if (tail) lines.push(theme.fg("muted", stripTerminalSequences(tail)));
++                return new Text(lines.join("\n"), 0, 0).render(width);
++            },
++            invalidate() {},
+         };
+     });
+ }

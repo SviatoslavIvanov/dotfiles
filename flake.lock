@@ -366,6 +366,23 @@
         "type": "github"
       }
     },
+    "pi-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793615901,
+        "narHash": "sha256-eH3RuypmXeayuZ9lEag6KW3m2LSM4bDc4ogyHxjZMNI=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "f9a26365568127461c47a07a37dcb42c140a3ac5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "ref": "v1.5.0",
+        "repo": "pi",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "catppuccin": "catppuccin",
@@ -374,6 +391,7 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
+        "pi-src": "pi-src",
         "stylix": "stylix"
       }
     },

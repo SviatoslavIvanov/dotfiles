@@ -17,6 +17,7 @@
     ./terminal.nix
     ./zed.nix
     ./claude-code.nix
+    ./pi.nix
     ./aerospace.nix
   ];
 

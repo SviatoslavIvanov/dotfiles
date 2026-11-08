@@ -1,0 +1,192 @@
+diff --git a/node_modules/pi-subagents-lite/src/agents/agent-manager.ts b/node_modules/pi-subagents-lite/src/agents/agent-manager.ts
+index 10ae6f9..6111b84 100644
+--- a/node_modules/pi-subagents-lite/src/agents/agent-manager.ts
++++ b/node_modules/pi-subagents-lite/src/agents/agent-manager.ts
+@@ -335,6 +335,14 @@ export class AgentManager {
+       }),
+       onSessionCreated: (session) => {
+         record.execution.session = session;
++        // Local footer integration; observer errors must not affect agent execution.
++        try {
++          pi.events.emit("sv:subagent-cost-session-v1", {
++            parentSessionId: ctx.sessionManager.getSessionId(), session,
++          });
++        } catch (error) {
++          console.error("[pi-subagents-lite] Cost observer unavailable:", error);
++        }
+         // Flush any steers that arrived before the session was ready
+         if (record.execution.pendingSteers?.length) {
+           for (const msg of record.execution.pendingSteers) {
+diff --git a/node_modules/pi-subagents-lite/src/registration.ts b/node_modules/pi-subagents-lite/src/registration.ts
+index e78fb5c..64df48d 100644
+--- a/node_modules/pi-subagents-lite/src/registration.ts
++++ b/node_modules/pi-subagents-lite/src/registration.ts
+@@ -13,7 +13,8 @@ import {
+   registerAgentInvalidation,
+ } from "./ui/renderer.ts";
+ import { showAgentsMainMenu } from "./ui/menu/menus.ts";
+-import { getStore } from "./shell.ts";
++import { getStore, getManager } from "./shell.ts";
++import { showConversationViewer } from "./ui/menu/menu-running-agents.ts";
+ import type { SubagentParentContext } from "./agents/subagent-context.ts";
+ 
+ // Provider-side json_schema enforcement; "prefer" falls back gracefully on
+@@ -205,6 +206,19 @@ export function registerCommunicationTools(pi: ExtensionAPI, parent?: SubagentPa
+ }
+ 
+ function registerCommandsAndMessages(pi: ExtensionAPI): void {
++  pi.events.on("sv:tasks:collect", (request: any) => {
++    for (const record of getManager()?.listAgents() ?? []) {
++      request.tasks.push({
++        id: record.id, kind: "agent",
++        label: record.display.description || record.display.type,
++        status: `${record.lifecycle.status} · ${record.execution.session?.model?.id ?? record.display.type}`,
++        active: record.lifecycle.status === "running" || record.lifecycle.status === "queued",
++        open: record.execution.session ? (ctx: ExtensionCommandContext) => showConversationViewer(ctx, record) : undefined,
++        read: () => record.result || record.error || "No result yet. Open conversation to watch the live agent.",
++        stop: () => { getManager()?.abort(record.id, "user"); },
++      });
++    }
++  });
+   pi.registerMessageRenderer<SubagentMessageDetails>("subagent-message", (message, _options, theme) => {
+     const store = getStore();
+     return renderSubagentMessage(message, theme, store.agent.modelDisplayStyle, store.agent.showCost);
+diff --git a/node_modules/pi-subagents-lite/src/ui/agent-widget.ts b/node_modules/pi-subagents-lite/src/ui/agent-widget.ts
+index 3f48aad..5297910 100644
+--- a/node_modules/pi-subagents-lite/src/ui/agent-widget.ts
++++ b/node_modules/pi-subagents-lite/src/ui/agent-widget.ts
+@@ -928,16 +928,21 @@ export class AgentWidget {
+     icon: string,
+     navReadout?: { position: number; size: number },
+   ): string {
+-    const iconText = `${theme.fg(color, icon)} ${theme.fg(color, "Agents")}`;
++    // Local: one-column inset like the bash/monitor activity rows; keyHint-style hints.
++    const iconText = ` ${theme.fg(color, icon)} ${theme.fg(color, "Agents")}`;
++    const hint = (s: string) => s.split(" · ").map((part) => {
++      const i = part.indexOf(" ");
++      return theme.fg("dim", part.slice(0, i)) + theme.fg("muted", part.slice(i));
++    }).join(theme.fg("dim", " · "));
+     if (this.navActive) {
+       const readout = navReadout
+         ? `${iconText} ${theme.fg("dim", `${navReadout.position}/${navReadout.size}`)}`
+         : iconText;
+       if (!this.navHint) return readout;
+-      return `${readout}  ${theme.fg("dim", "↑↓ navigate · enter view · esc back")}`;
++      return `${readout}  ${hint("enter view · esc back")}`;
+     }
+     if (!this.navHint) return iconText;
+-    return `${iconText}  ${theme.fg("dim", "↓ to navigate")}`;
++    return `${iconText}  ${hint("↓ select")}`;
+   }
+ 
+   private buildQueuedIndividualBlocks(queued: AgentRecord[], theme: Theme, w: number): RenderBlock[] {
+@@ -955,7 +960,7 @@ export class AgentWidget {
+   private renderBlock(block: RenderBlock, isHighlighted: boolean): string[] {
+     let header = block.header;
+     if (isHighlighted && header.startsWith("  ")) {
+-      header = "→ " + header.slice(2);
++      header = (this.theme ? this.theme.fg("accent", "❯ ") : "❯ ") + header.slice(2);
+     }
+     return [header, ...block.metadataLines];
+   }
+diff --git a/node_modules/pi-subagents-lite/src/ui/menu/menu-running-agents.ts b/node_modules/pi-subagents-lite/src/ui/menu/menu-running-agents.ts
+index 6e447b1..a4ecf19 100644
+--- a/node_modules/pi-subagents-lite/src/ui/menu/menu-running-agents.ts
++++ b/node_modules/pi-subagents-lite/src/ui/menu/menu-running-agents.ts
+@@ -37,7 +37,7 @@ function isActive(record: AgentRecord): boolean {
+   return record.lifecycle.status === "running" || record.lifecycle.status === "queued";
+ }
+ 
+-async function showConversationViewer(ctx: ExtensionCommandContext, record: AgentRecord): Promise<void> {
++export async function showConversationViewer(ctx: ExtensionCommandContext, record: AgentRecord): Promise<void> {
+   if (!record.execution?.session) return;
+   const manager = getManager();
+ 
+diff --git a/node_modules/pi-subagents-lite/src/ui/menu/wrappers/settings-list.ts b/node_modules/pi-subagents-lite/src/ui/menu/wrappers/settings-list.ts
+index b874465..f021f73 100644
+--- a/node_modules/pi-subagents-lite/src/ui/menu/wrappers/settings-list.ts
++++ b/node_modules/pi-subagents-lite/src/ui/menu/wrappers/settings-list.ts
+@@ -13,7 +13,8 @@
+  * to `closeMenu` for SelectList (SettingsList gets its own at construction).
+  */
+ 
+-import { type Component, isFocusable } from "@earendil-works/pi-tui";
++import { type Component, isFocusable, truncateToWidth } from "@earendil-works/pi-tui";
++import { keyHint } from "@earendil-works/pi-coding-agent";
+ import { installSeparatorSkip } from "../helpers.ts";
+ 
+ export interface SettingsListWrapperTheme {
+@@ -147,18 +148,15 @@ export class SettingsListWrapper implements Component {
+     const lines: string[] = [];
+ 
+     // Top separator
+-    lines.push(this.separatorChar.repeat(width));
+-    lines.push("");
+-
+-    const styledTitle = this.theme.bold(this.theme.fg("accent", this.title));
+-    lines.push("  " + styledTitle);
+-    lines.push("");
++    lines.push(this.theme.fg("border", this.separatorChar.repeat(width)));
++    lines.push(truncateToWidth(" " + this.theme.fg("accent", this.theme.bold(this.title)), width));
+ 
+     // SettingsList content — strip the hint line that pi-tui always appends
+     // (empty line + "Enter/Space to change · Esc to cancel"). Descriptions
+     // already explain what each item does, so the hint is redundant.
+     const settingsLines = this.settingsList.render(width);
+-    const hintPattern = /Enter\/Space|Esc to cancel/;
++    // Local: also matches the row after ui-polish rewrites it to keyHint style ("enter/space change").
++    const hintPattern = /Enter\/Space|Esc to cancel|\/space/;
+     if (settingsLines.length >= 2 && hintPattern.test(settingsLines[settingsLines.length - 1] ?? "")) {
+       lines.push(...settingsLines.slice(0, -2));
+     } else {
+@@ -166,8 +164,8 @@ export class SettingsListWrapper implements Component {
+     }
+ 
+     // Bottom separator
+-    lines.push("");
+-    lines.push(this.separatorChar.repeat(width));
++    lines.push(truncateToWidth(" " + [keyHint("tui.select.confirm", "select"), keyHint("tui.select.cancel", "back")].join(this.theme.fg("dim", " · ")), width));
++    lines.push(this.theme.fg("border", this.separatorChar.repeat(width)));
+ 
+     return lines;
+   }
+diff --git a/node_modules/pi-subagents-lite/src/ui/searchable-select.ts b/node_modules/pi-subagents-lite/src/ui/searchable-select.ts
+index 9ee13e5..1025eec 100644
+--- a/node_modules/pi-subagents-lite/src/ui/searchable-select.ts
++++ b/node_modules/pi-subagents-lite/src/ui/searchable-select.ts
+@@ -191,7 +191,7 @@ export class SearchableSelectDialog extends Container implements Focusable {
+       const isCurrent = item.value === this.currentValue;
+ 
+       const labelText = isSelected
+-        ? this.theme.fg("accent", "→ ") + this.theme.fg("accent", item.label)
++        ? this.theme.fg("accent", "❯ ") + this.theme.fg("accent", item.label)
+         : `  ${item.label}`;
+       const providerBadge = item.provider ? this.theme.fg("muted", `[${item.provider}]`) : "";
+       const checkmark = isCurrent ? this.theme.fg("success", " ✓") : "";
+diff --git a/node_modules/pi-subagents-lite/src/utils.ts b/node_modules/pi-subagents-lite/src/utils.ts
+index 3deb425..49c67f5 100644
+--- a/node_modules/pi-subagents-lite/src/utils.ts
++++ b/node_modules/pi-subagents-lite/src/utils.ts
+@@ -71,16 +71,18 @@ export function parseModelKey(value: unknown): { provider: string; modelId: stri
+   return { provider: value.slice(0, slashIdx), modelId: value.slice(slashIdx + 1) };
+ }
+ 
+-/** Find a model by "provider/model-id"; fallback if unparseable or not in registry. */
++/** Inherit only when omitted; an explicit model must resolve exactly or fail closed. */
+ export function findModelInRegistry(
+   value: unknown,
+   registry: { find(provider: string, modelId: string): Model<any> | undefined },
+   fallback: Model<any> | undefined,
+ ): Model<any> | undefined {
+-  if (!value) return fallback;
++  if (value === undefined || value === null) return fallback;
+   const parsed = parseModelKey(value);
+-  if (!parsed) return fallback;
+-  return registry.find(parsed.provider, parsed.modelId) ?? fallback;
++  if (!parsed || !parsed.modelId) throw new Error(`Invalid subagent model: ${String(value)}`);
++  const model = registry.find(parsed.provider, parsed.modelId);
++  if (!model) throw new Error(`Subagent model not found: ${value}. Refusing to use the parent model.`);
++  return model;
+ }
+ /** Timeout for git commands (ms). Shared by agent-runner and worktree-validator. */
+ export const GIT_EXEC_TIMEOUT_MS = 5000;

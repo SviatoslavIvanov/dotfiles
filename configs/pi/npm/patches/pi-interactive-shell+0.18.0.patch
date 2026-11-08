@@ -1,0 +1,282 @@
+diff --git a/node_modules/pi-interactive-shell/background-widget.ts b/node_modules/pi-interactive-shell/background-widget.ts
+index b700b36..6743fd6 100644
+--- a/node_modules/pi-interactive-shell/background-widget.ts
++++ b/node_modules/pi-interactive-shell/background-widget.ts
+@@ -86,7 +86,7 @@ export function setupBackgroundWidget(
+ 				invalidate: () => {},
+ 			};
+ 		},
+-		{ placement: "belowEditor" },
++		{ placement: "aboveEditor" },
+ 	);
+ 
+ 	manageDurationTimer();
+diff --git a/node_modules/pi-interactive-shell/index.ts b/node_modules/pi-interactive-shell/index.ts
+index 41b65e6..e141249 100644
+--- a/node_modules/pi-interactive-shell/index.ts
++++ b/node_modules/pi-interactive-shell/index.ts
+@@ -1,5 +1,5 @@
+ import { existsSync } from "node:fs";
+-import type { ExtensionAPI, ExtensionContext, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
++import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
+ import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
+ import { InteractiveShellOverlay } from "./overlay-component.ts";
+ import { ReattachOverlay } from "./reattach-overlay.ts";
+@@ -1115,7 +1115,7 @@ export default function interactiveShellExtension(pi: ExtensionAPI) {
+ 			if (!resolvedSpawn.ok) return { content: [{ type: "text", text: resolvedSpawn.error }], isError: true };
+ 			effectiveCommand = resolvedSpawn.spawn.command;
+ 			effectiveCwd = resolvedSpawn.spawn.cwd;
+-			effectiveReason = effectiveReason ? `${effectiveReason} • ${resolvedSpawn.spawn.reason}` : resolvedSpawn.spawn.reason;
++			effectiveReason = effectiveReason ? `${effectiveReason} · ${resolvedSpawn.spawn.reason}` : resolvedSpawn.spawn.reason;
+ 			spawnWorktreePath = resolvedSpawn.spawn.worktreePath;
+ 			spawnAgent = resolvedSpawn.spawn.agent;
+ 			spawnMode = resolvedSpawn.spawn.mode;
+@@ -2349,9 +2349,9 @@ export default function interactiveShellExtension(pi: ExtensionAPI) {
+ 		},
+ 	});
+ 
+-	pi.registerCommand("attach", {
++	const attachCommand = {
+ 		description: "Reattach to a background shell session",
+-		handler: async (args, ctx) => {
++		handler: async (args: string, ctx: ExtensionCommandContext) => {
+ 			if (coordinator.isOverlayOpen()) {
+ 				ctx.ui.notify("An overlay is already open. Close it first.", "error");
+ 				return;
+@@ -2458,6 +2458,39 @@ export default function interactiveShellExtension(pi: ExtensionAPI) {
+ 				coordinator.endOverlay();
+ 			}
+ 		},
++	};
++	pi.registerCommand("attach", attachCommand);
++
++	pi.events.on("sv:tasks:collect", (request: any) => {
++		const background = new Map(sessionManager.list().map(s => [s.id, s]));
++		const active = new Map(sessionManager.listActive().map(s => [s.id, s]));
++		const monitors = new Map(coordinator.listMonitorSessions().map(s => [s.sessionId, s]));
++		for (const id of new Set([...background.keys(), ...active.keys(), ...monitors.keys()])) {
++			const bg = background.get(id), live = active.get(id), monitor = monitors.get(id);
++			const result = live?.getResult();
++			const exited = bg?.session.exited ?? (result !== undefined);
++			const running = monitor ? monitor.status !== "stopped" : !exited;
++			const exitCode = bg?.session.exitCode ?? result?.exitCode ?? monitor?.exitCode;
++			request.tasks.push({
++				id, kind: monitor ? "monitor" : "shell", label: bg?.reason || live?.reason || bg?.command || live?.command || id,
++				status: `${monitor ? `${monitor.status} · ${monitor.strategy} · ${monitor.eventCount} events` : live?.getStatus() || (exited ? "exited" : "running")}${exitCode != null ? ` · exit ${exitCode}` : ""}`,
++				active: running && !!(live || bg),
++				open: bg ? (ctx: any) => attachCommand.handler(id, ctx) : undefined,
++				read: () => {
++					const state = coordinator.getMonitorSessionState(id);
++					const events = state ? coordinator.getMonitorEvents(id, { limit: 50 }).events : [];
++					const output = live?.getOutput({ skipRateLimit: true, lines: 200, maxChars: 32768 }).output
++						?? bg?.session.getLogSlice({ limit: 200 }).slice ?? "";
++					return [`Session: ${id}`, bg?.command || live?.command || "",
++						state ? JSON.stringify(state, null, 2) : "",
++						...events.map(e => `#${e.eventId} [${e.triggerId}] ${e.timestamp} :: ${e.matchedText}`), "", output].join("\n");
++				},
++				stop: () => {
++					if (live) live.kill();
++					else { coordinator.markMonitorStopping(id, "stopped"); bg?.session.kill(); }
++				},
++			});
++		}
+ 	});
+ 
+ 	pi.registerCommand("dismiss", {
+diff --git a/node_modules/pi-interactive-shell/overlay-component.ts b/node_modules/pi-interactive-shell/overlay-component.ts
+index ae228b6..f6e0708 100644
+--- a/node_modules/pi-interactive-shell/overlay-component.ts
++++ b/node_modules/pi-interactive-shell/overlay-component.ts
+@@ -959,13 +959,16 @@ export class InteractiveShellOverlay implements Component, Focusable {
+ 	render(width: number): string[] {
+ 		width = Math.max(4, width);
+ 		const th = this.theme;
+-		const borderColor = this.focused ? "borderAccent" : "borderMuted";
++		// Local: grey frames like Pi menus and the reattach overlay; focus = brighter border.
++		const borderColor = this.focused ? "border" : "borderMuted";
+ 		const borderGlyphs = this.focused
+ 			? { topLeft: "╔", topRight: "╗", bottomLeft: "╚", bottomRight: "╝", horizontal: "═", vertical: "║", separatorLeft: "╠", separatorRight: "╣" }
+ 			: { topLeft: "╭", topRight: "╮", bottomLeft: "╰", bottomRight: "╯", horizontal: "─", vertical: "│", separatorLeft: "├", separatorRight: "┤" };
+ 		const border = (s: string) => th.fg(borderColor, s);
+ 		const accent = (s: string) => th.fg("accent", s);
+ 		const dim = (s: string) => th.fg("dim", s);
++		// Local: keyHint style used by Pi menus — dim key, muted action, dim " · " separators.
++		const hints = (s: string) => s.split(" · ").map((part) => { const i = part.indexOf(" "); return i < 0 ? dim(part) : dim(part.slice(0, i)) + th.fg("muted", part.slice(i)); }).join(dim(" · "));
+ 		const warning = (s: string) => th.fg("warning", s);
+ 
+ 		const innerWidth = width - 4;
+@@ -1006,14 +1009,14 @@ export class InteractiveShellOverlay implements Component, Focusable {
+ 		const sanitizedReason = this.options.reason?.replace(/\s+/g, " ").trim();
+ 		if (this.state === "hands-free") {
+ 			const elapsed = formatDuration(Date.now() - this.startTime);
+-			hint = `🤖 Hands-free (${elapsed}) • Type anything to take over`;
++			hint = `🤖 Hands-free (${elapsed}) · type anything to take over`;
+ 		} else if (this.userTookOver) {
+ 			hint = sanitizedReason
+-				? `You took over • Ctrl+G return to agent • ${sanitizedReason}`
+-				: "You took over • Ctrl+G return to agent";
++				? `You took over · ctrl+g return to agent · ${sanitizedReason}`
++				: "You took over · ctrl+g return to agent";
+ 		} else {
+ 			hint = sanitizedReason
+-				? `Ctrl+B background • ${sanitizedReason}`
++				? `ctrl+b background · ${sanitizedReason}`
+ 				: "Ctrl+B background";
+ 		}
+ 		lines.push(row(dim(truncateToWidth(hint, innerWidth, "..."))));
+@@ -1060,31 +1063,31 @@ export class InteractiveShellOverlay implements Component, Focusable {
+ 		const focusHint = `${formatShortcut(this.config.focusShortcut)} ${this.focused ? "unfocus" : "focus shell"}`;
+ 
+ 		if (this.state === "detach-dialog") {
+-			footerLines.push(row(accent("Session actions:")));
++			footerLines.push(row(accent(th.bold("Session actions"))));
+ 			for (const opt of dialogOptions) {
+ 				const sel = this.dialogSelection === opt.key;
+-				footerLines.push(row((sel ? accent("▶ ") : "  ") + (sel ? accent(opt.label) : opt.label)));
++				footerLines.push(row((sel ? accent("❯ ") : "  ") + (sel ? accent(opt.label) : opt.label)));
+ 			}
+-			footerLines.push(row(dim("↑↓ select • Enter confirm • Esc cancel")));
++			footerLines.push(row(hints("enter confirm · esc cancel")));
+ 		} else if (this.state === "exited") {
+ 			const exitMsg =
+ 				this.session.exitCode === 0
+ 					? th.fg("success", "✓ Exited successfully")
+ 					: warning(`✗ Exited with code ${this.session.exitCode}`);
+ 			footerLines.push(row(exitMsg));
+-			footerLines.push(row(dim(`Closing in ${this.exitCountdown}s... (any key to close) • ${focusHint}`)));
++			footerLines.push(row(hints(`Closing in ${this.exitCountdown}s... (any key to close) · ${focusHint}`)));
+ 		} else if (this.state === "hands-free") {
+ 			if (this.focused) {
+-				footerLines.push(row(dim(`🤖 Agent controlling • Type to take over • Ctrl+T transfer • Ctrl+B background • ${focusHint}`)));
++				footerLines.push(row(hints(`🤖 Agent controlling · Type to take over · ctrl+t transfer · ctrl+b background · ${focusHint}`)));
+ 			} else {
+-				footerLines.push(row(dim(`🤖 Agent controlling • ${focusHint}`)));
++				footerLines.push(row(hints(`🤖 Agent controlling · ${focusHint}`)));
+ 			}
+ 		} else if (!this.focused) {
+ 			footerLines.push(row(dim(focusHint)));
+ 		} else if (this.userTookOver) {
+-			footerLines.push(row(dim(`Ctrl+G agent • Ctrl+T transfer • Ctrl+B background • Ctrl+Q menu • ${focusHint}`)));
++			footerLines.push(row(hints(`ctrl+g agent · ctrl+t transfer · ctrl+b background · ctrl+q menu · ${focusHint}`)));
+ 		} else {
+-			footerLines.push(row(dim(`Ctrl+T transfer • Ctrl+B background • Ctrl+Q menu • Shift+Up/Down scroll • ${focusHint}`)));
++			footerLines.push(row(hints(`ctrl+t transfer · ctrl+b background · ctrl+q menu · shift+↑↓ scroll · ${focusHint}`)));
+ 		}
+ 
+ 		while (footerLines.length < footerHeight) {
+diff --git a/node_modules/pi-interactive-shell/reattach-overlay.ts b/node_modules/pi-interactive-shell/reattach-overlay.ts
+index 683b422..5fc3d39 100644
+--- a/node_modules/pi-interactive-shell/reattach-overlay.ts
++++ b/node_modules/pi-interactive-shell/reattach-overlay.ts
+@@ -315,6 +315,8 @@ export class ReattachOverlay implements Component, Focusable {
+ 		const border = (s: string) => th.fg(borderColor, s);
+ 		const accent = (s: string) => th.fg("accent", s);
+ 		const dim = (s: string) => th.fg("dim", s);
++		// Local: keyHint style used by Pi menus — dim key, muted action, dim " · " separators.
++		const hints = (s: string) => s.split(" · ").map((part) => { const i = part.indexOf(" "); return i < 0 ? dim(part) : dim(part.slice(0, i)) + th.fg("muted", part.slice(i)); }).join(dim(" · "));
+ 		const warning = (s: string) => th.fg("warning", s);
+ 
+ 		const innerWidth = width - 4;
+@@ -348,8 +350,8 @@ export class ReattachOverlay implements Component, Focusable {
+ 		// Sanitize reason: collapse newlines and whitespace to single spaces for display
+ 		const sanitizedReason = this.bgSession.reason?.replace(/\s+/g, " ").trim();
+ 		const hint = sanitizedReason
+-			? `Reattached • ${sanitizedReason} • Ctrl+B background`
+-			: "Reattached • Ctrl+B background";
++			? `Reattached · ${sanitizedReason} · ctrl+b background`
++			: "Reattached · ctrl+b background";
+ 		lines.push(row(dim(truncateToWidth(hint, innerWidth, "..."))));
+ 		lines.push(border("├" + "─".repeat(width - 2) + "┤"));
+ 
+@@ -393,7 +395,7 @@ export class ReattachOverlay implements Component, Focusable {
+ 		const focusHint = `${formatShortcut(this.config.focusShortcut)} ${this.focused ? "unfocus" : "focus shell"}`;
+ 
+ 		if (this.state === "detach-dialog") {
+-			footerLines.push(row(accent("Session actions:")));
++			footerLines.push(row(accent(th.bold("Session actions"))));
+ 			const opts: Array<{ key: DialogChoice; label: string }> = [
+ 				{ key: "transfer", label: "Transfer output to agent" },
+ 				{ key: "background", label: "Run in background" },
+@@ -402,18 +404,18 @@ export class ReattachOverlay implements Component, Focusable {
+ 			];
+ 			for (const opt of opts) {
+ 				const sel = this.dialogSelection === opt.key;
+-				footerLines.push(row((sel ? accent("▶ ") : "  ") + (sel ? accent(opt.label) : opt.label)));
++				footerLines.push(row((sel ? accent("❯ ") : "  ") + (sel ? accent(opt.label) : opt.label)));
+ 			}
+-			footerLines.push(row(dim("↑↓ select • Enter confirm • Esc cancel")));
++			footerLines.push(row(hints("enter confirm · esc cancel")));
+ 		} else if (this.state === "exited") {
+ 			const exitMsg =
+ 				this.session.exitCode === 0
+ 					? th.fg("success", "✓ Exited successfully")
+ 					: warning(`✗ Exited with code ${this.session.exitCode}`);
+ 			footerLines.push(row(exitMsg));
+-			footerLines.push(row(dim(`Closing in ${this.exitCountdown}s... (any key to close) • ${focusHint}`)));
++			footerLines.push(row(hints(`Closing in ${this.exitCountdown}s... (any key to close) · ${focusHint}`)));
+ 		} else if (this.focused) {
+-			footerLines.push(row(dim(`Ctrl+T transfer • Ctrl+B background • Ctrl+Q menu • Shift+Up/Down scroll • ${focusHint}`)));
++			footerLines.push(row(hints(`ctrl+t transfer · ctrl+b background · ctrl+q menu · shift+↑↓ scroll · ${focusHint}`)));
+ 		} else {
+ 			footerLines.push(row(dim(focusHint)));
+ 		}
+diff --git a/node_modules/pi-interactive-shell/runtime-coordinator.ts b/node_modules/pi-interactive-shell/runtime-coordinator.ts
+index d9ffbc6..30466b7 100644
+--- a/node_modules/pi-interactive-shell/runtime-coordinator.ts
++++ b/node_modules/pi-interactive-shell/runtime-coordinator.ts
+@@ -220,6 +220,10 @@ export class InteractiveShellCoordinator {
+ 		return finalized;
+ 	}
+ 
++	listMonitorSessions(): MonitorSessionState[] {
++		return Array.from(this.monitorSessionState.values());
++	}
++
+ 	getMonitorSessionState(sessionId: string): MonitorSessionState | undefined {
+ 		return this.monitorSessionState.get(sessionId);
+ 	}
+diff --git a/node_modules/pi-interactive-shell/session-manager.ts b/node_modules/pi-interactive-shell/session-manager.ts
+index de2755e..dd16d32 100644
+--- a/node_modules/pi-interactive-shell/session-manager.ts
++++ b/node_modules/pi-interactive-shell/session-manager.ts
+@@ -441,6 +441,10 @@ export class ShellSessionManager {
+ 		}
+ 	}
+ 
++	listActive(): ActiveSession[] {
++		return Array.from(this.activeSessions.values());
++	}
++
+ 	list(): BackgroundSession[] {
+ 		return Array.from(this.sessions.values());
+ 	}
+diff --git a/node_modules/pi-interactive-shell/spawn.ts b/node_modules/pi-interactive-shell/spawn.ts
+index 89a72de..b6171a3 100644
+--- a/node_modules/pi-interactive-shell/spawn.ts
++++ b/node_modules/pi-interactive-shell/spawn.ts
+@@ -205,7 +205,7 @@ export function resolveSpawn(
+ 		args.push(prompt);
+ 	}
+ 	if (worktreePath) {
+-		reason += ` • worktree: ${worktreePath}`;
++		reason += ` · worktree: ${worktreePath}`;
+ 	}
+ 
+ 	const resolved: ResolvedSpawn = {
+diff --git a/node_modules/pi-interactive-shell/types.ts b/node_modules/pi-interactive-shell/types.ts
+index f436b93..d0815c0 100644
+--- a/node_modules/pi-interactive-shell/types.ts
++++ b/node_modules/pi-interactive-shell/types.ts
+@@ -293,10 +293,8 @@ export function formatDuration(ms: number): string {
+ 
+ /** Format a key shortcut string for display (capitalize modifier names) */
+ export function formatShortcut(shortcut: string): string {
+-	return shortcut
+-		.replace(/ctrl/gi, "Ctrl")
+-		.replace(/shift/gi, "Shift")
+-		.replace(/alt/gi, "Alt");
++	// Local: Pi's lowercase key names, like keyHint rows elsewhere.
++	return shortcut.toLowerCase();
+ }
+ 
+ /** Format milliseconds with ms precision for shorter durations */

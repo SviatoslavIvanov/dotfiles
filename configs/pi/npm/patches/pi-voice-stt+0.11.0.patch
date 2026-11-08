@@ -1,0 +1,35 @@
+diff --git a/node_modules/pi-voice-stt/src/index.ts b/node_modules/pi-voice-stt/src/index.ts
+index ddec32e..5b0d004 100644
+--- a/node_modules/pi-voice-stt/src/index.ts
++++ b/node_modules/pi-voice-stt/src/index.ts
+@@ -55,6 +55,12 @@ const notify = (
+   ctx.ui.notify(message, toastType(toast.variant));
+ };
+ 
++// The input-border indicator owns routine dictation feedback in the TUI.
++const notifyDictation = (ctx: ExtensionContext | undefined, toast: DictationToast): void => {
++  if (ctx?.mode === "tui" && toast.variant !== "warning" && toast.variant !== "error") return;
++  notify(ctx, toast);
++};
++
+ const reportError = (
+   ctx: ExtensionContext | undefined,
+   error: unknown,
+@@ -151,7 +157,7 @@ export default function piVoiceSttExtension(pi: ExtensionAPI) {
+       if (ctx.isIdle()) pi.sendUserMessage(prompt);
+       else pi.sendUserMessage(prompt, { deliverAs: "followUp" });
+     },
+-    notify,
++    notify: notifyDictation,
+     onModeChange: (mode) => inputIndicator.setMode(mode),
+     onError: reportError,
+   });
+@@ -173,7 +179,7 @@ export default function piVoiceSttExtension(pi: ExtensionAPI) {
+         ctx.ui.setEditorText(`${ctx.ui.getEditorText()}${text}`);
+       else ctx.ui.pasteToEditor(text);
+     },
+-    notify,
++    notify: notifyDictation,
+     onModeChange: (mode) =>
+       inputIndicator.setMode(mode === "idle" ? controller.getMode() : mode),
+     onLive: (text) => inputIndicator.setLive(text),

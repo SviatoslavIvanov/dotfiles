@@ -1,0 +1,31 @@
+{
+  "keybind": "ctrl+r",
+  "mode": "raw",
+  "capture": {
+    "type": "ffmpeg",
+    "ffmpegPath": "ffmpeg",
+    "inputFormat": "avfoundation",
+    "input": ":Микрофон MacBook Pro",
+    "sampleRate": 16000,
+    "channels": 1,
+    "maxSeconds": 300,
+    "minBytes": 4096
+  },
+  "provider": {
+    "type": "openai",
+    "model": "gpt-transcribe",
+    "apiKey": "!jq -er '.[\"openai-api\"] | select(.type == \"api_key\") | .key | select(type == \"string\" and length > 0)' \"$HOME/.pi/agent/auth.json\"",
+    "language": "auto"
+  },
+  "cleanup": {
+    "enabled": false
+  },
+  "output": {
+    "appendTrailingSpace": true,
+    "submitOnStop": false
+  },
+  "realtime": {
+    "keybind": "ctrl+alt+shift+r",
+    "enabled": false
+  }
+}

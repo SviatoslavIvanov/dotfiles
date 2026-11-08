@@ -1,0 +1,181 @@
+diff --git a/node_modules/pi-minimal-footer/extensions/index.ts b/node_modules/pi-minimal-footer/extensions/index.ts
+index 8217304..9c0f1cd 100644
+--- a/node_modules/pi-minimal-footer/extensions/index.ts
++++ b/node_modules/pi-minimal-footer/extensions/index.ts
+@@ -19,6 +19,7 @@ import { readConfig, writeEnabled, type FooterSettings } from "./lib/footer-sett
+ import { buildLine, type LineParts } from "./lib/footer-layout.js";
+ import { GitStatus } from "./lib/git-status.js";
+ import { sessionCost } from "./lib/session-cost.js";
++import { trackSubagentCosts } from "./lib/subagent-costs.js";
+ import { CompactEditorController } from "./lib/compact-editor.js";
+ 
+ // ── Formatting helpers ────────────────────────────────────────────────
+@@ -126,6 +127,7 @@ export default function (pi: ExtensionAPI) {
+   let disposeFooter: (() => void) | null = null;
+   const usageLimits = new UsageLimits(() => requestRender?.());
+   const compactEditor = new CompactEditorController();
++  const stopCostTracking = trackSubagentCosts(pi, () => currentCtx, () => { if (currentCtx) refresh(currentCtx); });
+   // Footer replacement must retain the editor to avoid resetting draft editing state.
+   let reinstallingFooter = false;
+ 
+@@ -185,7 +187,7 @@ export default function (pi: ExtensionAPI) {
+ 
+         const renderLine = (width: number, borderColor?: LineParts["borderColor"]): string => {
+           const statuses = config.showSkills
+-            ? [...footerData.getExtensionStatuses().values()].map((s) => s.replace(/[\r\n\t]/g, " ")).filter((s) => s.trim())
++            ? [...footerData.getExtensionStatuses()].filter(([key]) => key !== "subagents" && key !== "bg-tasks").map(([, s]) => s.replace(/[\r\n\t]/g, " ")).filter((s) => s.trim())
+             : [];
+           const branch = config.showGitBranch ? footerData.getGitBranch() : null;
+           const branchText = branch ? ` ${branch}${git.sync}` : "";
+@@ -289,6 +291,7 @@ export default function (pi: ExtensionAPI) {
+   });
+ 
+   pi.on("session_start", async (_event, ctx) => {
++    stopCostTracking();
+     compactEnabledOverride = undefined;
+     usageEnabledOverride = undefined;
+     costEnabledOverride = undefined;
+@@ -338,6 +341,7 @@ export default function (pi: ExtensionAPI) {
+   });
+ 
+   pi.on("session_shutdown", async () => {
++    stopCostTracking();
+     compactEnabledOverride = undefined;
+     usageEnabledOverride = undefined;
+     costEnabledOverride = undefined;
+diff --git a/node_modules/pi-minimal-footer/extensions/lib/session-cost.ts b/node_modules/pi-minimal-footer/extensions/lib/session-cost.ts
+index b5c7757..1afd4c0 100644
+--- a/node_modules/pi-minimal-footer/extensions/lib/session-cost.ts
++++ b/node_modules/pi-minimal-footer/extensions/lib/session-cost.ts
+@@ -1,23 +1,51 @@
++import type { Model } from "@earendil-works/pi-ai";
+ import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+ 
+-/** Match Pi's session total, but only expose it for a priced, non-subscription model. */
+-export function sessionCost(ctx: ExtensionContext): string | null {
+-  const model = ctx.model;
+-  if (!model || model.provider === "kimi-coding" || model.provider === "opencode-go") return null;
++export function isApiBilled(ctx: ExtensionContext, model: Model<any> | undefined): boolean {
++  if (!model || model.provider === "kimi-coding" || model.provider === "opencode-go") return false;
+   const registry = ctx.modelRegistry;
+   if (registry?.isUsingOAuth?.(model) &&
+-      registry.getProvider?.(model.provider)?.auth.oauth?.isSubscription !== false) return null;
++      registry.getProvider?.(model.provider)?.auth.oauth?.isSubscription !== false) return false;
+   const rates = model.cost;
+-  if (!rates || ![rates, ...(rates.tiers ?? [])].some((rate) =>
+-    [rate.input, rate.output, rate.cacheRead, rate.cacheWrite].some((price) => Number.isFinite(price) && price > 0))) return null;
++  return !!rates && [rates, ...(rates.tiers ?? [])].some((rate) =>
++    [rate.input, rate.output, rate.cacheRead, rate.cacheWrite].some((price) => Number.isFinite(price) && price > 0));
++}
+ 
++/** Price each recorded provider/model, never the whole history as the current model. */
++export function sessionCost(ctx: ExtensionContext): string | null {
++  const parentApi = isApiBilled(ctx, ctx.model);
++  const models = new Map<string, Model<any> | undefined>();
++  const children = new Map<string, { cost: number; apiCost?: number }>();
+   let total = 0;
+   for (const entry of ctx.sessionManager.getEntries()) {
++    let model = entry.parentId ? models.get(entry.parentId) : undefined;
++    if (entry.type === "model_change") {
++      model = ctx.modelRegistry.find(entry.provider, entry.modelId);
++    } else if (entry.type === "usage") {
++      model = ctx.modelRegistry.find(entry.provider, entry.model);
++    } else if (entry.type === "message" && entry.message.role === "assistant") {
++      model = ctx.modelRegistry.find(entry.message.provider, entry.message.model);
++    }
++    models.set(entry.id, model);
++    if (entry.type === "custom" && entry.customType === "sv-subagent-cost-v1") {
++      const data = entry.data as { sessionId?: string; cost?: number; apiCost?: number } | undefined;
++      if (typeof data?.sessionId === "string" && typeof data.cost === "number" && Number.isFinite(data.cost) && data.cost >= 0) {
++        const previous = children.get(data.sessionId);
++        const snapshot = { cost: Math.max(previous?.cost ?? 0, data.cost), apiCost: previous?.apiCost };
++        if (typeof data.apiCost === "number" && Number.isFinite(data.apiCost) && data.apiCost >= 0) {
++          snapshot.apiCost = Math.max(snapshot.apiCost ?? 0, Math.min(data.apiCost, data.cost));
++        }
++        children.set(data.sessionId, snapshot);
++      }
++    }
+     const usage = entry.type === "message"
+       ? (entry.message.role === "assistant" || entry.message.role === "toolResult" ? entry.message.usage : undefined)
+       : (entry.type === "usage" || entry.type === "compaction" || entry.type === "branch_summary" ? entry.usage : undefined);
+     const cost = usage?.cost.total;
+-    if (cost !== undefined && Number.isFinite(cost) && cost >= 0) total += cost;
++    if (isApiBilled(ctx, model) && cost !== undefined && Number.isFinite(cost) && cost >= 0) total += cost;
+   }
+-  return `~$${total.toFixed(3)}`;
++  // Old child snapshots have no billing split: retain their previous behavior only for API parents.
++  for (const child of children.values()) total += child.apiCost ?? (parentApi ? child.cost : 0);
++  if (!parentApi && total === 0) return null;
++  return `${parentApi ? "" : "API "}${total > 0 && total < 0.01 ? "<$0.01" : `~$${total.toFixed(2)}`}`;
+ }
+diff --git a/node_modules/pi-minimal-footer/extensions/lib/subagent-costs.ts b/node_modules/pi-minimal-footer/extensions/lib/subagent-costs.ts
+new file mode 100644
+index 0000000..3089550
+--- /dev/null
++++ b/node_modules/pi-minimal-footer/extensions/lib/subagent-costs.ts
+@@ -0,0 +1,65 @@
++import type { AgentSession, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
++import { isApiBilled } from "./session-cost.js";
++
++// Local integration with pi-subagents-lite 1.18.0. Snapshots are cumulative,
++// keyed by child session, persisted outside model context, and never summed twice.
++export const CHILD_COST_ENTRY = "sv-subagent-cost-v1";
++export const CHILD_COST_CHANNEL = "sv:subagent-cost-session-v1";
++
++export function trackSubagentCosts(
++  pi: ExtensionAPI,
++  getContext: () => ExtensionContext | undefined,
++  refresh: () => void,
++): () => void {
++  const tracked = new Map<string, { flush: () => void; stop: () => void }>();
++  pi.events.on(CHILD_COST_CHANNEL, (value: unknown) => {
++    const data = value as { parentSessionId?: string; session?: AgentSession } | undefined;
++    const child = data?.session;
++    const ctx = getContext();
++    if (!child || !ctx || data?.parentSessionId !== ctx.sessionManager.getSessionId()) return;
++    if (tracked.has(child.sessionId)) return;
++    const parentSessionId = data.parentSessionId;
++    let stopped = false;
++    let queued = false;
++    let lastCost = 0;
++    let apiCost = 0;
++    const flush = () => {
++      queued = false;
++      if (stopped || getContext()?.sessionManager.getSessionId() !== parentSessionId) return;
++      const cost = child.getSessionStats().cost;
++      if (!Number.isFinite(cost) || cost <= lastCost) return;
++      const nextApiCost = apiCost + (isApiBilled(ctx, child.model) ? cost - lastCost : 0);
++      try {
++        pi.appendEntry(CHILD_COST_ENTRY, { sessionId: child.sessionId, cost, apiCost: nextApiCost });
++        lastCost = cost;
++        apiCost = nextApiCost;
++        refresh();
++      } catch (error) {
++        console.error("[pi-minimal-footer] Could not save subagent cost:", error);
++      }
++    };
++    const unsubscribe = child.subscribe((event) => {
++      if (!["message_end", "compaction_end", "agent_end"].includes(event.type) || queued) return;
++      queued = true;
++      // Pi notifies public listeners BEFORE appending a finished message.
++      queueMicrotask(flush);
++    });
++    tracked.set(child.sessionId, {
++      flush,
++      stop: () => { stopped = true; unsubscribe(); },
++    });
++    flush();
++  });
++  pi.events.on("subagents:child:disposed", (value: unknown) => {
++    const id = (value as { sessionId?: string } | undefined)?.sessionId;
++    if (!id) return;
++    const trackedChild = tracked.get(id);
++    trackedChild?.flush();
++    trackedChild?.stop();
++    tracked.delete(id);
++  });
++  return () => {
++    for (const child of tracked.values()) { child.flush(); child.stop(); }
++    tracked.clear();
++  };
++}

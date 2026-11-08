@@ -1,0 +1,11 @@
+{
+  "defer": false,
+  "toolSchema": "lean",
+  "overlayWidthPercent": 95,
+  "overlayHeightPercent": 60,
+  "completionNotifyLines": 20,
+  "completionNotifyMaxChars": 3000,
+  "spawn": {
+    "worktree": true
+  }
+}

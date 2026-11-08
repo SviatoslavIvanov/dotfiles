@@ -36,10 +36,18 @@ description = "Check Lua formatting"
 run = "mise --cd configs/mise lock --dry-run --json | jq -e 'length == 0' && jq -e 'type == \"object\"' configs/nvim-lazyvim/lazy-lock.json >/dev/null"
 description = "Check mise and Neovim lock files"
 
+[tasks.pi-check]
+run = "node configs/pi/tests/settings.mjs"
+description = "Check Pi settings preservation, launcher migration and version consistency"
+
+[tasks.pi-extensions-check]
+run = ["node configs/pi/tests/extensions.mjs", "node configs/pi/tests/background.mjs", "node configs/pi/tests/ui.mjs", "node configs/pi/tests/screens.mjs"]
+description = "Check installed Pi extension compatibility and critical regressions (no API calls)"
+
 [tasks.secret-check]
 run = "gitleaks dir --redact --no-banner . && gitleaks git --redact --no-banner ."
 description = "Scan the working tree and Git history for secrets"
 
 [tasks.lint]
-depends = ["fmt-check", "check", "dead", "flake-check", "lua-check", "lock-check", "secret-check"]
+depends = ["fmt-check", "check", "dead", "flake-check", "lua-check", "lock-check", "pi-check", "secret-check"]
 description = "Run all checks"

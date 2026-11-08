@@ -1,0 +1,275 @@
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/config.ts b/node_modules/@juicesharp/rpiv-ask-user-question/config.ts
+index 7fc76da..a5897b0 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/config.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/config.ts
+@@ -110,8 +110,8 @@ export function formatKeySpecForDisplay(spec: CollapseKeySpec): string {
+ 		.split("+")
+ 		.map(
+ 			(part) =>
+-				COMPOUND_KEY_DISPLAY[part] ??
+-				(part.length <= 1 ? part.toUpperCase() : part.charAt(0).toUpperCase() + part.slice(1)),
++				// Local: Pi's lowercase key names, like keyHint rows elsewhere.
++				(COMPOUND_KEY_DISPLAY[part] ?? part).toLowerCase(),
+ 		)
+ 		.join("+");
+ }
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/state/questionnaire-session.ts b/node_modules/@juicesharp/rpiv-ask-user-question/state/questionnaire-session.ts
+index 5e237c7..00b8174 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/state/questionnaire-session.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/state/questionnaire-session.ts
+@@ -4,6 +4,7 @@ import { COLLAPSE_KEY_OFF, formatKeySpecForDisplay } from "../config.ts";
+ import type { QuestionData, QuestionnaireResult, QuestionParams } from "../tool/types.ts";
+ import type { WrappingSelectItem } from "../view/components/wrapping-select.ts";
+ import { COLLAPSED_HINT_TEMPLATE, HINT_PART_CANCEL, KEY_PLACEHOLDER } from "../view/dialog-builder.ts";
++import { styleHints } from "../view/tab-content-strategy.ts";
+ import type { QuestionnairePropsAdapter } from "../view/props-adapter.ts";
+ import { buildQuestionnaire, type QuestionnaireBuilt } from "./build-questionnaire.ts";
+ import { t } from "./i18n-bridge.ts";
+@@ -153,7 +154,7 @@ export class QuestionnaireSession {
+ 			this.collapseKey === COLLAPSE_KEY_OFF
+ 				? t("hint.cancel", HINT_PART_CANCEL)
+ 				: t("hint.expand_line", COLLAPSED_HINT_TEMPLATE).replace(KEY_PLACEHOLDER, collapseKeyDisplay);
+-		return (_width: number): string[] => [theme.fg("dim", ` ${collapsedHintLine()} `)];
++		return (_width: number): string[] => [` ${styleHints(theme, collapsedHintLine())} `];
+ 	}
+ 
+ 	dispatch(data: string): void {
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/inline-input.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/inline-input.ts
+index 5c1abbf..62be6a3 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/inline-input.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/inline-input.ts
+@@ -20,6 +20,8 @@ export interface RenderInlineInputOptions {
+ 	contentWidth: number;
+ 	/** Per-line styling (single-select: `theme.selectedText`; multi-select: accent+bold). */
+ 	selectedText: (text: string) => string;
++	/** Dim hint drawn under the cursor while the buffer is empty, so the row keeps its label. */
++	placeholder?: string;
+ }
+ 
+ /**
+@@ -57,8 +59,12 @@ function buildCursorRaw(buffer: string, offset: number): string {
+  * the cursor, with a non-breaking-space cell at end-of-line/end-of-buffer.
+  */
+ export function renderInlineInputRow(opts: RenderInlineInputOptions): string[] {
+-	const { buffer, cursorOffset, rowPrefix, continuationPrefix, contentWidth, selectedText } = opts;
+-	const raw = buildCursorRaw(buffer, resolveCursorOffset(buffer, cursorOffset));
++	const { buffer, cursorOffset, rowPrefix, continuationPrefix, contentWidth, selectedText, placeholder } = opts;
++	const [first] = placeholder ? graphemeSegmenter.segment(placeholder) : [];
++	const raw =
++		buffer === "" && first
++			? `${CURSOR_MARKER}\x1b[7m${first.segment}\x1b[27m\x1b[2m${placeholder!.slice(first.segment.length)}\x1b[22m`
++			: buildCursorRaw(buffer, resolveCursorOffset(buffer, cursorOffset));
+ 	return wrapTextWithAnsi(raw, contentWidth).map((segment, index) => {
+ 		const prefix = index === 0 ? rowPrefix : continuationPrefix;
+ 		return selectedText(`${prefix}${segment}`);
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/multi-select-view.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/multi-select-view.ts
+index 324c9e1..74817c4 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/multi-select-view.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/multi-select-view.ts
+@@ -7,7 +7,7 @@ import { renderInlineInputRow } from "./inline-input.ts";
+ 
+ const ACTIVE_POINTER = "❯ ";
+ const INACTIVE_POINTER = "  ";
+-const CHECKED = "[✔]";
++const CHECKED = "[✓]";
+ const UNCHECKED = "[ ]";
+ const NUMBER_SEPARATOR = ". ";
+ const BOX_LABEL_GAP = " ";
+@@ -168,6 +168,7 @@ export class MultiSelectView implements StatefulView<MultiSelectViewProps> {
+ 				continuationPrefix,
+ 				contentWidth,
+ 				selectedText,
++				placeholder: displayLabel("other"),
+ 			});
+ 		}
+ 
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/preview/preview-block-renderer.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/preview/preview-block-renderer.ts
+index e31e8d7..d6ecfbf 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/preview/preview-block-renderer.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/preview/preview-block-renderer.ts
+@@ -150,7 +150,7 @@ export class PreviewBlockRenderer {
+ 		const contentLines = hidden > 0 ? raw.slice(0, fit.contentRows) : raw;
+ 
+ 		const { boxWidth } = computeBoxDimensions(contentLines, maxInnerWidth);
+-		const colorFn = (s: string) => this.theme.fg("accent", s);
++		const colorFn = (s: string) => this.theme.fg("border", s); // local: grey frames, as elsewhere in Pi
+ 		const boxedLines = renderBorderedBox(contentLines, boxWidth, colorFn, hidden);
+ 		if (!fit.affordance) return boxedLines;
+ 
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/wrapping-select.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/wrapping-select.ts
+index 0af05b2..5b5ea03 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/components/wrapping-select.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/components/wrapping-select.ts
+@@ -45,7 +45,7 @@ export class WrappingSelect implements Component {
+ 	private static readonly ACTIVE_POINTER = "❯ ";
+ 	private static readonly INACTIVE_POINTER = "  ";
+ 	private static readonly NUMBER_SEPARATOR = ". ";
+-	private static readonly CONFIRMED_MARK = " ✔";
++	private static readonly CONFIRMED_MARK = " ✓";
+ 	private static readonly MIN_CONTENT_WIDTH = 1;
+ 
+ 	private readonly items: readonly WrappingSelectItem[];
+@@ -213,7 +213,7 @@ export class WrappingSelect implements Component {
+ 		const contentWidth = Math.max(WrappingSelect.MIN_CONTENT_WIDTH, width - visibleWidth(rowPrefix));
+ 
+ 		if (this.shouldRenderAsInlineInput(item, isActive)) {
+-			return this.renderInlineInputRow(rowPrefix, continuationPrefix, contentWidth);
++			return this.renderInlineInputRow(rowPrefix, continuationPrefix, contentWidth, item.label);
+ 		}
+ 
+ 		const { label, isConfirmed } = this.deriveConfirmedState(item, index);
+@@ -259,7 +259,12 @@ export class WrappingSelect implements Component {
+ 	}
+ 
+ 	/** Render the inline editor across logical and visually wrapped lines. */
+-	private renderInlineInputRow(rowPrefix: string, continuationPrefix: string, contentWidth: number): string[] {
++	private renderInlineInputRow(
++		rowPrefix: string,
++		continuationPrefix: string,
++		contentWidth: number,
++		placeholder: string,
++	): string[] {
+ 		return renderInlineInputRow({
+ 			buffer: this.inputBuffer,
+ 			cursorOffset: this.inputCursorOffset,
+@@ -267,6 +272,7 @@ export class WrappingSelect implements Component {
+ 			continuationPrefix,
+ 			contentWidth,
+ 			selectedText: this.theme.selectedText,
++			placeholder,
+ 		});
+ 	}
+ 
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-builder.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-builder.ts
+index f0e9bb8..fb8a7f5 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-builder.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-builder.ts
+@@ -37,9 +37,10 @@ export {
+  */
+ const MIN_SCROLL_ROWS_WITH_PINNED_HEADING = 3;
+ 
+-/** No-overflow path: append the residual spacer rows after the footer. */
+-function renderFitsTerminal(natural: string[], spacerRows: number): string[] {
+-	return spacerRows > 0 ? [...natural, ...Array<string>(spacerRows).fill("")] : natural;
++/** No-overflow path: keep the dock content-sized, without spare space for other tabs. */
++function renderFitsTerminal(natural: string[], _spacerRows: number): string[] {
++	// Local: content-sized dock; padding below the hints lifts the question away from the footer.
++	return natural;
+ }
+ 
+ /** Terminal too small for any middle content — show just chrome, hard-clamped to termRows. */
+@@ -156,7 +157,8 @@ export class DialogView implements StatefulView<DialogProps> {
+ 		// Fixed region sizes (deterministic from structure).
+ 		// TabBar.render() returns [tabLine, ""] — always 2 rows.
+ 		const topFixed = 1 + (this.config.isMulti && this.config.tabBar ? 2 : 0) + 1;
+-		const bottomFixed = 1 + strategy.footerRowCount;
++		// Local: footer = rows after its leading blank + closing border (see buildContainerFromStrategy).
++		const bottomFixed = strategy.footerRowCount;
+ 		const termRows = this.config.getTerminalRows();
+ 
+ 		this.allotBodyRows(
+@@ -269,7 +271,7 @@ export class DialogView implements StatefulView<DialogProps> {
+ 		const { theme, isMulti, tabBar } = this.config;
+ 		const state = this.liveProps.state;
+ 		const container = new Container();
+-		const border = () => new DynamicBorder((s) => theme.fg("accent", s));
++		const border = () => new DynamicBorder((s) => theme.fg("border", s));
+ 
+ 		container.addChild(border());
+ 		if (isMulti && tabBar) container.addChild(tabBar);
+@@ -280,8 +282,11 @@ export class DialogView implements StatefulView<DialogProps> {
+ 		container.addChild(new Spacer(1));
+ 		for (const c of strategy.midRows(state)) container.addChild(c);
+ 
++		// Local house style: key hints are the last row inside the frame. The footer's leading
++		// blank row is dropped; the body's trailing Spacer already separates it.
++		const footer = strategy.footerRows(state);
++		for (const c of footer[0] instanceof Spacer ? footer.slice(1) : footer) container.addChild(c);
+ 		container.addChild(border());
+-		for (const c of strategy.footerRows(state)) container.addChild(c);
+ 
+ 		// BodyResidualSpacer moved out of Container — handled in render().
+ 		return container;
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-copy.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-copy.ts
+index c78d514..cdb04eb 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-copy.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/dialog-copy.ts
+@@ -7,13 +7,13 @@ import {
+ 
+ /** Leaf: imports nothing from `view/`, so `dialog-builder` and `tab-content-strategy` never form a runtime cycle (#208). */
+ 
+-export const HINT_PART_ENTER = "Enter to select";
+-export const HINT_PART_NAV = "↑/↓ to navigate";
+-export const HINT_PART_NEW_LINE = "Shift+Enter for newline";
+-export const HINT_PART_CLEAR = "Ctrl+U to clear";
+-export const HINT_PART_TOGGLE = "Space to toggle";
+-export const HINT_PART_TAB = "Tab to switch questions";
+-export const HINT_PART_CANCEL = "Esc to cancel";
++export const HINT_PART_ENTER = "enter select";
++export const HINT_PART_NAV = "↑↓ move";
++export const HINT_PART_NEW_LINE = "shift+enter newline";
++export const HINT_PART_CLEAR = "ctrl+u clear";
++export const HINT_PART_TOGGLE = "space toggle";
++export const HINT_PART_TAB = "tab next";
++export const HINT_PART_CANCEL = "esc cancel";
+ /**
+  * Collapse/expand hint copy is templated on `KEY_PLACEHOLDER` because the
+  * shortcut is configurable (`collapseKey`) and `rpiv-i18n`'s `tr` has no
+@@ -22,10 +22,10 @@ export const HINT_PART_CANCEL = "Esc to cancel";
+  * lookup, so per-locale word order is preserved.
+  */
+ export const KEY_PLACEHOLDER = "{key}";
+-export const HINT_PART_COLLAPSE_TEMPLATE = `${KEY_PLACEHOLDER} to collapse`;
+-export const HINT_PART_EXPAND_TEMPLATE = `${KEY_PLACEHOLDER} to expand`;
++export const HINT_PART_COLLAPSE_TEMPLATE = `${KEY_PLACEHOLDER} collapse`;
++export const HINT_PART_EXPAND_TEMPLATE = `${KEY_PLACEHOLDER} expand`;
+ /** Notes hint, templated the same way on the configurable `notesKey`. */
+-export const HINT_PART_NOTES_TEMPLATE = `${KEY_PLACEHOLDER} to add notes`;
++export const HINT_PART_NOTES_TEMPLATE = `${KEY_PLACEHOLDER} notes`;
+ /** Default-key (`n`) rendering of the notes template. */
+ export const HINT_PART_NOTES = HINT_PART_NOTES_TEMPLATE.replace(
+ 	KEY_PLACEHOLDER,
+diff --git a/node_modules/@juicesharp/rpiv-ask-user-question/view/tab-content-strategy.ts b/node_modules/@juicesharp/rpiv-ask-user-question/view/tab-content-strategy.ts
+index 9181160..2b951e1 100644
+--- a/node_modules/@juicesharp/rpiv-ask-user-question/view/tab-content-strategy.ts
++++ b/node_modules/@juicesharp/rpiv-ask-user-question/view/tab-content-strategy.ts
+@@ -27,7 +27,18 @@ import type { TabComponents } from "./tab-components.ts";
+ 
+ const NOTES_HEADER = "Notes:";
+ const GLOBAL_NOTES_HEADER = "Global note:";
+-const REVIEW_GLOBAL_HINT_TEMPLATE = `${KEY_PLACEHOLDER} to add a note`;
++const REVIEW_GLOBAL_HINT_TEMPLATE = `${KEY_PLACEHOLDER} note`;
++
++/** Local: keyHint style used by Pi menus — dim key, muted action, dim " · " separators. */
++export function styleHints(theme: Theme, text: string): string {
++	return text
++		.split(" · ")
++		.map((part) => {
++			const space = part.indexOf(" ");
++			return space < 0 ? theme.fg("dim", part) : theme.fg("dim", part.slice(0, space)) + theme.fg("muted", part.slice(space));
++		})
++		.join(theme.fg("dim", " · "));
++}
+ const REVIEW_NOTE_LABEL = "Note";
+ /** Label for a question's saved note — the question tab's resting row and the review entry (#197). */
+ const SAVED_NOTE_LABEL = "Note for this answer:";
+@@ -160,8 +171,8 @@ export class QuestionTabStrategy implements TabContentStrategy {
+ 		return [
+ 			new Spacer(1),
+ 			new OneLineClippedText(
+-				this.config.theme.fg(
+-					"dim",
++				styleHints(
++					this.config.theme,
+ 					buildHintText(question, this.config.isMulti, state, this.config.collapseKey, this.config.notesKey),
+ 				),
+ 				1,
+@@ -285,7 +296,7 @@ export class SubmitTabStrategy implements TabContentStrategy {
+ 		// exactly 5. OneLineClippedText (not pi-tui Text) — a wrapped hint would inflate
+ 		// the footer past footerRowCount and desync the chrome's cross-tab height math.
+ 		out.push(
+-			new OneLineClippedText(this.config.theme.fg("dim", buildSubmitHintText(state, this.config.notesKey)), 1),
++			new OneLineClippedText(styleHints(this.config.theme, buildSubmitHintText(state, this.config.notesKey)), 1),
+ 		);
+ 		return out;
+ 	}

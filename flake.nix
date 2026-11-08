@@ -16,6 +16,11 @@
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
+    pi-src = {
+      url = "github:earendil-works/pi/v1.5.0";
+      flake = false;
+    };
+
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";

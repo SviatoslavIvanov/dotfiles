@@ -1,0 +1,12 @@
+{
+  "$schema": "https://pi.dev/schemas/keybindings.schema.json",
+  "app.clipboard.pasteImage": [],
+  "tui.select.down": [
+    "down",
+    "ctrl+j"
+  ],
+  "tui.select.up": [
+    "up",
+    "ctrl+k"
+  ]
+}

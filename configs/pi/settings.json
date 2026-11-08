@@ -1,0 +1,70 @@
+{
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6.1-sol",
+  "packages": [
+    "npm:pi-polish@0.1.10",
+    "npm:pi-voice-stt@0.11.0",
+    "npm:pi-web-access@0.47.0",
+    "npm:pi-interactive-shell@0.18.0",
+    "npm:pi-bg-tasks@0.1.4",
+    {
+      "source": "npm:@dietrichgebert/ponytail@5.3.3",
+      "prompts": []
+    },
+    "npm:pi-codemode-compact@0.5.0",
+    "npm:pi-minimal-footer@0.14.0",
+    "npm:pi-subagents-lite@1.18.0",
+    "npm:@amaster.ai/pi-computer-use@0.1.36",
+    "npm:@juicesharp/rpiv-ask-user-question@2.15.0",
+    "npm:@pi-archimedes/image-paste@2.13.0"
+  ],
+  "defaultTools": [
+    "+codemode"
+  ],
+  "pi-computer-use": {
+    "mode": "bundled",
+    "toolProfile": "lazy",
+    "confirmAppLaunch": true,
+    "confirmDangerousActions": true
+  },
+  "theme": "sv-light/sv-dark",
+  "quietStartup": true,
+  "enableSkillCommands": false,
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": true,
+  "editorPaddingX": 1,
+  "autocompleteMaxVisible": 5,
+  "collapseChangelog": true,
+  "enabledModels": [
+    "openai/gpt-6.1-sol:high",
+    "openai/gpt-6-astra:medium",
+    "openai-api/gpt-6.1-sol:high",
+    "openai-api/gpt-6-astra:medium",
+    "anthropic/claude-opus-5-5:high"
+  ],
+  "modelThinkingLevels": {
+    "openai/gpt-6.1-sol": "high",
+    "anthropic/claude-opus-5-5": "high",
+    "openai/gpt-6-astra": "medium",
+    "openai-api/gpt-6.1-sol": "high",
+    "openai-api/gpt-6-astra": "medium"
+  },
+  "minFooter": {
+    "enabled": true,
+    "compactEditor": false,
+    "showGitBranch": true,
+    "showSkills": true,
+    "showPath": true,
+    "showModel": true,
+    "showContext": true,
+    "showProvider": true,
+    "showThinking": true,
+    "showUsage": false,
+    "showCost": true,
+    "contextAsPercentage": true,
+    "powerlineSeparator": false,
+    "gitFetch": false
+  },
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "defaultProjectTrust": "ask"
+}

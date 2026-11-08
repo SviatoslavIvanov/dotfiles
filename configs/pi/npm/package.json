@@ -1,0 +1,22 @@
+{
+  "name": "pi-extensions",
+  "private": true,
+  "dependencies": {
+    "@amaster.ai/pi-computer-use": "0.1.36",
+    "@dietrichgebert/ponytail": "5.3.3",
+    "@juicesharp/rpiv-ask-user-question": "2.15.0",
+    "@pi-archimedes/image-paste": "2.13.0",
+    "patch-package": "8.0.1",
+    "pi-bg-tasks": "0.1.4",
+    "pi-codemode-compact": "0.5.0",
+    "pi-interactive-shell": "0.18.0",
+    "pi-minimal-footer": "0.14.0",
+    "pi-polish": "0.1.10",
+    "pi-subagents-lite": "1.18.0",
+    "pi-voice-stt": "0.11.0",
+    "pi-web-access": "0.47.0"
+  },
+  "scripts": {
+    "postinstall": "patch-package --error-on-fail"
+  }
+}
