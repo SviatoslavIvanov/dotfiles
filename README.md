@@ -56,7 +56,8 @@ the same value.
 ├── flake.lock          # Pinned dependency versions
 ├── mise.toml           # Dev tasks (lint, format, check)
 ├── modules/
-│   ├── darwin.nix      # macOS settings, Homebrew casks
+│   ├── system.nix      # macOS settings, security, power, login shell
+│   ├── homebrew.nix    # Homebrew casks and formulae
 │   ├── home.nix        # Home Manager entry point
 │   ├── hygiene.nix     # XDG paths and home-directory audit
 │   ├── packages.nix    # CLI tools and yazi config
@@ -275,7 +276,7 @@ first-migration file collisions, legacy PATH precedence, and offline checks.
 
 **Productivity:** Raycast, Obsidian, Todoist, Linear
 
-**Browsers:** Arc, Google Chrome
+**Browsers:** Google Chrome
 
 **Communication:** Telegram, WhatsApp, Signal, Discord, Zoom
 
@@ -290,6 +291,9 @@ first-migration file collisions, legacy PATH precedence, and offline checks.
 **Unmanaged exceptions:** qBittorrent stays installed until upstream ships a
 Gatekeeper-compliant build; VMware Fusion uses its vendor installer; VIA
 keyboards are configured with the maintained [VIA web app](https://usevia.app/).
+Arc stays installed but unmanaged: it is discontinued upstream and its cask is
+deprecated. Pages, Numbers and Keynote stay with the App Store. The screen locks
+immediately; that is set once in System Settings.
 
 ## Fonts
 
@@ -339,7 +343,8 @@ sudo darwin-rebuild switch --switch-generation <generation>
 ```
 
 Homebrew, App Store, and vendor-managed application changes are outside Nix
-generations and are not reverted by `darwin-rebuild --rollback`.
+generations and are not reverted by `darwin-rebuild --rollback`. Activation never
+upgrades or removes casks; upgrade one explicitly with `brew upgrade --cask <name>`.
 
 The mise config/lock are writable links into `$DOTFILES_DIR` so mise can update
 them. Git, rather than Nix generations, is their rollback mechanism.
@@ -374,7 +379,8 @@ Automatically configured:
   (AeroSpace recommendations), no window open/close animations
 - **Finder:** show hidden files, extensions, path bar, status bar
 - **Keyboard:** fast key repeat (2/15), no auto-corrections
-- **Security:** firewall + stealth mode, Touch ID for sudo, guest login disabled, immediate lock
+- **Security:** firewall + stealth mode, Touch ID for sudo (also inside tmux), guest login disabled
+- **Login shell:** the Nix zsh
 - **Power:** displays sleep after 10 minutes; computer sleep is disabled on AC
   and delayed to 30 minutes on battery
 - **Updates:** automatic macOS and App Store updates

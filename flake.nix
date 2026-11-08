@@ -62,7 +62,6 @@
       self,
       nix-darwin,
       home-manager,
-      nix-homebrew,
       catppuccin,
       dotfiles-private,
       ...
@@ -80,28 +79,21 @@
       packages.${system}.nixfmt = pkgs.nixfmt;
 
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-        specialArgs = {
-          inherit
-            inputs
-            username
-            hostname
-            homeDirectory
-            ;
-        };
+        specialArgs = { inherit inputs; };
         modules = [
-          { nixpkgs.hostPlatform = system; }
-          ./modules/darwin.nix
-          dotfiles-private.darwinModules.default
-
-          nix-homebrew.darwinModules.nix-homebrew
           {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = true;
-              user = username;
-              autoMigrate = true;
+            nixpkgs.hostPlatform = system;
+            networking = {
+              computerName = "Святослав MacBook Pro";
+              hostName = hostname;
+              localHostName = hostname;
             };
+            system.primaryUser = username;
+            users.users.${username}.home = homeDirectory;
           }
+          ./modules/system.nix
+          ./modules/homebrew.nix
+          dotfiles-private.darwinModules.default
 
           home-manager.darwinModules.home-manager
           {
