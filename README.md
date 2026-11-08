@@ -267,6 +267,7 @@ mise run check        # Lint with statix
 mise run dead         # Find dead code
 mise run clean        # Remove dead code
 mise run flake-check  # Validate flake
+mise run claude-check # Validate lossless Claude settings merge
 mise run lock-check   # Validate mise lock file
 mise run secret-check # Scan the tree and history for secrets
 mise run lint         # Run all checks
@@ -302,6 +303,12 @@ generations and are not reverted by `darwin-rebuild --rollback`.
 
 The mise config/lock are writable links into `$DOTFILES_DIR` so mise can update
 them. Git, rather than Nix generations, is their rollback mechanism.
+
+Claude settings are merged recursively and atomically during Home Manager
+activation, preserving local permission rules and undeclared settings. Invalid
+JSON aborts the merge without replacing the old file. The existing global
+`bypassPermissions` mode and disabled sandbox remain intentional opt-outs;
+use them only with trusted projects.
 
 CLI tools belong to Nix. When migrating an existing Brew installation, build
 and activate Nix first, verify command paths, then remove Brew duplicates

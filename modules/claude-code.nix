@@ -1,10 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
-  # Keys here are owned by Nix and will be overwritten on every activation.
-  # Everything else in ~/.claude/settings.json (mcpServers, enabledPlugins,
-  # pluginMarketplaces, ...) is left untouched so that `claude mcp add`,
-  # `/plugin install` etc. work without being reverted on next rebuild.
+  # Nix owns only the declared leaves; local permissions.deny/allow/ask,
+  # plugins and other undeclared settings survive activation.
   managed = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
 
@@ -12,7 +10,7 @@ let
     permissions.defaultMode = "bypassPermissions";
     skipDangerousModePermissionPrompt = true;
 
-    # Keep this explicit so activation replaces the previous sandbox rules.
+    # Keep the existing opt-out explicit without discarding other sandbox settings.
     sandbox.enabled = false;
 
     statusLine = {
@@ -31,24 +29,15 @@ let
   managedFile = pkgs.writeText "claude-managed.json" (builtins.toJSON managed);
 in
 {
-  home.activation.claudeConfig = ''
-    mkdir -p "$HOME/.claude"
-
-    SETTINGS="$HOME/.claude/settings.json"
-
-    # Remove symlink if exists (migration from old config)
-    [ -L "$SETTINGS" ] && rm "$SETTINGS"
-    [ ! -f "$SETTINGS" ] && echo '{}' > "$SETTINGS"
-
-    # Merge: Nix owns the keys present in managed.json; everything else
-    # (mcpServers, enabledPlugins, pluginMarketplaces, ...) is preserved
-    # so CLI-driven changes survive `darwin-rebuild switch`.
-    tmpfile=$(mktemp)
-    ${pkgs.jq}/bin/jq --slurpfile managed ${managedFile} '
-      ($managed[0] | keys) as $mkeys
-      | with_entries(select(.key as $k | $mkeys | index($k) | not))
-      + $managed[0]
-    ' "$SETTINGS" > "$tmpfile" && mv "$tmpfile" "$SETTINGS"
+  home.activation.claudeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run ${pkgs.coreutils}/bin/env PATH=${
+      lib.makeBinPath [
+        pkgs.coreutils
+        pkgs.jq
+      ]
+    } \
+      ${pkgs.bash}/bin/bash ${../configs/claude-code/merge-settings.sh} \
+      "$HOME/.claude/settings.json" ${managedFile}
   '';
 
   xdg.configFile."claude-code/statusline.sh" = {
