@@ -118,8 +118,8 @@ the same value.
 | **zed** | Code browsing, Git review, and ACP agents |
 | **VS Code** | When you need extensions |
 
-Zed is the default external editor (`EDITOR`, `VISUAL`, and Git use `zed --wait`;
-LazyGit uses its Zed preset). `v` opens Zed; `/usr/bin/nano` remains a manual
+Zed is the default external editor (`EDITOR` and `VISUAL` are `zed --wait`, which
+Git follows; LazyGit uses its Zed preset). `v` opens Zed; `/usr/bin/nano` remains a manual
 terminal fallback. VS Code is retained as a backup, without Neovim integration.
 
 Zed's layout keeps files/Git/outline on the left, the agent and Threads Sidebar on the
@@ -133,7 +133,7 @@ open when adding a folder to an existing window. Settings live in
 | `Cmd B` / `Cmd Alt B` | Toggle the left / right dock |
 | `Space a a` | Focus the agent |
 | `Space a d` | Review the active agent's changes (where supported) |
-| `Space a n` / `Space a o` / `Cmd Alt Shift C` | New Codex thread |
+| `Space a n` / `Cmd Alt Shift C` | New Codex thread |
 | `Space a l` / `Cmd Alt J` | Toggle the Threads Sidebar |
 | `Space a s` | Add selection to the current agent thread |
 | `Space g d` | Review uncommitted changes against HEAD |
