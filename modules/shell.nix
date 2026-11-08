@@ -180,6 +180,12 @@ in
 
     mise.enable = true;
 
-    starship.enable = true;
+    starship = {
+      enable = true;
+      settings.directory = {
+        truncation_length = 0;
+        fish_style_pwd_dir_length = 1;
+      };
+    };
   };
 }
