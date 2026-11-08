@@ -5,10 +5,11 @@ import { join } from "node:path";
 import { createRequire } from "node:module";
 import { homedir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { hostModules } from "./host.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const modules = process.env.PI_TEST_NPM_MODULES ?? join(homedir(), ".pi/agent/npm/node_modules");
-const hostModules = process.env.PI_TEST_HOST_MODULES ?? join(homedir(), ".pi/agent/install/releases/1.5.0/node_modules");
+
 const host = join(hostModules, "@earendil-works");
 const { loadExtensions, createExtensionRuntime } = await import(pathToFileURL(join(host, "pi-coding-agent/dist/core/extensions/loader.js")));
 const settings = JSON.parse(readFileSync(join(root, "settings.json"), "utf8"));

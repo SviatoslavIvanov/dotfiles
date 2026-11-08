@@ -9,7 +9,6 @@ dotnet = "10"
 "http:nebius" = { version = "0.12.288", url = "https://artifacts.nebius.cloud/cli/release/{{version}}/darwin/arm64/nebius" }
 lefthook = "latest"
 node = "lts"
-"npm:@playwright/cli" = "latest"
 "npm:turbo" = "latest"
 pnpm = "latest"
 python = "3.14"

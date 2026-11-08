@@ -5,10 +5,11 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { hostModules } from "./host.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const modules = process.env.PI_TEST_NPM_MODULES ?? join(homedir(), ".pi/agent/npm/node_modules");
-const hostModules = process.env.PI_TEST_HOST_MODULES ?? join(homedir(), ".pi/agent/install/releases/1.5.0/node_modules");
+
 const host = join(hostModules, "@earendil-works");
 const require = createRequire(join(host, "pi-coding-agent/dist/index.js"));
 const { createJiti } = await import(pathToFileURL(join(hostModules, "jiti/lib/jiti.mjs")));

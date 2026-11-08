@@ -7,11 +7,11 @@
 }:
 let
   source = ../configs/pi;
+  agentDir = config.programs.pi-coding-agent.configDir;
   pi =
     (pkgs.callPackage "${inputs.pi-src}/nix/package.nix" {
       source = inputs.pi-src;
-      # Pi 1.5.0's Nix recipe omits pi-schema from its workspace overrides;
-      # the install lock has no integrity for it. Pin the published tarball instead.
+      # Pi 1.5.0's recipe omits pi-schema from its workspace overrides, so pin the published tarball.
       importNpmLock = pkgs.importNpmLock // {
         importNpmLock =
           args:
@@ -29,8 +29,7 @@ let
       };
     }).overrideAttrs
       (old: {
-        # Cosmetic patches of the bundled CLI. --replace-fail makes a renamed upstream line fail
-        # the build loudly; then drop or update the patch.
+        # Cosmetic patches; --replace-fail breaks the build when upstream renames a patched line.
         postInstall = (old.postInstall or "") + ''
           chunks="$out"/lib/pi/node_modules/@earendil-works/pi-coding-agent/dist/bundle/chunks
 
@@ -40,9 +39,7 @@ let
             'getAutocompleteSourceTag(sourceInfo){if(!sourceInfo||' \
             'getAutocompleteSourceTag(sourceInfo){if(true||!sourceInfo||'
 
-          # Autocomplete menu above the editor, so the prompt line never jumps. The editor still
-          # renders the menu last (extensions decorate its first lines); the container moves the
-          # menu rows above it, and the editor's mouse mapping follows.
+          # Autocomplete menu above the editor, so the prompt line never jumps; mouse mapping follows.
           chunk=$(grep -l 'this.editorContainer=new Container,this.editorContainer.addChild(this.editor)' "$chunks"/*.js)
           substituteInPlace "$chunk" --replace-fail \
             'this.editorContainer=new Container,this.editorContainer.addChild(this.editor)' \
@@ -57,7 +54,6 @@ let
               'if(event.type!=="click"||event.button!=="left")return;event={...event,y:event.y-this.renderedAutocompleteHeight};if(event.y<=0||event.y>this.renderedVisibleLineCount)'
         '';
       });
-  stt = builtins.fromJSON (builtins.readFile (source + "/stt.json"));
   piMcpFields = {
     context7 = {
       exposure = "direct";
@@ -82,6 +78,7 @@ let
     "subagents-lite.json"
     "interactive-shell.json"
     "next-prompt.json"
+    "stt.json"
     "web-search.json"
     "agents"
     "extensions"
@@ -106,30 +103,18 @@ in
 
   home = {
     file =
-      lib.genAttrs (map (name: ".pi/agent/${name}") managedFiles) (name: {
-        source = source + "/${lib.removePrefix ".pi/agent/" name}";
-        recursive = true;
-      })
-      // {
-        ".pi/agent/mcp.json".text = builtins.toJSON { inherit mcpServers; };
-        ".pi/agent/stt.json".text = builtins.toJSON (
-          stt
-          // {
-            capture = stt.capture // {
-              ffmpegPath = "${pkgs.ffmpeg}/bin/ffmpeg";
-            };
-            provider = stt.provider // {
-              apiKey = "!${pkgs.jq}/bin/jq -er '.[\"openai-api\"] | select(.type == \"api_key\") | .key | select(type == \"string\" and length > 0)' \"${config.home.homeDirectory}/.pi/agent/auth.json\"";
-            };
+      lib.listToAttrs (
+        map (
+          name:
+          lib.nameValuePair "${agentDir}/${name}" {
+            source = source + "/${name}";
+            recursive = true;
           }
-        );
+        ) managedFiles
+      )
+      // {
+        "${agentDir}/mcp.json".text = builtins.toJSON { inherit mcpServers; };
       };
-
-    activation.piLauncher = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      run env PATH="${lib.makeBinPath [ pkgs.coreutils ]}:$PATH" \
-        ${pkgs.bash}/bin/bash ${source}/prefer-nix.sh \
-        /opt/homebrew/bin/pi "$HOME/.pi/agent/bin/pi" ${pi}/bin/pi
-    '';
 
     # Explicit maintenance, never network access or npm installation during activation.
     packages = [
@@ -141,7 +126,7 @@ in
         ];
         text = ''
           echo 'Stop all Pi sessions before restoring extensions.' >&2
-          agent="$HOME/.pi/agent"
+          agent="${agentDir}"
           mkdir -p "$agent/npm"
           install -m 600 ${source}/npm/package.json "$agent/npm/package.json"
           install -m 600 ${source}/npm/package-lock.json "$agent/npm/package-lock.json"

@@ -25,20 +25,16 @@
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": true,
   "editorPaddingX": 1,
-  "autocompleteMaxVisible": 5,
   "collapseChangelog": true,
   "enabledModels": [
-    "openai/gpt-6.1-sol:high",
-    "openai/gpt-6-astra:medium",
-    "openai-api/gpt-6.1-sol:high",
-    "openai-api/gpt-6-astra:medium",
-    "anthropic/claude-opus-5-5:high"
+    "openai/gpt-6.1-sol",
+    "openai/gpt-6-astra",
+    "openai-api/gpt-6.1-sol",
+    "openai-api/gpt-6-astra",
+    "anthropic/claude-opus-5-5"
   ],
   "modelThinkingLevels": {
-    "openai/gpt-6.1-sol": "high",
-    "anthropic/claude-opus-5-5": "high",
     "openai/gpt-6-astra": "medium",
-    "openai-api/gpt-6.1-sol": "high",
     "openai-api/gpt-6-astra": "medium"
   },
   "minFooter": {
@@ -57,6 +53,5 @@
     "powerlineSeparator": false,
     "gitFetch": false
   },
-  "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "defaultProjectTrust": "ask"
+  "$schema": "https://pi.dev/schemas/settings.schema.json"
 }

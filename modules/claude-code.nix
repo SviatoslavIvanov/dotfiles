@@ -19,7 +19,6 @@
       # Apply globally: Claude ignores bypassPermissions in project settings.
       permissions.defaultMode = "bypassPermissions";
       skipDangerousModePermissionPrompt = true;
-      sandbox.enabled = false;
 
       statusLine = {
         type = "command";
@@ -27,12 +26,7 @@
         padding = 0;
       };
 
-      attribution = {
-        commit = "";
-        pr = "";
-      };
-
-      outputStyle = "default";
+      attribution = false;
     };
 
     lspServers.typescript = {
@@ -70,15 +64,21 @@
 
       dir_name=$(basename "$cwd")
 
+      # status, unlike diff, never takes index.lock, so it cannot race the agent's own commits.
       git_branch=""
-      if cd "$cwd" 2>/dev/null && ${pkgs.git}/bin/git rev-parse --git-dir >/dev/null 2>&1; then
-          branch=$(${pkgs.git}/bin/git branch --show-current 2>/dev/null)
-          if [ -n "$branch" ]; then
-              if ${pkgs.git}/bin/git -c core.useBuiltinFSMonitor=false diff --quiet 2>/dev/null && \
-                 ${pkgs.git}/bin/git -c core.useBuiltinFSMonitor=false diff --cached --quiet 2>/dev/null; then
-                  git_branch=" \033[38;5;10m $branch\033[0m"
-              else
+      if status=$(${pkgs.git}/bin/git --no-optional-locks -C "$cwd" status --porcelain=v2 --branch --untracked-files=no 2>/dev/null); then
+          branch="" dirty=""
+          while IFS= read -r line; do
+              case $line in
+                  "# branch.head "*) branch=''${line#\# branch.head } ;;
+                  [12u]" "*) dirty=1 ;;
+              esac
+          done <<<"$status"
+          if [ -n "$branch" ] && [ "$branch" != "(detached)" ]; then
+              if [ -n "$dirty" ]; then
                   git_branch=" \033[38;5;11m $branch ●\033[0m"
+              else
+                  git_branch=" \033[38;5;10m $branch\033[0m"
               fi
           fi
       fi

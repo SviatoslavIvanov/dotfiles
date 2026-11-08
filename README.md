@@ -236,8 +236,8 @@ One source in [`modules/agents.nix`](modules/agents.nix) feeds all three agents:
 
 Third-party skills come from pinned flake inputs (`claude-plugins-official`,
 `playwright-cli`, `sentry-plugin-claude`); `nix flake update` brings their
-changes as a reviewable lock diff. The `playwright-cli` input tag follows the
-CLI version in the mise lock. Skills keep to the open Agent Skills frontmatter
+changes as a reviewable lock diff. The `playwright-cli` input also builds the
+CLI, so the CLI and its skill share one version. Skills keep to the open Agent Skills frontmatter
 so every agent can load them. Claude Code also gets a TypeScript LSP from Nix.
 
 Settings files stay writable: Home Manager merges declared keys into them on
@@ -307,7 +307,7 @@ mise run dead         # Find dead code
 mise run clean        # Remove dead code
 mise run flake-check  # Validate flake
 mise run lock-check   # Validate mise lock file
-mise run pi-check     # Check Pi extension versions and launcher migration
+mise run pi-check     # Check Pi extension versions
 mise run pi-extensions-check # Check installed Pi extensions and critical regressions
 mise run secret-check # Scan the tree and history for secrets
 mise run lint         # Run all checks

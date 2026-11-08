@@ -53,12 +53,7 @@ session/project overrides субагентов.
    npm manifest/lock, выполняет `npm ci --ignore-scripts --legacy-peer-deps`, затем явно запускает
    patch-package с ошибкой при несовместимости. Сеть нужна здесь, не во время
    Home Manager activation. Пакеты npm не являются частью Nix generations.
-5. Проверь `type -a pi`: первой должна быть Nix-установка. Активация
-   убирает только `/opt/homebrew/bin/pi`, если это ссылка на старый installer,
-   переименовывая её в `pi.pi-installer-backup` в том же каталоге. Другие
-   launcher-файлы и существующий backup не перезаписываются. Если явно добавлен
-   `~/.pi/agent/bin` в PATH, убери эту запись отдельно. В открытом zsh выполни
-   `rehash`. Сам installer, авторизацию и сессии модуль не удаляет.
+5. Проверь `type -a pi`: первой должна быть Nix-установка.
 6. На новой машине выполни `/login openai`, при необходимости
    `/login openai-api`, `/login anthropic` и авторизацию MCP-серверов через `/mcp`.
    API-запросы, включая диктовку, оплачиваются отдельно.
@@ -335,13 +330,12 @@ Haiku — мягкий предел, не денежный бюджет. Лок�
 Из корня dotfiles:
 
 ```sh
-mise run pi-check             # версии расширений и миграция launcher; входит в общий lint
+mise run pi-check             # версии расширений; входит в общий lint
 mise run pi-extensions-check  # после restore/обновления расширений; отдельно от lint
 ```
 
 Пять файлов:
-- `tests/settings.mjs`: согласованность версий settings/manifest/lock
-  и обратимая миграция launcher без перезаписи чужих файлов/backup.
+- `tests/settings.mjs`: согласованность версий settings/manifest/lock.
 - `tests/extensions.mjs`: загрузка расширений, конфликты клавиш/команд,
   единственный владелец bash; расходы при смене модели родителя и накопительные
   расходы детей; отказ Agent при отсутствии явно выбранной модели.
@@ -356,10 +350,9 @@ mise run pi-extensions-check  # после restore/обновления расш
   только в keyHint-формате; shutdown возвращает исходные методы.
 
 Проверки расширений требуют установленных пакетов с текущими патчами.
-По умолчанию они берут npm-модули из `~/.pi/agent/npm/node_modules` и host
-из старой установки 1.5.0. Для Nix укажи
-`PI_TEST_HOST_MODULES=<путь-к-пакету-Pi>/lib/pi/node_modules`;
-для отдельного npm-дерева — `PI_TEST_NPM_MODULES=<каталог-node_modules>`.
+По умолчанию они берут npm-модули из `~/.pi/agent/npm/node_modules`, а host —
+из Nix-пакета `pi` в PATH (`tests/host.mjs`). Переопределения:
+`PI_TEST_HOST_MODULES=<каталог-node_modules>` и `PI_TEST_NPM_MODULES=<каталог-node_modules>`.
 Тесты не вызывают модели, не читают credentials и не включают микрофон.
 
 Оформление проверяется вручную после UI-изменений: светлая/тёмная тема,

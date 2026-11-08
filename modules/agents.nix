@@ -8,6 +8,15 @@
 let
   rules = ../configs/agents/AGENTS.md;
 
+  playwright-cli = pkgs.buildNpmPackage {
+    pname = "playwright-cli";
+    inherit (lib.importJSON "${inputs.playwright-cli}/package.json") version;
+    src = inputs.playwright-cli;
+    npmDeps = pkgs.importNpmLock { npmRoot = inputs.playwright-cli; };
+    inherit (pkgs.importNpmLock) npmConfigHook;
+    dontNpmBuild = true;
+  };
+
   skills = {
     ui-taste = ../configs/agents/skills/ui-taste;
     frontend-design = "${inputs.claude-plugins-official}/plugins/frontend-design/skills/frontend-design";
@@ -55,7 +64,10 @@ in
       }
     ) skills;
 
-    # Project-scoped .mcp.json files call it by name.
-    packages = [ inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+    packages = [
+      playwright-cli
+      # Project-scoped .mcp.json files call it by name.
+      inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ];
   };
 }

@@ -4,9 +4,9 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { hostModules as host } from "./host.mjs";
 
 const modules = process.env.PI_TEST_NPM_MODULES ?? join(homedir(), ".pi/agent/npm/node_modules");
-const host = process.env.PI_TEST_HOST_MODULES ?? join(homedir(), ".pi/agent/install/releases/1.5.0/node_modules");
 const { loadExtensions, createExtensionRuntime } = await import(pathToFileURL(join(host, "@earendil-works/pi-coding-agent/dist/core/extensions/loader.js")));
 const cwd = mkdtempSync(join(tmpdir(), "pi-background-test-"));
 const runtime = createExtensionRuntime();
