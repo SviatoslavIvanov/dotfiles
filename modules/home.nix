@@ -36,10 +36,6 @@
     };
 
     sessionPath = [ "/Library/TeX/texbin" ];
-
-    file = {
-      ".config/p10k/config.zsh".source = ../configs/p10k.zsh;
-    };
   };
 
   xdg = {
@@ -85,5 +81,6 @@
       enable = true;
       icons.enable = false;
     };
+    zsh-syntax-highlighting.enable = false;
   };
 }

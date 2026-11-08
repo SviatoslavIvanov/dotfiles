@@ -50,6 +50,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    catppuccin-fsh = {
+      url = "github:catppuccin/zsh-fsh";
+      flake = false;
+    };
+
     dotfiles-private = {
       url = "git+ssh://git@github.com/SviatoslavIvanov/dotfiles-private";
       inputs.nixpkgs.follows = "nixpkgs";

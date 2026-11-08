@@ -39,6 +39,7 @@
   system.activationScripts.postActivation.text = lib.mkAfter ''
     pmset -c displaysleep 10 sleep 0
     pmset -b displaysleep 10 sleep 30
+    dscl . -create /Users/${username} UserShell /run/current-system/sw${pkgs.zsh.shellPath}
   '';
 
   users.users.${username} = {
@@ -190,6 +191,12 @@
     # and remain managed by the App Store rather than Homebrew/mas.
   };
 
-  programs.zsh.enable = true;
+  # The HM zshrc runs compinit itself; the global one doubles shell startup.
+  programs.zsh = {
+    enable = true;
+    enableGlobalCompInit = false;
+    enableBashCompletion = false;
+    promptInit = "";
+  };
   environment.shells = [ pkgs.zsh ];
 }

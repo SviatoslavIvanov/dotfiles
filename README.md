@@ -70,7 +70,7 @@ the same value.
 │   ├── claude-code.nix # Claude Code settings, LSP and statusline
 │   ├── codex.nix       # Codex config merge
 │   └── pi.nix          # Pi CLI, configuration and extension restore command
-└── configs/            # Non-Nix configs (agents, mise, p10k, pi)
+└── configs/            # Non-Nix configs (agents, mise, pi)
 ```
 
 ## CLI Tools
@@ -80,7 +80,7 @@ the same value.
 | Tool | Description |
 |------|-------------|
 | **zsh** | Shell with vi-mode, fzf-tab, fast-syntax-highlighting |
-| **powerlevel10k** | Prompt theme |
+| **starship** | Prompt |
 | **fzf** | Fuzzy finder |
 | **zoxide** | Smarter `cd` with frecency |
 | **atuin** | Shell history with fuzzy search |

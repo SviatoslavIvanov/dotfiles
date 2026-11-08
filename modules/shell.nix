@@ -1,104 +1,25 @@
 {
   pkgs,
-  lib,
   config,
   dotfilesDir,
+  inputs,
   ...
 }:
 
 {
-  xdg.configFile."fsh/catppuccin-mocha.ini".text = ''
-    [base]
-    default          = #cdd6f4
-    unknown-token    = #f38ba8,bold
-    commandseparator = #94e2d5
-    redirection      = #94e2d5
-    here-string-tri  = #bac2de
-    here-string-text = #bac2de
-    here-string-var  = #bac2de
-    exec-descriptor  = none
-    comment          = #6c7086
-    correct-subtle   = #b4befe
-    incorrect-subtle = #eba0ac
-    subtle-separator = none
-    subtle-bg        = none
-    secondary        =
-    recursive-base   = #cdd6f4
-
-    [command-point]
-    reserved-word     = #cba6f7
-    subcommand        = #74c7ec
-    alias             = #89b4fa
-    suffix-alias      = #89b4fa
-    global-alias      = #89b4fa
-    builtin           = #cba6f7
-    function          = #89b4fa
-    command           = #89b4fa
-    precommand        = #cba6f7
-    hashed-command    = #89b4fa
-    single-sq-bracket = #f9e2af
-    double-sq-bracket = #f9e2af
-    double-paren      = #a6e3a1
-
-    [paths]
-    path          = #f5e0dc
-    pathseparator = #f5e0dc
-    path-to-dir   = #f5e0dc
-    globbing      = #f5c2e7
-    globbing-ext  = none
-
-    [brackets]
-    paired-bracket  = bold
-    bracket-level-1 = #f38ba8
-    bracket-level-2 = #f9e2af
-    bracket-level-3 = #74c7ec
-
-    [arguments]
-    single-hyphen-option   = #94e2d5
-    double-hyphen-option   = #94e2d5
-    back-quoted-argument   = #94e2d5
-    single-quoted-argument = #a6e3a1
-    double-quoted-argument = #a6e3a1
-    dollar-quoted-argument = #a6e3a1
-    optarg-string          = #a6e3a1
-    optarg-number          = #fab387
-
-    [in-string]
-    back-dollar-quoted-argument           = #fab387
-    back-or-dollar-double-quoted-argument = #fab387
-
-    [other]
-    variable             = #fab387
-    assign               = none
-    assign-array-bracket = none
-    history-expansion    = none
-
-    [math]
-    mathvar = #f5c2e7
-    mathnum = #fab387
-    matherr = #f38ba8,bold
-
-    [for-loop]
-    forvar  = #cdd6f4
-    fornum  = #fab387
-    foroper = #89b4fa
-    forsep  = #89b4fa
-
-    [case]
-    case-input       = #fab387
-    case-parentheses = #9399b2
-    case-condition   = #cba6f7
-  '';
-
   programs = {
     zsh = {
       enable = true;
       dotDir = "${config.xdg.configHome}/zsh";
       autosuggestion.enable = true;
-      syntaxHighlighting.enable = false;
-      historySubstringSearch.enable = true;
-      enableCompletion = true;
       autocd = true;
+
+      fastSyntaxHighlighting = {
+        enable = true;
+        theme = "${inputs.catppuccin-fsh}/themes/catppuccin-mocha.ini";
+      };
+
+      localVariables.ZVM_INIT_MODE = "sourcing";
 
       history = {
         size = 10000;
@@ -127,7 +48,6 @@
         gco = "git checkout";
         gb = "git branch";
         glog = "git log --oneline --graph --decorate";
-        lg = "lazygit";
 
         d = "docker";
         dc = "docker compose";
@@ -139,15 +59,9 @@
 
         t = "tmux new-session -A -s";
         ta = "tmux attach";
-
       };
 
       plugins = [
-        {
-          name = "powerlevel10k";
-          src = pkgs.zsh-powerlevel10k;
-          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-        }
         {
           name = "fzf-tab";
           src = pkgs.zsh-fzf-tab;
@@ -158,71 +72,50 @@
           src = pkgs.zsh-vi-mode;
           file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
         }
-        {
-          name = "fast-syntax-highlighting";
-          src = pkgs.zsh-fast-syntax-highlighting;
-          file = "share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh";
+      ];
+
+      initContent = ''
+        # A generation built from uncommitted files cannot be rebuilt on
+        # another machine, and the flake silently ignores untracked ones.
+        function _dotfiles_require_clean() {
+          local changes
+          changes=$(git -C "${dotfilesDir}" status --porcelain) || return
+          [[ -z $changes || -n $REBUILD_DIRTY ]] && return 0
+          print -u2 "dotfiles have uncommitted changes; commit them or rerun with REBUILD_DIRTY=1:"
+          print -u2 -r -- "$changes"
+          return 1
         }
-      ];
 
-      initContent = lib.mkMerge [
-        (lib.mkBefore ''
-          if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-            source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-          fi
-        '')
-        ''
-          function zvm_after_init() {
-            source <(fzf --zsh)
-            eval "$(atuin init zsh)"
-          }
+        function rebuild() {
+          _dotfiles_require_clean && \
+            nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
+            sudo darwin-rebuild switch --flake "${dotfilesDir}#svyat-mac" --no-update-lock-file "$@"
+        }
 
-          # A generation built from uncommitted files cannot be rebuilt on
-          # another machine, and the flake silently ignores untracked ones.
-          function _dotfiles_require_clean() {
-            local changes
-            changes=$(git -C "${dotfilesDir}" status --porcelain) || return
-            [[ -z $changes || -n $REBUILD_DIRTY ]] && return 0
-            print -u2 "dotfiles have uncommitted changes; commit them or rerun with REBUILD_DIRTY=1:"
-            print -u2 -r -- "$changes"
-            return 1
-          }
+        # Only the refreshed flake.lock may be uncommitted when it rebuilds.
+        function update() {
+          _dotfiles_require_clean && \
+            nix flake update --flake "${dotfilesDir}" && \
+            mise --cd "${dotfilesDir}" run lint && \
+            REBUILD_DIRTY=1 rebuild
+        }
 
-          function rebuild() {
-            _dotfiles_require_clean && \
-              nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
-              sudo darwin-rebuild switch --flake "${dotfilesDir}#svyat-mac" --no-update-lock-file "$@"
-          }
+        function generations() {
+          sudo darwin-rebuild --list-generations "$@"
+        }
 
-          # Only the refreshed flake.lock may be uncommitted when it rebuilds.
-          function update() {
-            _dotfiles_require_clean && \
-              nix flake update --flake "${dotfilesDir}" && \
-              mise --cd "${dotfilesDir}" run lint && \
-              REBUILD_DIRTY=1 rebuild
-          }
+        function rollback() {
+          sudo darwin-rebuild switch --rollback "$@"
+        }
 
-          function generations() {
-            sudo darwin-rebuild --list-generations "$@"
-          }
-
-          function rollback() {
-            sudo darwin-rebuild switch --rollback "$@"
-          }
-
-          [[ -f ~/.config/p10k/config.zsh ]] && source ~/.config/p10k/config.zsh
-
-          zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
-
-          [[ -v functions[fast-theme] ]] && fast-theme XDG:catppuccin-mocha -q
-        ''
-      ];
+        zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
+      '';
     };
 
     fzf = {
       enable = true;
-      enableZshIntegration = false; # manual init in zvm_after_init (zsh-vi-mode resets keybindings)
       defaultCommand = "fd --type f --hidden --follow --exclude .git";
+      historyWidget.command = "";
       defaultOptions = [
         "--height=50%"
         "--layout=reverse"
@@ -232,7 +125,6 @@
 
     zoxide = {
       enable = true;
-      enableZshIntegration = true;
       options = [
         "--cmd"
         "c"
@@ -249,8 +141,6 @@
 
     atuin = {
       enable = true;
-      enableZshIntegration = false; # manual init in zvm_after_init to load after fzf
-
       settings = {
         auto_sync = false;
         search_mode = "fuzzy";
@@ -281,9 +171,8 @@
       };
     };
 
-    mise = {
-      enable = true;
-      enableZshIntegration = true;
-    };
+    mise.enable = true;
+
+    starship.enable = true;
   };
 }

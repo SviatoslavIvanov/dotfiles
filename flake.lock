@@ -129,6 +129,22 @@
         "type": "github"
       }
     },
+    "catppuccin-fsh": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721499232,
+        "narHash": "sha256-WeqvsKXTO3Iham+2dI1QsNZWA8Yv9BHn1BgdlvR8zaw=",
+        "owner": "catppuccin",
+        "repo": "zsh-fsh",
+        "rev": "a9bdf479f8982c4b83b5c5005c8231c6b3352e2a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "zsh-fsh",
+        "type": "github"
+      }
+    },
     "claude-plugins-official": {
       "flake": false,
       "locked": {
@@ -510,6 +526,7 @@
     "root": {
       "inputs": {
         "catppuccin": "catppuccin",
+        "catppuccin-fsh": "catppuccin-fsh",
         "claude-plugins-official": "claude-plugins-official",
         "dotfiles-private": "dotfiles-private",
         "home-manager": "home-manager_2",
