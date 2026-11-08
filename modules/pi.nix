@@ -95,6 +95,11 @@ in
         # Pi loads one context file per directory and has no imports.
         ".pi/agent/AGENTS.md".text =
           builtins.readFile ../configs/agents/AGENTS.md + "\n" + builtins.readFile (source + "/AGENTS.md");
+        # Pi reads skills from the Agent Skills location, shared with other harnesses.
+        ".agents/skills" = {
+          source = ../configs/agents/skills;
+          recursive = true;
+        };
         ".pi/agent/stt.json".text = builtins.toJSON (
           stt
           // {

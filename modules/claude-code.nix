@@ -24,21 +24,31 @@ let
       pr = "";
     };
 
-    outputStyle = "explanatory";
+    outputStyle = "default";
   };
   managedFile = pkgs.writeText "claude-managed.json" (builtins.toJSON managed);
 in
 {
-  home.activation.claudeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    run ${pkgs.coreutils}/bin/env PATH=${
-      lib.makeBinPath [
-        pkgs.coreutils
-        pkgs.jq
-      ]
-    } \
-      ${pkgs.bash}/bin/bash ${../configs/claude-code/merge-settings.sh} \
-      "$HOME/.claude/settings.json" ${managedFile}
-  '';
+  home = {
+    activation.claudeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${pkgs.coreutils}/bin/env PATH=${
+        lib.makeBinPath [
+          pkgs.coreutils
+          pkgs.jq
+        ]
+      } \
+        ${pkgs.bash}/bin/bash ${../configs/claude-code/merge-settings.sh} \
+        "$HOME/.claude/settings.json" ${managedFile}
+    '';
+
+    file = {
+      ".claude/CLAUDE.md".source = ../configs/agents/AGENTS.md;
+      ".claude/skills" = {
+        source = ../configs/agents/skills;
+        recursive = true;
+      };
+    };
+  };
 
   xdg.configFile."claude-code/statusline.sh" = {
     executable = true;

@@ -66,8 +66,9 @@ the same value.
 │   ├── aerospace.nix   # AeroSpace workspaces and window rules
 │   ├── stylix.nix      # Shared fonts and base16 theme
 │   ├── zed.nix         # Zed editor settings
-│   └── claude-code.nix # Claude Code settings
-└── configs/            # Non-Nix configs (nvim, p10k)
+│   ├── claude-code.nix # Claude Code settings and global instructions
+│   └── pi.nix          # Pi CLI, configuration and extension restore command
+└── configs/            # Non-Nix configs (agents, claude-code, p10k, pi)
 ```
 
 ## CLI Tools
@@ -220,6 +221,21 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 | **claude** | Claude desktop app |
 | **claude-code** | Claude CLI agent |
 | **codex** | OpenAI Codex CLI |
+| **pi** | Extensible coding harness; pinned CLI and non-secret config via Nix |
+
+Personal agent instructions live in [`configs/agents/AGENTS.md`](configs/agents/AGENTS.md):
+Claude Code reads them as `~/.claude/CLAUDE.md`, Pi as the head of
+`~/.pi/agent/AGENTS.md` (followed by the Pi-only part from `configs/pi`).
+Skills from [`configs/agents/skills`](configs/agents/skills) load only when a task
+needs them: Claude Code finds them in `~/.claude/skills`, Pi in `~/.agents/skills`.
+
+Pi configuration lives in [`configs/pi`](configs/pi/README.md), managed by
+[`modules/pi.nix`](modules/pi.nix). Credentials, sessions, trust decisions, and
+caches remain local. Settings stay writable; Nix restores declared preferences
+on activation without replacing Pi's runtime keys. Extension dependencies and
+four local patches are restored explicitly with `pi-restore-extensions`, not
+during activation. Stop Pi before rebuilding/restoring; see the Pi README for
+first-migration file collisions, legacy PATH precedence, and offline checks.
 
 ### Nix Tooling
 
@@ -269,6 +285,8 @@ mise run clean        # Remove dead code
 mise run flake-check  # Validate flake
 mise run claude-check # Validate lossless Claude settings merge
 mise run lock-check   # Validate mise lock file
+mise run pi-check     # Check Pi settings preservation and launcher migration
+mise run pi-extensions-check # Check installed Pi extensions and critical regressions
 mise run secret-check # Scan the tree and history for secrets
 mise run lint         # Run all checks
 ```
