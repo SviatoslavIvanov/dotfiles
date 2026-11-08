@@ -1,22 +1,11 @@
 result
 result-*
-.direnv
 
-.DS_Store
 ._*
-
 .local/
-
-*.swp
-*.swo
-*~
-.idea/
-.vscode/
 
 *.gpg
 *.asc
 .env
 .env.*
 secrets/
-
-.claude/settings.local.json
