@@ -255,7 +255,7 @@ in
           run = "layout floating";
         }
         {
-          "if" = "test %{app-bundle-id} = com.parallels.desktop.console";
+          "if" = "test %{app-bundle-id} = com.vmware.fusion";
           run = "layout floating";
         }
       ];

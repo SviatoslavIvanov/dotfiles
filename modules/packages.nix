@@ -39,6 +39,12 @@ in
     _1password-cli
     cloudflared
     postgresql
+    actionlint
+    djvulibre
+    _7zz
+    plantuml
+    openssh
+    shellcheck
     ffmpeg
     poppler-utils
     tesseract

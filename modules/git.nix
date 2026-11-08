@@ -47,7 +47,6 @@ in
         pull.rebase = true;
         push.autoSetupRemote = true;
         fetch.prune = true;
-        fetch.pruneTags = true;
         rebase.autoStash = true;
         branch.sort = "-committerdate";
         merge.conflictstyle = "zdiff3";

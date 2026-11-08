@@ -126,7 +126,6 @@
     };
 
     brews = [
-      "openssh"
       {
         name = "FelixKratz/formulae/borders";
         trusted = true;
@@ -155,7 +154,6 @@
       "discord"
       "ghostty"
       "google-chrome"
-      "iina"
       "jordanbaird-ice"
       "linear"
       "mac-mouse-fix"
@@ -163,14 +161,10 @@
       "moonlight"
       "obsidian"
       "orbstack"
-      # "parallels" — the current app was restored with the vendor installer
-      # after an old Homebrew upgrade failure. Leave it vendor-managed until it
-      # is deliberately adopted by Homebrew; VMs in ~/Parallels are separate.
       "pritunl"
       # qBittorrent 5.2.3 fails Gatekeeper (self-signed, not notarized), and
       # Homebrew disables the cask on 2026-09-01. Keep the verified current app
       # installed but unmanaged until upstream ships a Developer ID build.
-      "raindropio"
       "raycast"
       "signal"
       "spotify"
@@ -186,7 +180,6 @@
       "zoom"
       "homerow"
       "input-source-pro"
-      "skim"
       "codex"
     ];
 

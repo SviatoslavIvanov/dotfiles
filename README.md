@@ -189,7 +189,8 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 | **orbstack** | Docker & Linux VMs for macOS |
 | **lazydocker** | Docker TUI |
 | **ansible** | Infrastructure automation (pipelining enabled) |
-| **utm** | Virtual machines |
+| **VMware Fusion** | Primary general-purpose VM app (vendor-managed) |
+| **utm** | Existing Windows labs and emulation |
 
 ### Data & HTTP
 
@@ -207,7 +208,7 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 | **glow** | Markdown viewer |
 | **ouch** | Universal archiver |
 | **ragenix** | Secrets management |
-| **openssh** | Homebrew OpenSSH with FIDO2 support |
+| **openssh** | Nix OpenSSH with built-in FIDO2 support |
 | **coreutils** | GNU core utilities |
 | **gnused** | GNU sed |
 | **curl** / **wget** | HTTP clients |
@@ -231,13 +232,13 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 
 ## GUI Apps (via Homebrew)
 
-**Productivity:** Raycast, Obsidian, Todoist, Raindrop.io, Linear
+**Productivity:** Raycast, Obsidian, Todoist, Linear
 
 **Browsers:** Arc, Google Chrome
 
 **Communication:** Telegram, WhatsApp, Signal, Discord, Mattermost, Zoom
 
-**Media:** Spotify, IINA
+**Media:** Spotify
 
 **Security:** 1Password (+ CLI), AmneziaVPN, Pritunl
 
@@ -246,7 +247,7 @@ this is not a read-only mode. Source/tooling folders such as `.husky`,
 **Utilities:** Ice (menu bar), Mac Mouse Fix
 
 **Unmanaged exceptions:** qBittorrent stays installed until upstream ships a
-Gatekeeper-compliant build; Parallels Desktop uses its vendor installer; VIA
+Gatekeeper-compliant build; VMware Fusion uses its vendor installer; VIA
 keyboards are configured with the maintained [VIA web app](https://usevia.app/).
 
 ## Fonts
@@ -301,6 +302,11 @@ generations and are not reverted by `darwin-rebuild --rollback`.
 
 The mise config/lock are writable links into `$DOTFILES_DIR` so mise can update
 them. Git, rather than Nix generations, is their rollback mechanism.
+
+CLI tools belong to Nix. When migrating an existing Brew installation, build
+and activate Nix first, verify command paths, then remove Brew duplicates
+without `--ignore-dependencies` or automatic dependency cleanup. Borders stays
+with the Brew-managed AeroSpace for now.
 
 Collect unreachable Nix store paths without deleting profile generations:
 ```bash
