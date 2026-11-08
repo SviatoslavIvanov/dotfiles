@@ -2,24 +2,28 @@
   "nodes": {
     "agenix": {
       "inputs": {
-        "darwin": "darwin",
-        "home-manager": "home-manager",
+        "darwin": [
+          "dotfiles-private"
+        ],
+        "home-manager": [
+          "dotfiles-private"
+        ],
         "nixpkgs": [
           "dotfiles-private",
           "nixpkgs"
-        ],
-        "systems": "systems"
+        ]
       },
       "locked": {
-        "lastModified": 1762618334,
-        "narHash": "sha256-wyT7Pl6tMFbFrs8Lk/TlEs81N6L+VSybPfiIgzU8lbQ=",
+        "lastModified": 1790530381,
+        "narHash": "sha256-/FjF9A8HVLVftjdmz1MPA2G0wSYWRaC628NTAsCqeyI=",
         "owner": "ryantm",
         "repo": "agenix",
-        "rev": "fcdea223397448d35d9b31f798479227e80183f6",
+        "rev": "9353cb29366a8535ac9483065284785fd48012a2",
         "type": "github"
       },
       "original": {
         "owner": "ryantm",
+        "ref": "0.18.0",
         "repo": "agenix",
         "type": "github"
       }
@@ -93,29 +97,6 @@
         "type": "github"
       }
     },
-    "darwin": {
-      "inputs": {
-        "nixpkgs": [
-          "dotfiles-private",
-          "agenix",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1744478979,
-        "narHash": "sha256-dyN+teG9G82G+m+PX/aSAagkC+vUv0SgUw3XkPhQodQ=",
-        "owner": "lnl7",
-        "repo": "nix-darwin",
-        "rev": "43975d782b418ebf4969e9ccba82466728c2851b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lnl7",
-        "ref": "master",
-        "repo": "nix-darwin",
-        "type": "github"
-      }
-    },
     "devshell": {
       "inputs": {
         "nixpkgs": [
@@ -145,11 +126,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794158441,
-        "narHash": "sha256-ZU88H0KNb7fZTghaALXw6nPTc+P28Tq5Ajj/QLPQnEM=",
+        "lastModified": 1794169261,
+        "narHash": "sha256-+wDV5kzTKs1iv+tu0j+3n0SV6VnAoI4ql121syjtLpE=",
         "ref": "refs/heads/main",
-        "rev": "38c8b4de8ff5d261f95ed4d895deb064eba44d57",
-        "revCount": 42,
+        "rev": "8afab2ad3450243336aad3dcf94840e87b42bf86",
+        "revCount": 43,
         "type": "git",
         "url": "ssh://git@github.com/SviatoslavIvanov/dotfiles-private"
       },
@@ -177,28 +158,6 @@
       }
     },
     "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "dotfiles-private",
-          "agenix",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1745494811,
-        "narHash": "sha256-YZCh2o9Ua1n9uCvrvi5pRxtuVNml8X2a03qIFfRKpFs=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "abfad3d2958c9e6300a883bd443512c55dfeb1be",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_2": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -364,7 +323,7 @@
         "catppuccin-fsh": "catppuccin-fsh",
         "claude-plugins-official": "claude-plugins-official",
         "dotfiles-private": "dotfiles-private",
-        "home-manager": "home-manager_2",
+        "home-manager": "home-manager",
         "mcp-nixos": "mcp-nixos",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
@@ -388,21 +347,6 @@
         "owner": "getsentry",
         "ref": "v1.4.6",
         "repo": "plugin-claude",
-        "type": "github"
-      }
-    },
-    "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
         "type": "github"
       }
     }

@@ -155,38 +155,9 @@ Codex. Built-in agent model overrides and the inline-assistant shortcut are
 removed; new-thread leader bindings launch Codex directly. The shared Agent
 Panel stays enabled because disabling all AI also disables external ACP agents.
 
-Sticky scope headers, smart-case search, and inline agent edit review are enabled.
-The quiet UI hides account/onboarding controls, collaboration and search buttons,
-inline diagnostic text, inlay hints, diagnostic badges, tab icons, and quick-action
-menus. Breadcrumbs, project/branch identity, Git markers, and review controls stay
-visible. Inlay hints remain available on demand with `Space u i`. The commit
-editor starts collapsed. Catppuccin Mocha keeps its peach accent and syntax colors,
-with matching panel backgrounds, neutral separators, a subtle active-line tint,
-and a non-blinking cursor. Stock Zed icons keep the file tree quiet.
-
-The UI uses Zed's proportional font at 26 px; code uses Monaspice at 22 px with
-1.4 line height. Agent responses use 28 px and its input/code font uses 24 px.
-Navigation and agent prose are enlarged independently for comfortable reading
-on the external monitor, without increasing the editor's code size.
-Automatic documentation popovers are disabled; request documentation with `K`
-in Vim normal mode or `Cmd K`, `Cmd I`.
-Navigation panels default to 280 px, and the agent defaults to a fixed 560 px.
-Existing windows may retain manually resized docks; these are reset defaults,
-not enforced proportions. The right dock can be hidden for wide diff reviews.
-
-File finder and file-tree navigation use preview tabs; pin a tab or open it
-permanently to keep it. Reference multibuffers remain permanent while browsing
-their source files. The tree no longer follows every code-navigation jump;
-`Space f E` reveals the current file explicitly. Branch comparison opens a
-separate view without changing the normal HEAD-based diff. Outline retains
-symbol and search-match details instead of globally hiding them in multibuffers.
-
-The review-oriented defaults disable autosave, AI edit predictions, automatic
-completion menus, and signature popups; use absolute line numbers; display Git changes as a file
-tree; and show blame/commit summaries in the status bar. Split diffs automatically
-fall back to unified diffs below 100 em of editor width. Buffers remain editable;
-this is not a read-only mode. Source/tooling folders such as `.husky`,
-`.storybook`, `.vscode`, and `bin` remain searchable unless ignored by the project.
+Zed is tuned as a quiet review surface: no autosave, edit predictions or automatic
+popups, larger UI and agent fonts than code, and Vim leader bindings; the details
+live in [`modules/zed.nix`](modules/zed.nix).
 
 ### DevOps & Containers
 
@@ -239,8 +210,8 @@ One source in [`modules/agents.nix`](modules/agents.nix) feeds all three agents:
 Third-party skills come from pinned flake inputs (`claude-plugins-official`,
 `playwright-cli`, `sentry-plugin-claude`); `nix flake update` brings their
 changes as a reviewable lock diff. The `playwright-cli` input also builds the
-CLI, so the CLI and its skill share one version. Skills keep to the open Agent Skills frontmatter
-so every agent can load them. Claude Code also gets a TypeScript LSP from Nix.
+CLI, so the CLI and its skill share one version. Skills keep to the open Agent
+Skills frontmatter so every agent can load them. Claude Code also gets a TypeScript LSP from Nix.
 
 Settings files stay writable: Home Manager merges declared keys into them on
 activation (`mutableSettings` for Claude Code and Pi, `mkImpureConfigMerger`
