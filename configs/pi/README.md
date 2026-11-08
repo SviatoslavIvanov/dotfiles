@@ -84,7 +84,7 @@ session/project overrides субагентов. Общие пользовате�
 | pi-codemode-compact 0.5.0 | Компактный вывод codemode |
 | pi-minimal-footer 0.14.0 | Footer; исторические модели родителя и API-расходы детей, без дублирующих счётчиков активности |
 | pi-subagents-lite 1.18.0 | Субагенты; передача стоимости в footer и ошибка вместо подмены отсутствующей модели; меню и виджет в общем стиле |
-| @amaster.ai/pi-computer-use 0.1.36 | Управление приложениями/браузером; bundled Cua Driver 0.37.0, lazy tools и подтверждения |
+| codex-computer-use-mcp 0.7.1 | Computer Use через официальный runtime ChatGPT.app (`cua_repl`): приложения и браузер, AX-дерево, фоновый курсор |
 | @pi-archimedes/image-paste 2.13.0 | Ctrl+V вставляет картинку маркером `[Image #1]` и прикрепляет её к сообщению с превью, как Claude Code; встроенный `app.clipboard.pasteImage` отвязан в keybindings.json |
 | @juicesharp/rpiv-ask-user-question 2.15.0 | ask_user_question как в Claude Code: вкладки, мультивыбор, ввод «Type something.» прямо в строке; патч: пустая строка ввода сохраняет тусклую подпись, серые рамки, подсказки внутри рамки в общем формате; UI на английском (rpiv-i18n не ставим) |
 
@@ -120,38 +120,39 @@ MacBook по имени, максимум 5 минут. Имя микрофон�
 на другом Mac; Ghostty нужно разрешение macOS. Запись по Ctrl+R вставляет
 текст для проверки, без отдельной LLM-обработки.
 
-## Computer Use (Amaster)
+## Computer Use
 
-Подключён `@amaster.ai/pi-computer-use@0.1.36` с bundled Cua Driver 0.37.0.
-Драйвер macOS поставляется optional npm-пакетом: при restore не используй
-`--omit=optional`. Отдельный сервис и установка через Codex Desktop не нужны.
-В настройки добавлен `defaultTools: ["+codemode"]`: он дополняет штатные
-инструменты и позволяет находить desktop-инструменты по необходимости.
+Подключён `codex-computer-use-mcp@0.7.1`: он даёт Pi официальный runtime
+Computer Use из ChatGPT.app, тот же `cua_repl`, через который работает Codex.
+Окна читаются через дерево Accessibility, действия идут виртуальным курсором
+в фоне, без вывода окна вперёд. JS для `cua_repl` пишет текущая модель Pi.
+Пакет запускает подписанный app-server ChatGPT с отключённым провайдером
+моделей и без учётных данных, поэтому лимит подписки ChatGPT он не тратит.
+Описания инструментов берутся из установленного ChatGPT при загрузке.
 
-- `toolProfile: "lazy"`: схемы driver-инструментов доступны через discovery
-  codemode, а не загружаются все сразу. На macOS драйвер стартует при первом
-  обращении, не при запуске Pi.
-- `confirmAppLaunch` и `confirmDangerousActions` включены. Это подтверждения
-  отдельных действий, не каждого клика и не sandbox. В неинтерактивном режиме
-  операции, требующие подтверждения, отклоняются.
-- Отдельная `visionModel` не задана: используется текущая модель Pi; скриншоты
-  требуют поддержки изображений. Дополнительный Perception/OCR не установлен
-  и не требуется для базового использования.
-- Скриншоты и прочитанный текст окон могут попадать в контекст выбранного
-  провайдера. Не открывай секретные данные ради проверки подключения.
+- Нужны ChatGPT.app в `/Applications` с компонентом Computer Use
+  (`~/.codex/computer-use/`) и аккаунт, на котором OpenAI включил unified
+  runtime. Настройки runtime ChatGPT пишет в
+  `~/.codex/plugins/cache/openai-bundled/unified-computer-use/<версия>/`
+  при запуске: после обновления ChatGPT открой его один раз. Без них пакет
+  регистрирует устаревшие `computer_use_<method>` вместо `cua_repl`.
+- Инструменты `cua_repl` и `cua_repl_reset`, состояние компонентов и маршрута
+  в `/computer-use-status`. Аудит без содержимого окон пишется в
+  `~/.pi/agent/direct-computer-use/`.
+- Разрешения macOS Accessibility и Screen & System Audio Recording выдаются
+  приложению **Codex Computer Use**.
+- В адаптере нет подтверждений, allowlist приложений и фильтра опасных
+  действий. Сервис по умолчанию не управляет самим ChatGPT; глобальный
+  `ComputerUseAllowForbiddenTargets` не включаем.
+- Пакет держится на экспериментальном API app-server: обновление ChatGPT может
+  его сломать, ошибки и шаги восстановления описаны в README пакета. Зависший
+  сервис: `pkill -f MacOS/SkyComputerUseService`.
+- AX-дерево и скриншоты попадают в контекст выбранного провайдера, через API
+  это заметные токены. Для сложных задач со скриншотами OpenAI рекомендует
+  GPT-6 Astra. Не открывай секретные данные ради проверки подключения.
 
-После rebuild и `pi-restore-extensions` при закрытых сессиях запусти Pi заново.
-Первый вызов может запросить разрешения macOS для **CuaDriver.app**
-(`com.trycua.driver`): System Settings → Privacy & Security → Accessibility
-и Screen & System Audio Recording. Разрешения выдаёт пользователь; после
-их изменения может потребоваться перезапуск Pi/драйвера.
-
-Начни с запроса: «Используй Computer Use: только перечисли приложения,
-не открывай окна, не делай скриншотов и ничего не нажимай». При lazy-профиле
-агент находит инструменты через codemode. Доступен также
-`/computer-use-tools` для списка групп и `/computer-use-tools browser` для
-активации браузерных инструментов. Для полного workflow есть
-`/skill:computer-use`; наблюдай состояние, действуй и проверяй результат.
+Начни с запроса: «Используй cua_repl: прочитай Finder и перечисли его окна,
+ничего не нажимай».
 
 ## Единый UI
 

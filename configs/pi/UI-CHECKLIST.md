@@ -55,7 +55,7 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 | pi-subagents-lite `/agents`, widget ↓ Enter | S; главное меню, running/queued + actions, spawn wizard (type/prompt/model/overrides), settings (model/concurrency/behavior/system prompt/widget), debug и conversation viewer/steering/continue | Общая собственная SettingsListWrapper уплотнена: нейтральные рамки/title, видимые Enter/Esc. screens.mjs R B: frame/navigation/prompt. Агенты не запускались; все экраны wizard/settings не пройдены end-to-end |
 | pi-minimal-footer `/minfooter` | S; footer + status/help notifications, опциональный compact editor | extensions.mjs B: billing и история расходов. Основной footer не переделывался |
 | pi-codemode-compact | S; компактный tool result, раскрытие вывода | Не отдельный экран настроек; оценка полного/свернутого результата остаётся в ручной приёмке |
-| @amaster.ai/pi-computer-use `/computer-use-tools`, `/computer-use-connect` | S; обычные notifications, launch/high-risk confirmations через общий confirm, tool output | Общий confirm R; разрешения безопасности не ослаблены. Приложения не открывались и опасные действия не исполнялись |
+| codex-computer-use-mcp `/computer-use-status` | S; status notification, tool output с текстом и изображениями, официальные запросы runtime через общий select и editor | Общий select R; собственных подтверждений действий у адаптера нет. Опасные действия не исполнялись |
 | @juicesharp/rpiv-ask-user-question | S R B; tabs/options/multi-select/custom answer/notes/preview/collapse/submit/cancel | ui.mjs: content-sized dialog без пустого хвоста. Сочетания всех состояний и реальная работа фокуса/мыши — ручной чек |
 | @pi-archimedes/image-paste | S; shortcut offer через общий confirm, attachment marker/preview/errors | Общий confirm R; clipboard, Quick Look и keybinding-файлы не изменяются ради проверки |
 | @dietrichgebert/ponytail | S; `/ponytail*`, статус/help/report в чате | Не отдельное интерактивное окно; никакого редизайна текстовых отчётов или запуска агента ради UI |
@@ -109,7 +109,7 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 8. `/mcp`: empty/loading/connected/error, menu refresh, server details/tools, sign-in cancel.
    `/login` и `/trust` — сначала только open/cancel, без смены credentials/trust.
 9. STT profiles/recording/cancel/error, stored search actions, browser curator отдельно,
-   computer-use confirmations с отказом, clipboard offer/attachment preview.
+   запросы Computer Use runtime с отказом, clipboard offer/attachment preview.
 10. Light/dark, IME/кириллица, клавиатура/мышь, возврат в редактор с исходным черновиком.
 
 Внешняя авторизация, первый запуск, разрешения macOS и удаление ресурсов не должны

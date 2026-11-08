@@ -2,10 +2,10 @@
   "name": "pi-extensions",
   "private": true,
   "dependencies": {
-    "@amaster.ai/pi-computer-use": "0.1.36",
     "@dietrichgebert/ponytail": "5.3.3",
     "@juicesharp/rpiv-ask-user-question": "2.15.0",
     "@pi-archimedes/image-paste": "2.13.0",
+    "codex-computer-use-mcp": "0.7.1",
     "patch-package": "8.0.1",
     "pi-bg-tasks": "0.1.4",
     "pi-codemode-compact": "0.5.0",

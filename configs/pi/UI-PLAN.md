@@ -23,7 +23,7 @@
 | `/resume`, `/tree` | Есть поиск/фильтры, собственные маркеры и насыщенные подсказки | Сохранить специализированную навигацию; `/resume` уплотнён, `/tree` получил компактный chrome и справку по F1; UI остаётся английским |
 | Обычные select/input/confirm | Общие `extension-selector` / `extension-input` с рамками и Spacer | Исправлять общие компоненты, а не каждый вызывающий плагин |
 | `/login`, доверие проекту | Общая тема, но отдельный layout и английский текст | Унифицировать осторожно; сохранить предупреждения, область действия и явные подтверждения |
-| Файлы/diff, MCP, web curator, STT, computer-use confirmations | Есть дополнительные поверхности расширений | Все внесены в UI-CHECKLIST; MCP manager и browser curator не покрываются правкой общих selectors |
+| Файлы/diff, MCP, web curator, STT, запросы Computer Use runtime | Есть дополнительные поверхности расширений | Все внесены в UI-CHECKLIST; MCP manager и browser curator не покрываются правкой общих selectors |
 
 Источники для воспроизведения: `dist/modes/interactive/components/` установленного Pi;
 `rpiv-ask-user-question/view/dialog-builder.ts` и `presentation.ts`;
@@ -165,7 +165,7 @@ UI остаётся английским, i18n-пакет и настройка 
   короткие проверки новой логики layout, адаптеров и маршрутизации действий.
 - Ручной обход: `/model`, `/settings`, тема/effort, `/resume`, `/tree`, `/agents`,
   `/attach`, `/bg-tasks`, `/tasks`, вопросы, `/files`, MCP, web curator, STT,
-  login/trust и computer-use confirmations (без запуска опасных действий).
+  login/trust и запросы Computer Use runtime (без запуска опасных действий).
 
 ## Внешние ориентиры
 
