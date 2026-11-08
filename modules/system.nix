@@ -36,8 +36,7 @@ in
   };
   environment.shells = [ pkgs.zsh ];
 
-  # systemsetup only changes the active power profile, so pin both: a brief unplug from the
-  # dock must not inherit a one-minute battery sleep, while real battery use keeps a timeout.
+  # systemsetup sets only the active power profile; pin both so a brief unplug never sleeps within a minute.
   system.activationScripts.postActivation.text = lib.mkAfter ''
     pmset -c displaysleep 10 sleep 0
     pmset -b displaysleep 10 sleep 30

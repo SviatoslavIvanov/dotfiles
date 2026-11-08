@@ -1,11 +1,12 @@
 {
-  dotfilesDir,
+  config,
   lib,
   osConfig,
   ...
 }:
 
 let
+  flake = ''(builtins.getFlake "${config.home.sessionVariables.DOTFILES_DIR}")'';
   biome.formatter.language_server.name = "biome";
   biomeWithFixes = biome // {
     code_actions_on_format = {
@@ -25,7 +26,7 @@ let
       reveal_target = "center";
     }
   ];
-  dotfiles = ''(builtins.getFlake "${dotfilesDir}").darwinConfigurations.${osConfig.networking.hostName}'';
+  dotfiles = "${flake}.darwinConfigurations.${osConfig.networking.hostName}";
   paneNavigation = {
     "ctrl-h" = "workspace::ActivatePaneLeft";
     "ctrl-l" = "workspace::ActivatePaneRight";
@@ -160,7 +161,7 @@ in
         ];
         biome.settings.require_config_file = true;
         nixd.settings = {
-          nixpkgs.expr = ''import (builtins.getFlake "${dotfilesDir}").inputs.nixpkgs { }'';
+          nixpkgs.expr = "import ${flake}.inputs.nixpkgs { }";
           options = {
             nix-darwin.expr = "${dotfiles}.options";
             home-manager.expr = "${dotfiles}.options.home-manager.users.type.getSubOptions [ ]";

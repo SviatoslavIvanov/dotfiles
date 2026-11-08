@@ -27,8 +27,7 @@ let
   };
 in
 {
-  # Not programs.codex: with preferXdgDirectories it moves CODEX_HOME to ~/.config/codex,
-  # which the ChatGPT desktop app never reads.
+  # Not programs.codex: with preferXdgDirectories it moves CODEX_HOME where the ChatGPT app never looks.
   home.activation.codexConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] (
     lib.hm.generators.mkImpureConfigMerger {
       inherit pkgs;

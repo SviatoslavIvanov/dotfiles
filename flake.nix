@@ -71,7 +71,6 @@
       hostname = "svyat-mac";
       username = "ivsv";
       homeDirectory = "/Users/${username}";
-      dotfilesDir = "${homeDirectory}/Developer/github.com/SviatoslavIvanov/dotfiles";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
@@ -100,15 +99,7 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = {
-                inherit
-                  inputs
-                  username
-                  system
-                  homeDirectory
-                  dotfilesDir
-                  ;
-              };
+              extraSpecialArgs = { inherit inputs; };
               sharedModules = [
                 catppuccin.homeModules.catppuccin
                 dotfiles-private.homeModules.default

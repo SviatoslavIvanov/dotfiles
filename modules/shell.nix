@@ -1,12 +1,20 @@
 {
   pkgs,
   config,
-  dotfilesDir,
   inputs,
   ...
 }:
 
+let
+  dotfiles = config.home.sessionVariables.DOTFILES_DIR;
+in
 {
+  xdg.configFile = {
+    "mise/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/configs/mise/mise.toml";
+    "mise/mise.lock".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/configs/mise/mise.lock";
+  };
+
   programs = {
     zsh = {
       enable = true;
@@ -75,11 +83,10 @@
       ];
 
       initContent = ''
-        # A generation built from uncommitted files cannot be rebuilt on
-        # another machine, and the flake silently ignores untracked ones.
+        # The flake ignores untracked files, and an uncommitted generation cannot be rebuilt elsewhere.
         function _dotfiles_require_clean() {
           local changes
-          changes=$(git -C "${dotfilesDir}" status --porcelain) || return
+          changes=$(git -C "$DOTFILES_DIR" status --porcelain) || return
           [[ -z $changes || -n $REBUILD_DIRTY ]] && return 0
           print -u2 "dotfiles have uncommitted changes; commit them or rerun with REBUILD_DIRTY=1:"
           print -u2 -r -- "$changes"
@@ -88,15 +95,15 @@
 
         function rebuild() {
           _dotfiles_require_clean && \
-            nix flake archive --no-update-lock-file "${dotfilesDir}" >/dev/null && \
-            sudo darwin-rebuild switch --flake "${dotfilesDir}#svyat-mac" --no-update-lock-file "$@"
+            nix flake archive --no-update-lock-file "$DOTFILES_DIR" >/dev/null && \
+            sudo darwin-rebuild switch --flake "$DOTFILES_DIR" --no-update-lock-file "$@"
         }
 
         # Only the refreshed flake.lock may be uncommitted when it rebuilds.
         function update() {
           _dotfiles_require_clean && \
-            nix flake update --flake "${dotfilesDir}" && \
-            mise --cd "${dotfilesDir}" run lint && \
+            nix flake update --flake "$DOTFILES_DIR" && \
+            mise --cd "$DOTFILES_DIR" run lint && \
             REBUILD_DIRTY=1 rebuild
         }
 

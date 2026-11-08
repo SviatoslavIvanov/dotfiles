@@ -60,8 +60,9 @@ the same value.
 │   ├── homebrew.nix    # Homebrew casks and formulae
 │   ├── home.nix        # Home Manager entry point
 │   ├── hygiene.nix     # XDG paths and home-directory audit
-│   ├── packages.nix    # CLI tools and yazi config
-│   ├── shell.nix       # Zsh, fzf, zoxide, bat, eza
+│   ├── packages.nix    # CLI tools
+│   ├── yazi.nix        # yazi file manager
+│   ├── shell.nix       # Zsh, starship, fzf, atuin, zoxide, mise
 │   ├── ghostty.nix     # Ghostty terminal
 │   ├── tmux.nix        # tmux
 │   ├── git.nix         # Git, delta, lazygit, gh
@@ -325,7 +326,7 @@ Apply changes (commit them first; `rebuild` refuses a dirty tree unless
 rebuild
 # or directly:
 nix flake archive --no-update-lock-file "$DOTFILES_DIR"
-sudo darwin-rebuild switch --flake "$DOTFILES_DIR#svyat-mac" --no-update-lock-file
+sudo darwin-rebuild switch --flake "$DOTFILES_DIR" --no-update-lock-file
 ```
 
 Update all inputs:

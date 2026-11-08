@@ -56,8 +56,7 @@ let
           esac
         fi
 
-        # macOS/XDG roots and the canonical source checkout are intentional.
-        # Everything else remains visible until it is explicitly allow-listed.
+        # Intentional roots; everything else stays visible until allow-listed here.
         case "$name" in
           .1password|.cache|.CFUserTextEncoding|.config|.DS_Store|.gnupg|.local|.nix-profile|.ssh|.Trash|Applications|Desktop|Developer|Documents|Downloads|Library|Movies|Music|Pictures|Public)
             continue
@@ -87,32 +86,26 @@ let
       fi
     '';
   };
+  stateFiles = {
+    NODE_REPL_HISTORY = "${config.xdg.stateHome}/node/repl_history";
+    PSQL_HISTORY = "${config.xdg.stateHome}/postgresql/history";
+    PYTHON_HISTORY = "${config.xdg.stateHome}/python/history";
+  };
+  wgetHsts = "${config.xdg.stateHome}/wget/hsts";
 in
 {
-  # Keep tools which support explicit locations inside the XDG hierarchy.
-  # Stateful SDK homes (Cargo, Rustup, Gradle, .NET) are intentionally not
-  # redirected here: changing those variables without migrating their current
-  # contents would hide installed toolchains and user configuration.
   home = {
-    sessionVariables = {
+    sessionVariables = stateFiles // {
       ANSIBLE_CONFIG = "${config.xdg.configHome}/ansible/ansible.cfg";
       ANSIBLE_GALAXY_CACHE_DIR = "${config.xdg.cacheHome}/ansible/galaxy";
       ANSIBLE_LOCAL_TEMP = "${config.xdg.cacheHome}/ansible/tmp";
-      NODE_REPL_HISTORY = "${config.xdg.stateHome}/node/repl_history";
       NPM_CONFIG_CACHE = "${config.xdg.cacheHome}/npm";
-      PSQL_HISTORY = "${config.xdg.stateHome}/postgresql/history";
-      PYTHON_HISTORY = "${config.xdg.stateHome}/python/history";
       WGETRC = "${config.xdg.configHome}/wget/wgetrc";
     };
 
+    # These tools write their state files but do not create the parent directories.
     activation.createXdgStateDirectories = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      $DRY_RUN_CMD mkdir -p \
-        "${config.xdg.cacheHome}/ansible/galaxy" \
-        "${config.xdg.cacheHome}/ansible/tmp" \
-        "${config.xdg.stateHome}/node" \
-        "${config.xdg.stateHome}/postgresql" \
-        "${config.xdg.stateHome}/python" \
-        "${config.xdg.stateHome}/wget"
+      run mkdir -p ${lib.escapeShellArgs (map dirOf (lib.attrValues stateFiles ++ [ wgetHsts ]))}
     '';
 
     packages = [ homeAudit ];
@@ -128,8 +121,7 @@ in
     '';
 
     "wget/wgetrc".text = ''
-      hsts-file = ${config.xdg.stateHome}/wget/hsts
+      hsts-file = ${wgetHsts}
     '';
   };
-
 }
