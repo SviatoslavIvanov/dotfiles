@@ -61,7 +61,8 @@ the same value.
 │   ├── hygiene.nix     # XDG paths and home-directory audit
 │   ├── packages.nix    # CLI tools and yazi config
 │   ├── shell.nix       # Zsh, fzf, zoxide, bat, eza
-│   ├── terminal.nix    # Ghostty, tmux
+│   ├── ghostty.nix     # Ghostty terminal
+│   ├── tmux.nix        # tmux
 │   ├── git.nix         # Git, delta, lazygit, gh
 │   ├── aerospace.nix   # AeroSpace workspaces and window rules
 │   ├── stylix.nix      # Shared fonts and base16 theme

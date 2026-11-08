@@ -14,7 +14,8 @@
     ./packages.nix
     ./shell.nix
     ./git.nix
-    ./terminal.nix
+    ./ghostty.nix
+    ./tmux.nix
     ./zed.nix
     ./agents.nix
     ./claude-code.nix
@@ -67,12 +68,7 @@
     eza.enable = true;
     fzf.enable = true;
     lazygit.enable = true;
-    tmux = {
-      enable = true;
-      extraConfig = ''
-        set -g @catppuccin_window_status_style "basic"
-      '';
-    };
+    tmux.enable = true;
     yazi.enable = true;
 
     gtk.icon.enable = false;
