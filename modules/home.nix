@@ -28,21 +28,14 @@
 
     sessionVariables = {
       DOTFILES_DIR = dotfilesDir;
-      EDITOR = "nvim";
-      VISUAL = "nvim";
+      EDITOR = "zed --wait";
+      VISUAL = "zed --wait";
       SSH_AUTH_SOCK = "$HOME/.1password/agent.sock";
     };
 
     sessionPath = [ "/Library/TeX/texbin" ];
 
     file = {
-      ".config/nvim/init.lua".source = ../configs/nvim-lazyvim/init.lua;
-      ".config/nvim/lazyvim.json".source = ../configs/nvim-lazyvim/lazyvim.json;
-      ".config/nvim/lazy-lock.json".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/configs/nvim-lazyvim/lazy-lock.json";
-      ".config/nvim/stylua.toml".source = ../configs/nvim-lazyvim/stylua.toml;
-      ".config/nvim/lua".source = ../configs/nvim-lazyvim/lua;
-      ".config/nvim-vscode".source = ../configs/nvim-vscode;
       ".config/p10k/config.zsh".source = ../configs/p10k.zsh;
     };
   };

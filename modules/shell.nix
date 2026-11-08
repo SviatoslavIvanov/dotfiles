@@ -111,8 +111,7 @@
 
       shellAliases = {
         cat = "bat -pp";
-        vim = "nvim";
-        v = "nvim";
+        v = "zed";
         lt = "eza --tree --level=2";
 
         rst = "exec zsh";

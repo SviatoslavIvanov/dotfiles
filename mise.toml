@@ -28,13 +28,9 @@ confirm = "Remove code that Deadnix considers unused?"
 run = "nix flake check --no-update-lock-file"
 description = "Check flake validity"
 
-[tasks.lua-check]
-run = "stylua --check configs/nvim-lazyvim configs/nvim-vscode"
-description = "Check Lua formatting"
-
 [tasks.lock-check]
-run = "mise --cd configs/mise lock --dry-run --json | jq -e 'length == 0' && jq -e 'type == \"object\"' configs/nvim-lazyvim/lazy-lock.json >/dev/null"
-description = "Check mise and Neovim lock files"
+run = "mise --cd configs/mise lock --dry-run --json | jq -e 'length == 0'"
+description = "Check mise lock file"
 
 [tasks.pi-check]
 run = "node configs/pi/tests/settings.mjs"
@@ -49,5 +45,5 @@ run = "gitleaks dir --redact --no-banner . && gitleaks git --redact --no-banner 
 description = "Scan the working tree and Git history for secrets"
 
 [tasks.lint]
-depends = ["fmt-check", "check", "dead", "flake-check", "lua-check", "lock-check", "pi-check", "secret-check"]
+depends = ["fmt-check", "check", "dead", "flake-check", "lock-check", "pi-check", "secret-check"]
 description = "Run all checks"

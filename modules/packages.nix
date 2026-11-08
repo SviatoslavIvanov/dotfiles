@@ -10,9 +10,6 @@ let
 in
 {
   home.packages = with pkgs; [
-    (writeShellScriptBin "nvim-vscode" ''
-      NVIM_APPNAME=nvim-vscode exec nvim "$@"
-    '')
     coreutils
     curl
     wget
@@ -22,7 +19,6 @@ in
     yq
     sd
     ouch
-    neovim
     jdk21
     tree-sitter
     tokei

@@ -57,7 +57,7 @@ in
         };
         diff.algorithm = "histogram";
         core = {
-          editor = "nvim";
+          editor = "zed --wait";
           ignorecase = false;
         };
       };
@@ -89,7 +89,7 @@ in
             pager = "delta --dark --paging=never";
           }
         ];
-        os.editPreset = "nvim";
+        os.editPreset = "zed";
       };
     };
   };

@@ -12,7 +12,6 @@
 
     extensions = [
       "catppuccin"
-      "material-icon-theme"
       "nix"
       "toml"
       "dockerfile"
@@ -26,11 +25,27 @@
 
     userSettings = {
       which_key.enabled = true;
-      autosave = "on_focus_change";
-      ui_font_size = lib.mkForce 24;
+      # Zed is primarily a code browser and review surface.
+      autosave = "off";
+      edit_predictions.provider = "none";
+      show_edit_predictions = false;
+      show_completions_on_input = false;
+      auto_signature_help = false;
+      show_signature_help_after_edits = false;
+      inline_code_actions = false;
+      # Documentation stays available explicitly via K or Cmd K, Cmd I.
+      hover_popover_enabled = false;
+      diff_view_style = "split";
+      minimum_split_diff_width = 100;
+      word_diff_enabled = true;
+      ui_font_family = ".ZedSans";
+      # Scale navigation and agent prose independently for the external display.
+      ui_font_size = lib.mkForce 26;
       buffer_font_size = lib.mkForce 22;
-      agent_ui_font_size = 24;
-      agent_buffer_font_size = 22;
+      buffer_line_height.custom = 1.4;
+      agent_ui_font_size = 28;
+      agent_buffer_font_size = 24;
+      cursor_blink = false;
       buffer_font_family = "MonaspiceNe Nerd Font Mono";
       buffer_font_fallbacks = [
         "JetBrainsMono Nerd Font Mono"
@@ -51,47 +66,87 @@
       theme = {
         mode = "dark";
       };
-      icon_theme = "Material Icon Theme";
+      icon_theme = "Zed (Default)";
+      # Keep the Catppuccin syntax and peach accent, with quiet, consistent chrome.
+      theme_overrides."Catppuccin Mocha (peach)" = {
+        background = "#1e1e2e";
+        "title_bar.background" = "#1e1e2e";
+        "title_bar.inactive_background" = "#1e1e2e";
+        "tab_bar.background" = "#1e1e2e";
+        "tab.inactive_background" = "#1e1e2e";
+        "tab.active_background" = "#262637";
+        "toolbar.background" = "#1e1e2e";
+        "status_bar.background" = "#1e1e2e";
+        "panel.background" = "#1e1e2e";
+        "panel.focused_border" = "#45475a";
+        border = "#313244";
+        "border.variant" = "#313244";
+        "editor.active_line.background" = "#cdd6f408";
+      };
 
-      terminal.toolbar.breadcrumbs = false;
-      preview_tabs.enable_preview_from_file_finder = false;
+      # Keep navigation, editing, and agent conversations in separate areas.
+      bottom_dock_layout = "contained";
+      terminal = {
+        dock = "bottom";
+        working_directory = "current_project_directory";
+        toolbar.breadcrumbs = false;
+      };
+      preview_tabs = {
+        enabled = true;
+        enable_preview_from_file_finder = true;
+        enable_preview_from_project_panel = true;
+        enable_preview_file_from_code_navigation = true;
+        # Keep reference/search results available while browsing their source files.
+        enable_preview_multibuffer_from_code_navigation = false;
+      };
+      toolbar = {
+        breadcrumbs = true;
+        quick_actions = false;
+        selections_menu = false;
+        agent_review = true;
+        code_actions = false;
+      };
 
       title_bar = {
         show_menus = false;
-        show_user_picture = true;
-        show_user_menu = true;
-        show_onboarding_banner = true;
+        show_user_picture = false;
+        show_user_menu = false;
+        show_sign_in = false;
+        show_onboarding_banner = false;
         show_project_items = true;
         show_branch_name = true;
-        show_branch_status_icon = true;
+        show_branch_status_icon = false;
       };
 
       status_bar = {
-        active_language_button = true;
-        cursor_position_button = false;
+        active_language_button = false;
+        cursor_position_button = true;
       };
 
-      search.button = true;
+      search.button = false;
       debugger.button = false;
-      diagnostics.inline.enabled = true;
+      diagnostics.inline.enabled = false;
+      sticky_scroll.enabled = true;
+      use_smartcase_search = true;
 
       vim_mode = true;
       vim = {
         use_system_clipboard = "on_yank";
         use_smartcase_find = true;
       };
-      relative_line_numbers = "enabled";
+      relative_line_numbers = "disabled";
 
       tab_bar.show = true;
       scrollbar.show = "auto";
+      minimap.show = "never";
       tabs = {
-        file_icons = true;
+        file_icons = false;
         git_status = true;
-        show_diagnostics = "all";
+        show_diagnostics = "off";
       };
       indent_guides = {
         enabled = true;
-        coloring = "indent_aware";
+        coloring = "fixed";
       };
 
       project_panel = {
@@ -100,15 +155,36 @@
         hide_root = true;
         button = true;
         dock = "left";
+        default_width = 280;
+        auto_reveal_entries = false;
         git_status = true;
+        diagnostic_badges = false;
+        show_diagnostics = "off";
       };
-      git_panel.dock = "left";
+      git_panel = {
+        dock = "left";
+        default_width = 280;
+        tree_view = true;
+        file_icons = true;
+        show_count_badge = false;
+        commit_editor = "collapsed";
+      };
+      git = {
+        diff_base = "head";
+        path_style = "file_path_first";
+        inline_blame = {
+          enabled = true;
+          location = "status_bar";
+          show_commit_summary = true;
+        };
+      };
       outline_panel = {
-        button = false;
-        dock = "right";
+        button = true;
+        dock = "left";
+        default_width = 280;
       };
       collaboration_panel = {
-        button = true;
+        button = false;
         dock = "left";
       };
       notification_panel.dock = "right";
@@ -119,15 +195,17 @@
       };
 
       agent = {
-        inline_assistant_model = {
-          provider = "copilot_chat";
-          model = "gpt-5.6-sol";
+        # This shared panel is also required by external ACP agents.
+        # `disable_ai` or `agent.enabled = false` would hide Codex as well.
+        dock = "right";
+        flexible = false;
+        default_width = 560;
+        threads_sidebar = {
+          position = "right";
+          auto_open = false;
         };
-        default_model = {
-          provider = "copilot_chat";
-          model = "gpt-5.6-sol";
-        };
-        model_parameters = [ ];
+        single_file_review = true;
+        show_merge_conflict_indicator = false;
       };
 
       agent_servers = {
@@ -137,12 +215,12 @@
             CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude";
           };
         };
-        codex = {
+        codex-acp = {
           type = "registry";
         };
       };
 
-      inlay_hints.enabled = true;
+      inlay_hints.enabled = false;
       lsp.tailwindcss-language-server.settings = {
         classAttributes = [
           "class"
@@ -225,24 +303,12 @@
 
       file_scan_exclusions = [
         "..."
-        "**/.git"
-        "**/.svn"
-        "**/.hg"
-        "**/CVS"
-        "**/.DS_Store"
-        "**/Thumbs.db"
-        "**/.classpath"
-        "**/.settings"
         "**/out"
         "**/dist"
-        "**/.husky"
         "**/.turbo"
         "**/.vscode-test"
-        "**/.vscode"
-        "**/bin"
         "**/obj"
         "**/.next"
-        "**/.storybook"
         "**/.tap"
         "**/.nyc_output"
         "**/report"
@@ -261,11 +327,24 @@
 
     userKeymaps = [
       {
+        context = "Editor || Terminal";
+        unbind."ctrl-enter" = "assistant::InlineAssist";
+      }
+      {
+        context = "CommitEditor > Editor || GitCommit > Editor";
+        unbind."alt-tab" = "git::GenerateCommitMessage";
+      }
+      {
         context = "Workspace";
         bindings = {
           "ctrl-/" = "workspace::ToggleBottomDock";
           "ctrl-\\" = "terminal_panel::ToggleFocus";
           "cmd-b" = "workspace::ToggleLeftDock";
+          "cmd-alt-b" = "workspace::ToggleRightDock";
+          "cmd-alt-shift-c" = [
+            "agent::NewExternalAgentThread"
+            { agent = "codex-acp"; }
+          ];
         };
       }
 
@@ -304,11 +383,20 @@
           "space s s" = "outline::Toggle";
           "space s S" = "project_symbols::Toggle";
           "space s d" = "diagnostics::Deploy";
+          "space o" = "outline_panel::ToggleFocus";
 
           "space a a" = "agent::ToggleFocus";
-          "space a e" = "assistant::InlineAssist";
+          "space a d" = "agent::OpenAgentDiff";
           "space a h" = "agents_sidebar::ToggleThreadHistory";
-          "space a n" = "agent::NewThread";
+          "space a n" = [
+            "agent::NewExternalAgentThread"
+            { agent = "codex-acp"; }
+          ];
+          "space a o" = [
+            "agent::NewExternalAgentThread"
+            { agent = "codex-acp"; }
+          ];
+          "space a l" = "multi_workspace::ToggleWorkspaceSidebar";
           "space a s" = "agent::AddSelectionToThread";
           "space a t" = "workspace::ToggleRightDock";
 
@@ -332,6 +420,7 @@
           "g T" = "editor::GoToTypeDefinitionSplit";
           "g y" = "editor::GoToTypeDefinition";
           "g r" = "editor::FindAllReferences";
+          "shift-k" = "editor::Hover";
 
           "] d" = "editor::GoToDiagnostic";
           "[ d" = "editor::GoToPreviousDiagnostic";
@@ -345,7 +434,8 @@
             }
           ];
           "space g b" = "git::Blame";
-          "space g d" = "git::Diff";
+          "space g d" = "git::DiffHead";
+          "space g c" = "git::CompareWithBranch";
           "space g D" = "editor::ExpandAllDiffHunks";
 
           "space d d" = [
@@ -364,6 +454,7 @@
           "space b o" = "pane::CloseOtherItems";
           "space b b" = "pane::AlternateFile";
           "space b n" = "workspace::NewFile";
+          "space b p" = "pane::TogglePinTab";
           "space ," = "tab_switcher::Toggle";
 
           "space 1" = [
@@ -407,7 +498,7 @@
           "ctrl-s" = "workspace::Save";
           "space space" = "file_finder::Toggle";
           "space /" = "workspace::NewSearch";
-          "space e" = "workspace::ToggleLeftDock";
+          "space e" = "project_panel::ToggleFocus";
           "space f E" = "pane::RevealInProjectPanel";
 
           "space -" = "pane::SplitDown";
@@ -545,12 +636,13 @@
           "g g" = "menu::SelectFirst";
           "shift-g" = "menu::SelectLast";
           "-" = "project_panel::SelectParent";
-          "enter" = "project_panel::OpenPermanent";
-          "o" = "project_panel::OpenPermanent";
+          "enter" = "project_panel::Open";
+          "o" = "project_panel::Open";
+          "shift-enter" = "project_panel::OpenPermanent";
           "t" = "project_panel::OpenPermanent";
           "v" = "project_panel::OpenPermanent";
           "q" = "workspace::ToggleLeftDock";
-          "space e" = "workspace::ToggleLeftDock";
+          "space e" = "project_panel::ToggleFocus";
           "escape" = "project_panel::ToggleFocus";
           "/" = "project_panel::NewSearchInDirectory";
           ":" = "command_palette::Toggle";
@@ -570,7 +662,7 @@
       }
 
       {
-        context = "AssistantPanel && vim_mode == normal";
+        context = "AgentPanel && vim_mode == normal";
         bindings = {
           "q" = "workspace::ToggleRightDock";
         };
