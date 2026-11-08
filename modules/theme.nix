@@ -9,6 +9,7 @@ let
   inherit (config.catppuccin) flavor accent;
   palette = (lib.importJSON "${config.catppuccin.sources.palette}/palette.json").${flavor}.colors;
   color = name: palette.${name}.hex;
+  argb = name: "0xff${lib.removePrefix "#" (color name)}";
 
   monospace = {
     family = "MonaspiceNe Nerd Font Mono";
@@ -31,6 +32,14 @@ in
     gtk.icon.enable = false;
     zed.icons.enable = false;
     zsh-syntax-highlighting.enable = false;
+  };
+
+  xdg.configFile."borders/bordersrc" = {
+    executable = true;
+    text = ''
+      #!/bin/sh
+      borders active_color=${argb accent} inactive_color=${argb "surface0"} width=4.0
+    '';
   };
 
   programs.ghostty.settings = {
