@@ -371,6 +371,8 @@ SDK homes are intentionally left in place for manual review.
 Automatically configured:
 
 - **Dock:** auto-hide, no recent apps, stable spaces order
+- **Windows:** one Space across displays and Mission Control grouped by app
+  (AeroSpace recommendations), no window open/close animations
 - **Finder:** show hidden files, extensions, path bar, status bar
 - **Keyboard:** fast key repeat (2/15), no auto-corrections
 - **Security:** firewall + stealth mode, Touch ID for sudo, guest login disabled, immediate lock

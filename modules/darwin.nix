@@ -60,7 +60,12 @@
         show-recents = false;
         mru-spaces = false;
         minimize-to-application = true;
+        # Mission Control shows AeroSpace's corner-parked windows too small otherwise.
+        expose-group-apps = true;
       };
+
+      # AeroSpace focus is more stable with one Space across displays; needs a logout
+      spaces.spans-displays = true;
 
       finder = {
         ShowPathbar = true;
@@ -97,6 +102,7 @@
         NSAutomaticPeriodSubstitutionEnabled = false;
         NSAutomaticDashSubstitutionEnabled = false;
         NSAutomaticQuoteSubstitutionEnabled = false;
+        NSAutomaticWindowAnimationsEnabled = false;
       };
 
       screencapture.location = "~/Pictures/Screenshots";

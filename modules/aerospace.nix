@@ -38,10 +38,8 @@ in
         "workspace E"
       ];
 
-      # Mouse follows focus — mouse moves to focused window/monitor
-      on-focus-changed = [ "move-mouse window-lazy-center" ];
+      # Not on-focus-changed: spurious focus jumps after auth prompts would drag the cursor
       on-focused-monitor-changed = [ "move-mouse monitor-lazy-center" ];
-      automatically-unhide-macos-hidden-apps = true;
 
       # Clean layouts — prevents messy nested containers
       enable-normalization-flatten-containers = true;
@@ -136,6 +134,10 @@ in
 
         # Service mode
         alt-shift-semicolon = "mode service";
+
+        # Not automatically-unhide-macos-hidden-apps: it unhides every app whenever any app hides itself
+        cmd-h = [ ];
+        cmd-alt-h = [ ];
       };
 
       # ── Service mode ──
