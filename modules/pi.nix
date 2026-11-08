@@ -65,6 +65,7 @@ let
     "mcp.json"
     "subagents-lite.json"
     "interactive-shell.json"
+    "next-prompt.json"
     "web-search.json"
     "agents"
     "extensions"

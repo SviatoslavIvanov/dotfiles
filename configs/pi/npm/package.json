@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@dietrichgebert/ponytail": "5.3.3",
+    "@gamaraan/next-prompt": "0.3.0",
     "@juicesharp/rpiv-ask-user-question": "2.15.0",
     "@pi-archimedes/image-paste": "2.13.0",
     "codex-computer-use-mcp": "0.7.1",

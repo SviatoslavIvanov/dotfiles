@@ -16,7 +16,8 @@
     "npm:pi-subagents-lite@1.18.0",
     "npm:codex-computer-use-mcp@0.7.1",
     "npm:@juicesharp/rpiv-ask-user-question@2.15.0",
-    "npm:@pi-archimedes/image-paste@2.13.0"
+    "npm:@pi-archimedes/image-paste@2.13.0",
+    "npm:@gamaraan/next-prompt@0.3.0"
   ],
   "theme": "sv-light/sv-dark",
   "quietStartup": true,

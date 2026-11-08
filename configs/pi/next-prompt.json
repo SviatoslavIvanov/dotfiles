@@ -1,0 +1,10 @@
+{
+  "model": { "provider": "openai-api", "model": "gpt-6-luna" },
+  "thinking": "low",
+  "acceptKey": "right",
+  "allowCrossProvider": true,
+  "allowCrossProviderPairs": [
+    ["openai", "openai-api"],
+    ["openai-api", "openai-api"]
+  ]
+}

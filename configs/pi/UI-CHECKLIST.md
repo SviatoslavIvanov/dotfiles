@@ -1,6 +1,6 @@
 # Инвентаризация интерфейсов Pi 1.5.0
 
-Область: закреплённое ядро, встроенные MCP/codemode/tool-search и **все 12 npm-пакетов**
+Область: закреплённое ядро, встроенные MCP/codemode/tool-search и **все 13 npm-пакетов**
 из settings.json, а также локальные extensions. Навыки и prompt templates — текстовые
 ответы в чате, не самостоятельные экраны. Внешние приложения и системные диалоги
 учтены отдельно, но тема Pi ими не управляет.
@@ -58,6 +58,7 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 | codex-computer-use-mcp `/computer-use-status` | S; status notification, tool output с текстом и изображениями, официальные запросы runtime через общий select и editor | Общий select R; собственных подтверждений действий у адаптера нет. Опасные действия не исполнялись |
 | @juicesharp/rpiv-ask-user-question | S R B; tabs/options/multi-select/custom answer/notes/preview/collapse/submit/cancel | ui.mjs: content-sized dialog без пустого хвоста. Сочетания всех состояний и реальная работа фокуса/мыши — ручной чек |
 | @pi-archimedes/image-paste | S; shortcut offer через общий confirm, attachment marker/preview/errors | Общий confirm R; clipboard, Quick Look и keybinding-файлы не изменяются ради проверки |
+| @gamaraan/next-prompt `/next-prompt-config` | S; widget под редактором, согласие на другой адрес модели через общий select, wizard настроек | Общий select R; wizard пишет в read-only конфиг, настройки меняются в репо |
 | @dietrichgebert/ponytail | S; `/ponytail*`, статус/help/report в чате | Не отдельное интерактивное окно; никакого редизайна текстовых отчётов или запуска агента ради UI |
 
 ## Локальные extensions
