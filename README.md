@@ -276,11 +276,11 @@ first-migration file collisions, legacy PATH precedence, and offline checks.
 
 **Browsers:** Arc, Google Chrome
 
-**Communication:** Telegram, WhatsApp, Signal, Discord, Mattermost, Zoom
+**Communication:** Telegram, WhatsApp, Signal, Discord, Zoom
 
 **Media:** Spotify
 
-**Security:** 1Password (+ CLI), AmneziaVPN, Pritunl
+**Security:** 1Password (+ CLI)
 
 **Gaming:** Steam, Moonlight
 

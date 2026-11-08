@@ -125,7 +125,7 @@ in
         alt-e = "workspace E"; # Editor
         alt-c = "workspace C"; # Communication
         alt-m = "workspace M"; # Media
-        alt-w = "workspace W"; # Work (MM, Linear, Pritunl)
+        alt-w = "workspace W"; # Work
 
         alt-shift-b = "move-node-to-workspace B";
         alt-shift-t = "move-node-to-workspace T";
@@ -206,22 +206,10 @@ in
         }
         # Work
         {
-          "if" = "test %{app-bundle-id} = com.mattermost.desktop";
-          run = "move-node-to-workspace W";
-        }
-        {
           "if" = "test %{app-bundle-id} = com.linear";
           run = "move-node-to-workspace W";
         }
         # Force float — apps that don't tile well
-        {
-          "if" = "test %{app-bundle-id} = com.electron.pritunl";
-          run = "layout floating";
-        }
-        {
-          "if" = "test %{app-name} ~= AmneziaVPN";
-          run = "layout floating";
-        }
         {
           "if" = "test %{app-bundle-id} = com.apple.systempreferences";
           run = "layout floating";

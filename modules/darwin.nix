@@ -148,7 +148,6 @@
       }
       "1password"
       "claude-code@latest"
-      "amneziavpn"
       "arc"
       "claude"
       "discord"
@@ -157,11 +156,9 @@
       "jordanbaird-ice"
       "linear"
       "mac-mouse-fix"
-      "mattermost"
       "moonlight"
       "obsidian"
       "orbstack"
-      "pritunl"
       # qBittorrent 5.2.3 fails Gatekeeper (self-signed, not notarized), and
       # Homebrew disables the cask on 2026-09-01. Keep the verified current app
       # installed but unmanaged until upstream ships a Developer ID build.
