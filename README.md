@@ -233,7 +233,7 @@ Pi configuration lives in [`configs/pi`](configs/pi/README.md), managed by
 [`modules/pi.nix`](modules/pi.nix). Credentials, sessions, trust decisions, and
 caches remain local. Settings stay writable; Nix restores declared preferences
 on activation without replacing Pi's runtime keys. Extension dependencies and
-four local patches are restored explicitly with `pi-restore-extensions`, not
+local patches are restored explicitly with `pi-restore-extensions`, not
 during activation. Stop Pi before rebuilding/restoring; see the Pi README for
 first-migration file collisions, legacy PATH precedence, and offline checks.
 

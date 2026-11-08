@@ -1,6 +1,6 @@
 ---
 name: haiku-worker
-description: "Haiku 5.5 · API · medium: небольшая конкретная правка с проверкой."
+description: "Haiku 5.5 · API · medium, только после согласования: небольшая конкретная правка с проверкой."
 model: anthropic/claude-haiku-5-5
 thinking: medium
 max_turns: 12

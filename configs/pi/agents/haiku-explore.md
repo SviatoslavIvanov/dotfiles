@@ -1,6 +1,6 @@
 ---
 name: haiku-explore
-description: "Haiku 5.5 · API · medium: ограниченный поиск и извлечение фактов без правок."
+description: "Haiku 5.5 · API · medium, только после согласования: узкий поиск и извлечение фактов без правок."
 model: anthropic/claude-haiku-5-5
 thinking: medium
 max_turns: 12
