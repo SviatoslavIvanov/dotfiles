@@ -77,6 +77,8 @@ in
     extraConfig = ''
 
       set -as terminal-features ",xterm-ghostty:RGB:clipboard"
+      set -g extended-keys on
+      set -g extended-keys-format csi-u
       set -g status-position top
       set -g renumber-windows on
       set -s set-clipboard external
