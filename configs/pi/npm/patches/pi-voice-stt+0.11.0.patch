@@ -33,3 +33,25 @@ index ddec32e..5b0d004 100644
      onModeChange: (mode) =>
        inputIndicator.setMode(mode === "idle" ? controller.getMode() : mode),
      onLive: (text) => inputIndicator.setLive(text),
+diff --git a/node_modules/pi-voice-stt/src/ui/input-indicator.ts b/node_modules/pi-voice-stt/src/ui/input-indicator.ts
+index a5f8d27..1944bc1 100644
+--- a/node_modules/pi-voice-stt/src/ui/input-indicator.ts
++++ b/node_modules/pi-voice-stt/src/ui/input-indicator.ts
+@@ -1,5 +1,6 @@
+ import { CustomEditor, type AppKeybinding, type ExtensionContext, type KeybindingsManager, type Theme } from "@earendil-works/pi-coding-agent";
+ import {
++  isKeyRepeat,
+   matchesKey,
+   truncateToWidth,
+   visibleWidth,
+@@ -141,6 +142,10 @@ class VoiceEditorWrapper implements EditorComponent {
+     this.syncBase();
+     const mode = this.options.getMode();
+ 
++    // A held toggle chord auto-repeats; only its first press may toggle.
++    const toggleKeys = [this.options.realtimeKeybind, this.options.keybind, this.options.profileKeybind];
++    if (isKeyRepeat(data) && toggleKeys.some((key) => matchesKey(data, key as KeyId))) return;
++
+     // Checked before the recording keybind so a mis-parsed ctrl+shift+<letter>
+     // can never fall through to the batch recorder.
+     if (matchesKey(data, this.options.realtimeKeybind as KeyId)) {
