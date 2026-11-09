@@ -2,6 +2,7 @@
   "defaultProvider": "openai",
   "defaultModel": "gpt-6.1-sol",
   "packages": [
+    "npm:pi-editor-selection@0.1.8",
     "npm:pi-polish@0.1.10",
     "npm:pi-voice-stt@0.11.0",
     "npm:pi-web-access@0.47.0",
@@ -17,7 +18,8 @@
     "npm:codex-computer-use-mcp@0.7.1",
     "npm:@juicesharp/rpiv-ask-user-question@2.15.0",
     "npm:@pi-archimedes/image-paste@2.13.0",
-    "npm:@gamaraan/next-prompt@0.3.0"
+    "npm:@gamaraan/next-prompt@0.3.0",
+    "npm:pi-codex-style-table@0.1.3"
   ],
   "theme": "sv-light/sv-dark",
   "quietStartup": true,

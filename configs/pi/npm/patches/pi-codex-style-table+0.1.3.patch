@@ -1,0 +1,14 @@
+diff --git a/node_modules/pi-codex-style-table/src/copy-adapter.ts b/node_modules/pi-codex-style-table/src/copy-adapter.ts
+index c605a88..2cdc95a 100644
+--- a/node_modules/pi-codex-style-table/src/copy-adapter.ts
++++ b/node_modules/pi-codex-style-table/src/copy-adapter.ts
+@@ -140,8 +140,8 @@ export function installSelectionCopy(warn: (message: string) => void) {
+ 
+   return {
+     observe(markdown: Markdown): () => void {
++      // Local: pi-polish owns the renderer to draw its ● marker; copying visible text is expected, not a warning
+       if (Object.getOwnPropertyDescriptor(markdown, "render")) {
+-        warn("Another extension owns this Markdown renderer; selection copying uses visible text.");
+         return () => {};
+       }
+       const previousRender = markdown.render;

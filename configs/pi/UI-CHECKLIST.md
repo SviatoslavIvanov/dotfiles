@@ -1,6 +1,6 @@
 # Инвентаризация интерфейсов Pi 1.5.0
 
-Область: закреплённое ядро, встроенные MCP/codemode/tool-search и **все 13 npm-пакетов**
+Область: закреплённое ядро, встроенные MCP/codemode/tool-search и **все 15 npm-пакетов**
 из settings.json, а также локальные extensions. Навыки и prompt templates — текстовые
 ответы в чате, не самостоятельные экраны. Внешние приложения и системные диалоги
 учтены отдельно, но тема Pi ими не управляет.
@@ -47,7 +47,7 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 
 | Пакет / вход | Поверхности и покрытие | Правки / что не запускалось |
 |---|---|---|
-| pi-polish | S; tools, diff, streaming/status/ожидание вопроса | Существующие компактные рендереры; ожидание пользователя отдельно от вычислительного running timer |
+| pi-polish | S R B; tools, diff, streaming/status/ожидание вопроса, hover и клики по группам, codemode в группах, хвост скрытого thinking | B в tmux: hover, закрытие кликом по выводу, сводки со скриптами на реальной сессии, 60 колонок; события вложенных вызовов прогнаны вне Pi. Живой codemode и стриминг thinking с моделью не запускались, курсор в Ghostty без tmux не проверен |
 | pi-voice-stt `/stt`, Ctrl+R | S; profiles, speaker selection используют общий select; recording/errors/status — notifications/widget | Общий select R; запись, микрофон, разрешения macOS и оплачиваемая транскрипция не запускались |
 | pi-web-access `/websearch`, `/curator`, `/search`, `/google-account` | S; stored-results/actions — общий select; search/fetch — tool renderer; curator — отдельная HTML-страница | Общий select R; browser curator имеет собственную light/dark CSS-палитру, не Catppuccin Pi. Cookies/login, поиск и summary approval не запускались |
 | pi-interactive-shell `/spawn`, `/attach`, `/dismiss` | S; session select, launch approval, InteractiveShellOverlay, ReattachOverlay, output selector, widget/monitor events | ui.mjs B: адаптер монитора, output/events/stop; это не полный PTY/resize/detach-тест. Сохранён настоящий PTY, не имитация attach для bash |
@@ -58,7 +58,9 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 | codex-computer-use-mcp `/computer-use-status` | S B; status notification, tool output с текстом и изображениями, официальные запросы runtime через общий select и editor | B: реальный `cua_repl` прочитал AX-дерево Finder и Linear, окна не вышли вперёд. Общий select R; собственных подтверждений действий у адаптера нет. Опасные действия не исполнялись |
 | @juicesharp/rpiv-ask-user-question | S R B; tabs/options/multi-select/custom answer/notes/preview/collapse/submit/cancel | ui.mjs: content-sized dialog без пустого хвоста. Сочетания всех состояний и реальная работа фокуса/мыши — ручной чек |
 | @pi-archimedes/image-paste | S; shortcut offer через общий confirm, attachment marker/preview/errors | Общий confirm R; clipboard, Quick Look и keybinding-файлы не изменяются ради проверки |
-| @gamaraan/next-prompt `/next-prompt-config` | S B; widget под редактором, согласие на другой адрес модели через общий select, wizard настроек | B: в tmux widget показал подсказку, → вставил её без отправки. Общий select R; диалог согласия и wizard не открывались, wizard пишет в read-only конфиг |
+| @gamaraan/next-prompt `/next-prompt-config` | S B; widget над редактором, согласие на другой адрес модели через общий select, wizard настроек | B: в tmux widget показал подсказку, → вставил её без отправки. Общий select R; диалог согласия и wizard не открывались, wizard пишет в read-only конфиг |
+| pi-editor-selection | S B; выделение Shift+стрелками и мышью, колесо по длинному промпту | B в tmux: Shift+← выделяет, `❯` и «voice ctrl+r» на месте при первом месте в packages. Копирование в буфер не запускалось |
+| pi-codex-style-table | S B; таблицы в ответах, узкая ширина | B: 110 и 60 колонок, без предупреждения на старте. Копирование таблицы выделением не проверялось |
 | @dietrichgebert/ponytail | S; `/ponytail*`, статус/help/report в чате | Не отдельное интерактивное окно; никакого редизайна текстовых отчётов или запуска агента ради UI |
 
 ## Локальные extensions
@@ -69,6 +71,7 @@ R-проверки в screens.mjs проходят при ширине 40/80/120
 | tasks.ts | `/tasks [kind]`, Ctrl+Shift+T; picker/search; per-task actions; output/events viewer; stop confirmation | S R B в ui.mjs; Esc не останавливает задачу, отказ подтверждения сохраняет процесс |
 | ui-polish.ts | Model + общие selectors/input/editor/auth + tree/resume/fork | S R B; shutdown восстанавливает оригинальные методы. Привязка к внутренностям Pi 1.5.0 проверяется при обновлении |
 | notify.ts | Только внешнее уведомление завершения | S; отдельного TUI-окна нет; OS-уведомление не переводится темой Pi |
+| stash.ts | Alt+S, статус `stash` в footer | B в tmux: черновик уходит и возвращается, статус появляется и исчезает. Маркеры `[Image #N]` в отложенном черновике не проверялись |
 | no-sleep.ts | `/no-sleep` status/help и notifications | S; нет отдельного списка/диалога |
 
 ## Единый стиль: что приведено и что осталось

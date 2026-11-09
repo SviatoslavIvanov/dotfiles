@@ -1,0 +1,67 @@
+diff --git a/node_modules/@gamaraan/next-prompt/next-prompt.ts b/node_modules/@gamaraan/next-prompt/next-prompt.ts
+index 060e991..77d2b86 100644
+--- a/node_modules/@gamaraan/next-prompt/next-prompt.ts
++++ b/node_modules/@gamaraan/next-prompt/next-prompt.ts
+@@ -5,9 +5,9 @@
+  * turn has fully settled, computes the single most logical next instruction
+  * the user would type and shows it. Three render modes (config `renderMode`,
+  * default "widget"):
+- *   - "widget": a colored below-editor line `↳ next: <suggestion>  (Alt-/ to accept)`.
++ *   - "widget": a colored above-editor line `↳ next: <suggestion>  (Alt-/ to accept)`.
+  *   - "ghost":  inline greyed ghost text in the input box after the caret.
+- *   - "both":   inline ghost AND the below-editor line.
++ *   - "both":   inline ghost AND the above-editor line.
+  * All three modes run on Pi and OMP. OMP has no editor-owner getter, so a ghost
+  * failure there restores the default editor (Pi restores the captured prior
+  * owner), and another custom-editor extension installed first in the same OMP
+@@ -140,7 +140,7 @@ export interface NextPromptConfig {
+ 	thinking?: ThinkingLevel;
+ 	/** Key id that accepts the suggestion (any pi-tui KeyId). Defaults to "alt+/". */
+ 	acceptKey?: string;
+-	/** How the suggestion is shown. "widget" (default) = below-editor line; "ghost" = inline overlay in the input box. */
++	/** How the suggestion is shown. "widget" (default) = above-editor line; "ghost" = inline overlay in the input box. */
+ 	renderMode?: RenderMode;
+ 	systemPrompt?: string;
+ 	maxTranscriptChars?: number;
+@@ -281,7 +281,7 @@ const THINKING_LEVELS: readonly string[] = [
+ 	"max",
+ ];
+ 
+-// ANSI styling for the below-editor widget. Cyan accent for the ↳/next: prefix and
++// ANSI styling for the above-editor widget. Cyan accent for the ↳/next: prefix and
+ // the shortcut hint; the suggestion itself is plain (high-contrast default text).
+ const ACCENT = "\x1b[36m";
+ const DIM = "\x1b[2m";
+@@ -1780,7 +1780,7 @@ export interface SuggestionState {
+ 	globalInputGeneration?: number;
+ }
+ 
+-/** Publish the below-editor widget (or clear it when there's no suggestion). */
++/** Publish the above-editor widget (or clear it when there's no suggestion). */
+ function renderWidget(state: SuggestionState): void {
+ 	if (state.suggestion) {
+ 		const hint = humanizeKey(state.acceptKey);
+@@ -2736,7 +2736,7 @@ export default function nextPromptExtension(pi: ExtensionAPI): void {
+ 		}
+ 
+ 		const publishWidget = (content: string[] | undefined) => {
+-			ctx.ui.setWidget("next-prompt", content, { placement: "belowEditor" });
++			ctx.ui.setWidget("next-prompt", content, { placement: "aboveEditor" });
+ 		};
+ 		// F-05: install the ghost editor exactly once per session. If another
+ 		// extension already owns the editor, still try ghost mode on top of it
+@@ -3344,11 +3344,11 @@ export async function configureInteractively(
+ 	}
+ 
+ 	// 2. renderMode — ghost first (nicer, inline in the box), then widget (reliable
+-	// below-editor line), then both.
++	// above-editor line), then both.
+ 	const renderOptions = [
+ 		"ghost — inline greyed text in the input box",
+-		"widget — colored line below the input box",
+-		"both — inline ghost AND the below-editor line",
++		"widget — colored line above the input box",
++		"both — inline ghost AND the above-editor line",
+ 	];
+ 	const currentRenderLabel = current.renderMode ?? "widget";
+ 	const renderPick = await ctx.ui.select(

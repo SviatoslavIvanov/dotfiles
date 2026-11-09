@@ -1,11 +1,11 @@
 diff --git a/node_modules/pi-polish/extensions/chrome.ts b/node_modules/pi-polish/extensions/chrome.ts
-index 31ed59a..ce916e1 100644
+index 31ed59a..fab5011 100644
 --- a/node_modules/pi-polish/extensions/chrome.ts
 +++ b/node_modules/pi-polish/extensions/chrome.ts
 @@ -1,13 +1,11 @@
  import { AssistantMessageComponent, CustomEditor, type ExtensionAPI, UserMessageComponent } from "@earendil-works/pi-coding-agent";
 -import { Markdown, MouseRegion, Spacer, Text, truncateToWidth } from "@earendil-works/pi-tui";
-+import { Markdown, MouseRegion, Spacer, Text } from "@earendil-works/pi-tui";
++import { Markdown, MouseRegion, Spacer, stripTerminalSequences, Text, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
  
  const PROMPT = "❯";
  const REPLY = "●";
@@ -18,7 +18,19 @@ index 31ed59a..ce916e1 100644
  const LEADING_ESCAPES = /^((?:\x1b\[[0-9;]*m|\x1b\][^\x07]*\x07)*) {2}/;
  const OSC133_START = "\x1b]133;A\x07";
  const OSC133_END = "\x1b]133;B\x07\x1b]133;C\x07";
-@@ -77,17 +75,16 @@ export default function (pi: ExtensionAPI) {
+@@ -17,6 +15,11 @@ function markFirstLine(line: string, marker: string): string {
+ 	return line.replace(LEADING_ESCAPES, (_m, esc: string) => `${esc}${marker} `);
+ }
+ 
++function lastLine(text: string): string {
++	const lines = stripTerminalSequences(text).split("\n").map((l) => l.replace(/[\x00-\x1f\x7f-\x9f]+/g, " ").replace(/\s+/g, " ").trim());
++	return lines.filter(Boolean).at(-1) ?? "";
++}
++
+ function patchOnce(proto: any, method: string, wrap: (original: (...args: any[]) => any) => (...args: any[]) => any) {
+ 	if (!proto || typeof proto[method] !== "function" || proto[method][patched]) return;
+ 	const replacement: any = wrap(proto[method]);
+@@ -77,17 +80,22 @@ export default function (pi: ExtensionAPI) {
  		console.error(`[pi-polish] could not patch message components: ${(err as Error).message}`);
  	}
  
@@ -28,6 +40,8 @@ index 31ed59a..ce916e1 100644
 -	let tokens = 0;
 -	let streamed = 0;
  	let phase = "Thinking";
++	// The newest line of hidden thinking, so a long think shows where it is going
++	let thought = "";
 +	const pendingAgents = new Set<string>();
  	let timer: NodeJS.Timeout | undefined;
 -	const fmtTokens = (n: number) => (n < 1000 ? `${n}` : `${(n / 1000).toFixed(1)}k`);
@@ -37,11 +51,15 @@ index 31ed59a..ce916e1 100644
 -		const stats = `(${secs}s · ↓ ${fmtTokens(tokens + Math.round(streamed / 4))} tokens)`;
 -		ctx.ui.setWorkingMessage(`${ORANGE}${phase}…${RESET} ${DIM}${stats}${RESET}`);
 +		const elapsed = phase === "Waiting for your answer" ? "" : ` · ${secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m ${secs % 60}s`}`;
-+		ctx.ui.setWorkingMessage(ctx.ui.theme.fg("muted", `${phase}…`) + ctx.ui.theme.fg("dim", elapsed));
++		const head = ctx.ui.theme.fg("muted", `${phase}…`) + ctx.ui.theme.fg("dim", elapsed);
++		// The working row wraps long text and would push the editor down, so the thought is cut to the row
++		const room = (process.stdout.columns || 80) - visibleWidth(head) - 7;
++		const shown = phase === "Thinking" && thought && room >= 12 && pi.getSettings().hideThinkingBlock;
++		ctx.ui.setWorkingMessage(head + (shown ? ctx.ui.theme.fg("dim", ` · ${truncateToWidth(thought, room, "…")}`) : ""));
  	};
  	// Just the verb for tools that pi-polish draws as live rows, which already show what is running;
  	// other extensions' tools keep their name, since their rows may not
-@@ -114,14 +111,12 @@ export default function (pi: ExtensionAPI) {
+@@ -114,15 +122,14 @@ export default function (pi: ExtensionAPI) {
  		}
  	};
  	pi.on("session_start", async (_event, ctx) => {
@@ -56,9 +74,11 @@ index 31ed59a..ce916e1 100644
 -		streamed = 0;
 +		pendingAgents.clear();
  		phase = "Thinking";
++		thought = "";
  		show(ctx);
  		clearInterval(timer);
-@@ -132,51 +127,32 @@ export default function (pi: ExtensionAPI) {
+ 		timer = setInterval(() => show(ctx), 1000);
+@@ -132,51 +139,35 @@ export default function (pi: ExtensionAPI) {
  		const parts = (event.message as any).content ?? [];
  		const last = parts[parts.length - 1];
  		phase = last?.type === "text" ? "Responding" : last?.type === "toolCall" ? "Preparing a tool call" : "Thinking";
@@ -68,6 +88,8 @@ index 31ed59a..ce916e1 100644
 -		if (event.message.role !== "assistant") return;
 -		tokens += (event.message as any).usage?.output ?? 0;
 -		streamed = 0;
++		if (!last) thought = "";
++		else if (last.type === "thinking") thought = lastLine(last.thinking ?? "");
  	});
  	pi.on("tool_execution_start", async (event, ctx) => {
  		if (!ctx.hasUI) return;
@@ -81,6 +103,7 @@ index 31ed59a..ce916e1 100644
 +		if (!ctx.hasUI) return;
 +		pendingAgents.delete(event.toolCallId);
  		phase = "Thinking";
++		thought = "";
 +		show(ctx);
  	});
  	pi.on("agent_end", async (_event, ctx) => {
@@ -123,7 +146,7 @@ index 31ed59a..ce916e1 100644
  	// ❯ before the input: two columns of editor padding, with the marker drawn into the first content line
  	pi.on("session_start", async (_event, ctx) => {
 diff --git a/node_modules/pi-polish/extensions/tools.ts b/node_modules/pi-polish/extensions/tools.ts
-index 6661769..133f53e 100644
+index 6661769..34cac11 100644
 --- a/node_modules/pi-polish/extensions/tools.ts
 +++ b/node_modules/pi-polish/extensions/tools.ts
 @@ -33,8 +33,9 @@ import tsx from "@shikijs/langs/tsx";
@@ -138,7 +161,39 @@ index 6661769..133f53e 100644
  import { diffWordsWithSpace } from "diff";
  import { createHighlighterCoreSync, type HighlighterCore } from "shiki/core";
  import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
-@@ -145,14 +146,14 @@ function expandedBody(theme: any, text: string, maxLines = 60): string {
+@@ -54,11 +55,12 @@ const FILE_TOOL_GUIDELINES: Record<string, string[]> = {
+ };
+ 
+ const DIFF_PREVIEW_LINES = 16;
++const SCRIPT_OUTPUT_LINES = 6;
+ const BG_RESET = "\x1b[49m";
+ const FG_RESET = "\x1b[39m";
+ 
+-type Kind = "bash" | "read" | "search" | "list" | "tools" | "mcp";
+-const KIND_OF: Record<string, Kind> = { bash: "bash", read: "read", grep: "search", find: "search", ls: "list", tool_search: "tools" };
++type Kind = "bash" | "read" | "search" | "list" | "tools" | "mcp" | "codemode";
++const KIND_OF: Record<string, Kind> = { bash: "bash", read: "read", grep: "search", find: "search", ls: "list", tool_search: "tools", codemode: "codemode" };
+ // Pi names MCP tools mcp__<server>__<tool>
+ const kindOf = (toolName: string): Kind | undefined => KIND_OF[toolName] ?? (toolName.startsWith("mcp__") ? "mcp" : undefined);
+ const VERBS: Record<Kind, [done: string, running: string, one: string, many: string]> = {
+@@ -68,6 +70,7 @@ const VERBS: Record<Kind, [done: string, running: string, one: string, many: str
+ 	list: ["Listed", "Listing", "directory", "directories"],
+ 	tools: ["Ran", "Running", "tool search", "tool searches"],
+ 	mcp: ["Called", "Calling", "MCP tool", "MCP tools"],
++	codemode: ["Ran", "Running", "script", "scripts"],
+ };
+ 
+ interface Member {
+@@ -118,6 +121,8 @@ function label(toolName: string, args: any, cwd: string): string {
+ 			return `Search tools "${args?.query ?? ""}"`;
+ 		case "ls":
+ 			return `List ${args?.path ? shortPath(args.path, cwd) : "."}`;
++		case "codemode":
++			return "codemode";
+ 		default: {
+ 			// server/tool like pi's own MCP rows, with the first text argument, which is usually the query
+ 			const [, server, ...tool] = toolName.split("__");
+@@ -145,14 +150,14 @@ function expandedBody(theme: any, text: string, maxLines = 60): string {
  	return "  " + theme.fg("toolOutput", shown).replace(/\n/g, "\n  ") + extra;
  }
  
@@ -156,7 +211,7 @@ index 6661769..133f53e 100644
  	mts: "typescript", cts: "typescript", xml: "xml", yml: "yaml", yaml: "yaml",
  };
  const FILE_TO_LANG: Record<string, string> = { Dockerfile: "docker", Makefile: "make", makefile: "make" };
-@@ -166,7 +167,8 @@ const withPythonRules = (theme: any, name: string, call: string, attribute: stri
+@@ -166,7 +171,8 @@ const withPythonRules = (theme: any, name: string, call: string, attribute: stri
  		{ scope: ["meta.attribute"], settings: { foreground: attribute } },
  	],
  });
@@ -166,7 +221,7 @@ index 6661769..133f53e 100644
  let shiki: HighlighterCore | undefined;
  
  /** Slightly brighter and more saturated than stock Dark+, which reads as muddy on the terminal background. */
-@@ -207,32 +209,32 @@ const rgb = (hex: string): [number, number, number] => {
+@@ -207,32 +213,32 @@ const rgb = (hex: string): [number, number, number] => {
  /** Colors for dark and light pi themes: Dark+ or Light+ code, and diff bands that suit the background. */
  const PALETTES = {
  	dark: {
@@ -221,3 +276,187 @@ index 6661769..133f53e 100644
  	},
  };
  type Palette = (typeof PALETTES)["dark"];
+@@ -452,6 +458,28 @@ export default function (pi: ExtensionAPI) {
+ 		for (const m of group.members) rowInvalidate.get(m.id)?.();
+ 	};
+ 
++	// The finished group under the pointer brightens, so its rows read as clickable
++	let hovered: Group | undefined;
++	let hoverClaimed = false;
++	const hover = (group: Group | undefined) => {
++		if (group === hovered) return;
++		const previous = hovered;
++		hovered = group;
++		if (previous) refresh(previous);
++		if (group) refresh(group);
++	};
++	// Pi's fullscreen viewport consumes mouse input before extension listeners and rows get no leave event, so stdin
++	// is watched for pointer motion that no row claimed while pi dispatched it
++	const watchPointer = (data: Buffer | string) => {
++		const buttons = [...String(data).matchAll(/\x1b\[<(\d+);\d+;\d+[Mm]/g)].map((m) => Number(m[1]));
++		if (buttons.some((b) => b & 64)) hover(undefined);
++		else if (buttons.some((b) => b & 32))
++			queueMicrotask(() => {
++				if (!hoverClaimed) hover(undefined);
++				hoverClaimed = false;
++			});
++	};
++
+ 	const tick = (group: Group) => {
+ 		const running = group.members.some((m) => !m.done);
+ 		if (running && !group.timer) group.timer = setInterval(() => rowInvalidate.get(group.members[0].id)?.(), 1000);
+@@ -469,16 +497,21 @@ export default function (pi: ExtensionAPI) {
+ 		return current;
+ 	};
+ 
++	const memberOf = (id: string) => groupOf.get(id)?.members.find((m) => m.id === id);
++
+ 	const reset = () => {
+ 		for (const g of new Set(groupOf.values())) if (g.timer) clearInterval(g.timer);
+ 		groupOf.clear();
+ 		current = undefined;
+ 		ready = false;
++		hovered = undefined;
++		process.stdin.off("data", watchPointer);
+ 	};
+ 
+ 	// Rebuild groups for history so resumed sessions collapse the same way
+ 	pi.on("session_start", async (_event, ctx) => {
+ 		reset();
++		if (ctx.mode === "tui") process.stdin.on("data", watchPointer);
+ 		const branch = ctx.sessionManager.getBranch();
+ 		// Tool results come after their calls, so collect the failures first
+ 		const failed = new Set(branch.flatMap((e: any) => (e.type === "message" && e.message.role === "toolResult" && e.message.isError ? [e.message.toolCallId] : [])));
+@@ -522,6 +555,12 @@ export default function (pi: ExtensionAPI) {
+ 		if (msg.role === "assistant" && (msg.content ?? []).some((c: any) => c.type === "text" && c.text.trim())) current = undefined;
+ 	});
+ 	pi.on("tool_execution_start", async (event) => {
++		// A script's nested calls draw inside its row; here they only name the step the running script is on
++		if (event.parentToolCallId) {
++			const member = memberOf(event.parentToolCallId.split("/")[0]);
++			if (member) member.latest = label(event.toolName, event.args, cwd);
++			return;
++		}
+ 		if (!kindOf(event.toolName)) {
+ 			current = undefined;
+ 			return;
+@@ -532,7 +571,7 @@ export default function (pi: ExtensionAPI) {
+ 	});
+ 	// Pi streams a running command's output; its row shows the latest line, as a terminal would, redrawn with the timer
+ 	pi.on("tool_execution_update", async (event) => {
+-		const member = groupOf.get(event.toolCallId)?.members.find((m) => m.id === event.toolCallId);
++		const member = memberOf(event.toolCallId);
+ 		if (!member || member.kind !== "bash") return;
+ 		const text = (event.partialResult?.content ?? []).map((c: any) => c.text ?? "").join("");
+ 		const latest = text
+@@ -580,17 +619,27 @@ export default function (pi: ExtensionAPI) {
+ 		const mark = failed ? theme.fg("error", `${MARK} `) : "  ";
+ 		// Always the summary, even for one call ("Ran 1 shell command"), like Claude Code; a click or ctrl+o shows each one
+ 		const text = summary(group, false);
+-		return clickable(group, oneLine([mark + theme.fg("dim", text)], failNote));
++		return clickable(group, oneLine([mark + theme.fg(hovered === group ? "toolTitle" : "dim", text)], failNote));
+ 	};
+ 
+-	/** A row that opens or closes its group when clicked. */
++	/** A row that opens or closes its group when clicked and brightens the group under the pointer. */
+ 	const clickable = (group: Group, row: Component): Component =>
+ 		new MouseRegion(row, (event) => {
++			if (event.type === "move") {
++				hoverClaimed = true;
++				hover(group);
++				return { handled: true };
++			}
+ 			if (event.type !== "click" || event.button !== "left") return undefined;
+ 			group.open = !group.open;
+ 			refresh(group);
+ 			return { handled: true };
+ 		});
++	/** Any row of a group opened by a click closes it again, its output included. */
++	const inOpenGroup = (toolCallId: string, row: Component): Component => {
++		const group = groupOf.get(toolCallId);
++		return group?.open ? clickable(group, row) : row;
++	};
+ 	const isOpen = (context: { expanded?: boolean; toolCallId?: string }) => Boolean(context.expanded || groupOf.get(context.toolCallId ?? "")?.open);
+ 
+ 	// The ● carries the status, like Claude Code: dim while arguments stream, accent while running, green or red when done.
+@@ -614,19 +663,19 @@ export default function (pi: ExtensionAPI) {
+ 			// Finished rows are dim without a dot; running and failed ones keep it
+ 			const done = status(context) === "success";
+ 			const mark = done ? "  " : dot(theme, context);
++			const group = groupOf.get(context.toolCallId);
++			const quiet = done && !(group?.open && hovered === group);
+ 			// Wrapped lines continue under the text, past the dot, instead of at the left edge
+ 			const row = {
+ 				invalidate() {},
+ 				render: (width: number) =>
+-					wrapTextWithAnsi(text, Math.max(10, width - 2)).map((line, i) => (i === 0 ? mark : "  ") + theme.fg(done ? "dim" : "toolTitle", line)),
++					wrapTextWithAnsi(text, Math.max(10, width - 2)).map((line, i) => (i === 0 ? mark : "  ") + theme.fg(quiet ? "dim" : "toolTitle", line)),
+ 			};
+-			// A row of a group opened by a click closes it again
+-			const group = groupOf.get(context.toolCallId);
+-			return group?.open ? clickable(group, row) : row;
++			return inOpenGroup(context.toolCallId, row);
+ 		},
+ 		renderResult(result, { expanded }, theme, context) {
+ 			if (!expanded && !isOpen(context)) return empty();
+-			return new Text(expandedBody(theme, resultText(result as Result)), 0, 0);
++			return inOpenGroup(context.toolCallId, new Text(expandedBody(theme, resultText(result as Result)), 0, 0));
+ 		},
+ 	});
+ 
+@@ -694,6 +743,36 @@ export default function (pi: ExtensionAPI) {
+ 		},
+ 	});
+ 
++	const capped = (inner: Component, max: number, theme: any): Component => ({
++		invalidate: () => inner.invalidate(),
++		render: (width: number) => {
++			const lines = inner.render(width);
++			if (lines.length <= max) return lines;
++			return [...lines.slice(0, max), theme.fg("dim", `… +${lines.length - max} lines (${keyHint("app.tools.expand", "expand")})`)];
++		},
++	});
++	// A script folds into its group like a shell command. Shown, it keeps codemode-compact's rows; an opened group lists
++	// the script's calls and output, and the code itself stays behind ctrl+o
++	const scriptTool = (own: ToolRenderers, script: ToolRenderers | undefined): ToolRenderers => ({
++		renderShell: "self",
++		renderCall(args, theme, context) {
++			const grouped = renderGrouped(context.toolCallId, theme, context);
++			if (grouped || !script?.renderCall) return grouped ?? own.renderCall!(args, theme, context);
++			const mark = status(context) === "success" ? "  " : dot(theme, context);
++			return inOpenGroup(context.toolCallId, frame(script.renderCall(args, theme, { ...context, lastComponent: undefined }), mark));
++		},
++		renderResult(result, options, theme, context) {
++			if (!script?.renderResult) return own.renderResult!(result, options, theme, context);
++			const group = groupOf.get(context.toolCallId);
++			if (group && !group.open && !options.expanded) return empty();
++			const shown = script.renderResult(result, { ...options, expanded: options.expanded || Boolean(group?.open) }, theme, { ...context, lastComponent: undefined });
++			if (options.expanded) return inOpenGroup(context.toolCallId, frame(shown, "  "));
++			// Opened by a click: the summary and the call list, then the head of the output, like a shell command's
++			const calls = (result as { details?: { calls?: unknown[] } }).details?.calls?.length ?? 0;
++			return inOpenGroup(context.toolCallId, frame(capped(shown, 1 + calls + SCRIPT_OUTPUT_LINES, theme), "  "));
++		},
++	});
++
+ 	// Only the drawing changes: pi's own tools keep running, with their own schema and on/off state
+ 	pi.registerToolRenderer((toolName, next) => {
+ 		if (renderers[toolName]) return renderers[toolName];
+@@ -703,6 +782,7 @@ export default function (pi: ExtensionAPI) {
+ 			return own && own.renderShell !== "self" ? otherTool(toolName, own) : own;
+ 		}
+ 		const own = groupedTool(toolName);
++		if (kindOf(toolName) === "codemode") return scriptTool(own, next());
+ 		if (kindOf(toolName) !== "mcp") return own;
+ 		// Expanded MCP results keep pi's own view, which shows images and limits long one-line JSON. It gets
+ 		// no lastComponent, since that may be the empty component drawn while the row was collapsed.
+@@ -710,7 +790,9 @@ export default function (pi: ExtensionAPI) {
+ 		return {
+ 			...own,
+ 			renderResult: (result, options, theme, context) =>
+-				isOpen({ expanded: options.expanded, toolCallId: context.toolCallId }) && pis ? pis(result, { ...options, expanded: true }, theme, { ...context, lastComponent: undefined }) : own.renderResult!(result, options, theme, context),
++				isOpen({ expanded: options.expanded, toolCallId: context.toolCallId }) && pis
++					? inOpenGroup(context.toolCallId, pis(result, { ...options, expanded: true }, theme, { ...context, lastComponent: undefined }))
++					: own.renderResult!(result, options, theme, context),
+ 		};
+ 	});
+ 

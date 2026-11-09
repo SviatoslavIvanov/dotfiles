@@ -8,7 +8,8 @@
   ],
   "localExtensions": {
     "tasks.ts": "Unified local task browser; synchronous event-bus adapters in versioned manager patches; no model calls.",
-    "ui-polish.ts": "House style for all short menus: shared title/hint/focus helpers, Pi 1.5.0 native selectors restyled (❯ marker, grey rules, keyHint rows, sentence-case titles), non-exported screens patched on first show, compact interactive-shell messages; native handlers, row counts and child indices preserved; restored on shutdown."
+    "ui-polish.ts": "House style for all short menus: shared title/hint/focus helpers, Pi 1.5.0 native selectors restyled (❯ marker, grey rules, keyHint rows, sentence-case titles), non-exported screens patched on first show, compact interactive-shell messages; native handlers, row counts and child indices preserved; restored on shutdown.",
+    "stash.ts": "Alt+S swaps the editor text with one stashed draft; muted `stash` status while it holds one; in memory until exit or reload."
   },
   "localChanges": {
     "notify.ts": "Notify only on non-aborted agent_settled in TUI+TTY; capture text from agent_end, sanitize terminal sequences, preserve RPC JSON output.",
